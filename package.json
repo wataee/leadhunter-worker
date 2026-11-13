@@ -1,0 +1,16 @@
+{
+  "name": "leadhunter-tg-worker",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "24/7 Telegram lead listener worker for LeadHunter",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "auth": "node auth.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "input": "^1.0.1",
+    "telegram": "^2.26.16"
+  }
+}
