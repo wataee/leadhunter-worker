@@ -84,6 +84,15 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
   console.log(`[Health-Check] HTTP-сервер запущен на порту ${PORT}`);
+
+  // Самопинг каждые 10 минут чтобы Render не усыплял процесс
+  const selfUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  setInterval(async () => {
+    try {
+      await fetch(`${selfUrl}/`);
+      console.log(`[Keep-Alive] Самопинг OK → ${selfUrl}`);
+    } catch {}
+  }, 10 * 60 * 1000); // каждые 10 минут
 });
 
 if (!SESSION_STRING) {
