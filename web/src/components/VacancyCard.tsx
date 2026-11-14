@@ -73,7 +73,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
             rel="noopener noreferrer"
             className="text-xs font-bold text-accent hover:underline flex items-center gap-1 truncate"
           >
-            <span>@{vacancy.channel}</span>
+            <span>{vacancy.channel.startsWith('@') ? vacancy.channel : `@${vacancy.channel}`}</span>
             <ExternalLink size={11} />
           </a>
           <span className="text-border">|</span>
@@ -84,6 +84,17 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
             <span className="hidden sm:flex items-center gap-1 text-[11px] text-muted font-mono">
               <Eye size={11} />
               <span>{vacancy.views}</span>
+            </span>
+          )}
+          {vacancy.budget && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/20">
+              💰 {vacancy.budget.currency === 'NEGOTIABLE'
+                ? 'По договорённости'
+                : `${vacancy.budget.min != null ? vacancy.budget.min.toLocaleString('ru-RU') : ''}${
+                    vacancy.budget.min != null && vacancy.budget.max != null && vacancy.budget.min !== vacancy.budget.max ? ' - ' : ''
+                  }${
+                    vacancy.budget.max != null && vacancy.budget.max !== vacancy.budget.min ? vacancy.budget.max.toLocaleString('ru-RU') : ''
+                  } ${vacancy.budget.currency === 'RUB' ? '₽' : vacancy.budget.currency === 'USD' ? '$' : vacancy.budget.currency === 'EUR' ? '€' : vacancy.budget.currency === 'KZT' ? '₸' : vacancy.budget.currency}`}
             </span>
           )}
         </div>

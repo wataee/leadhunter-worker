@@ -94,13 +94,15 @@ export const Vacancies: React.FC = () => {
       const processed: Vacancy[] = [];
 
       for (const msg of res.allMessages) {
-        const { relevance, matchedKeywords, isExcluded, formatTag, qualityTier } = computeVacancyRelevance(
+        const isWorkerLead = Boolean((msg as any).views === 'MTProto 24/7' || msg.id.startsWith('tg_') || (msg as any).fromWorker);
+        const { relevance, matchedKeywords, isExcluded, formatTag, qualityTier, budget } = computeVacancyRelevance(
           msg.text,
           includeKeywords,
-          excludeKeywords
+          excludeKeywords,
+          isWorkerLead
         );
 
-        if (!isExcluded && matchedKeywords.length > 0) {
+        if (!isExcluded && (isWorkerLead || matchedKeywords.length > 0)) {
           processed.push({
             id: msg.id,
             channel: msg.channel,
@@ -112,6 +114,8 @@ export const Vacancies: React.FC = () => {
             relevance,
             formatTag,
             qualityTier,
+            budget: budget || (msg as any).budget || null,
+            fromWorker: isWorkerLead,
             seen: false,
             hidden: false,
           });

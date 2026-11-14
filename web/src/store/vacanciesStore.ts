@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Vacancy } from '../types';
+import KEYWORDS from '../shared/keywords.js';
+import { parseBudget, BudgetResult } from '../shared/budget.js';
 
 export interface TelegramSource {
   username: string;
@@ -39,35 +41,8 @@ interface VacanciesState {
   clearAllVacancies: () => void;
 }
 
-const DEFAULT_INCLUDE_KEYWORDS = [
-  'ищу монтажер',
-  'ищу монтажёр',
-  'нужен монтажер',
-  'нужен монтажёр',
-  'требуется монтажер',
-  'ищем монтажер',
-  'вакансия монтажер',
-  'видеомонтажер',
-  'видеомонтажёр',
-  'editor needed',
-  'looking for editor',
-  'video editor',
-  'монтаж видео',
-  'монтаж ролик',
-  'монтаж подкаст',
-];
-
-const DEFAULT_EXCLUDE_KEYWORDS = [
-  'ищу заказы',
-  'ищу работу',
-  'предлагаю услуги',
-  'мои услуги',
-  'резюме',
-  'портфолио:',
-  'возьму заказ',
-  'делаю монтаж',
-  'открыт к заказам',
-];
+export const DEFAULT_INCLUDE_KEYWORDS = KEYWORDS.coreRoles;
+export const DEFAULT_EXCLUDE_KEYWORDS = KEYWORDS.stopPhrases;
 
 const DEFAULT_SOURCES: TelegramSource[] = [
   { username: 'work_videoedit', enabled: true, addedAt: new Date().toISOString() },
@@ -85,13 +60,15 @@ const DEFAULT_SOURCES: TelegramSource[] = [
 export function computeVacancyRelevance(
   text: string,
   includeKeywords: string[],
-  excludeKeywords: string[]
+  excludeKeywords: string[],
+  isWorkerLead = false
 ): {
   relevance: number;
   matchedKeywords: string[];
   isExcluded: boolean;
   formatTag: 'short' | 'long' | 'both';
   qualityTier: 'great' | 'fair' | 'shady';
+  budget?: BudgetResult | null;
 } {
   const lower = text.toLowerCase();
 
@@ -104,18 +81,25 @@ export function computeVacancyRelevance(
       isExcluded: true,
       formatTag: 'both',
       qualityTier: 'shady',
+      budget: null,
     };
   }
 
-  const matchedKeywords = includeKeywords.filter((kw) => lower.includes(kw.toLowerCase()));
+  let matchedKeywords = includeKeywords.filter((kw) => lower.includes(kw.toLowerCase()));
+  
+  // Для лидов от воркера не отбрасываем при отсутствии точного совпадения includeKeywords
   if (matchedKeywords.length === 0) {
-    return {
-      relevance: 0,
-      matchedKeywords: [],
-      isExcluded: false,
-      formatTag: 'both',
-      qualityTier: 'fair',
-    };
+    if (!isWorkerLead) {
+      return {
+        relevance: 0,
+        matchedKeywords: [],
+        isExcluded: false,
+        formatTag: 'both',
+        qualityTier: 'fair',
+        budget: null,
+      };
+    }
+    matchedKeywords = ['монтаж'];
   }
 
   // Format detection
@@ -123,7 +107,7 @@ export function computeVacancyRelevance(
   const hasLong = /(youtube|ютуб|подкаст|горизонтальн|хронометраж|выпуск|фильм|шоу)/i.test(lower);
   const formatTag: 'short' | 'long' | 'both' = hasShort && hasLong ? 'both' : hasShort ? 'short' : 'long';
 
-  // Quality tier detection (как в @jobforeditors_bot)
+  // Quality tier detection
   let qualityTier: 'great' | 'fair' | 'shady' = 'fair';
   const isGreat =
     /(\$\s*1[\s,.]?000|\$\s*1[\s,.]?200|\$\s*1[\s,.]?500|\$\s*2[\s,.]?000|80\s*000|100\s*000|120\s*000|150\s*000|6\s*000\s*aed|международн|долларах)/i.test(
@@ -140,13 +124,12 @@ export function computeVacancyRelevance(
     qualityTier = 'shady';
   }
 
-  let score = 50 + matchedKeywords.length * 10;
-  if (qualityTier === 'great') score += 25;
-  if (qualityTier === 'shady') score -= 35;
+  const budget = parseBudget(text);
 
-  // Budget / price mentions
-  const budgetKeywords = ['бюджет', 'оплата', '$', '₽', 'руб', '₸', 'usd', 'ставка', 'фикс', 'оклад'];
-  if (budgetKeywords.some((b) => lower.includes(b))) score += 15;
+  let score = isWorkerLead ? 70 : 50 + matchedKeywords.length * 10;
+  if (qualityTier === 'great') score += 20;
+  if (qualityTier === 'shady') score -= 35;
+  if (budget) score += 15;
 
   return {
     relevance: Math.max(0, Math.min(100, score)),
@@ -154,6 +137,7 @@ export function computeVacancyRelevance(
     isExcluded: false,
     formatTag,
     qualityTier,
+    budget,
   };
 }
 

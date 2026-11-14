@@ -88,6 +88,12 @@ export interface Vacancy {
   qualityTier?: 'great' | 'fair' | 'shady';
   seen: boolean;
   hidden: boolean;
+  budget?: {
+    min: number | null;
+    max: number | null;
+    currency: 'RUB' | 'USD' | 'EUR' | 'KZT' | 'NEGOTIABLE';
+  } | null;
+  fromWorker?: boolean;
 }
 
 export type TemplateType =
