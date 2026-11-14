@@ -21,7 +21,7 @@ export function buildWordBoundaryRegex(phrase) {
 
   // Split into words by spaces
   const words = escaped.split(/\\\s+|\s+/);
-  const transformedWords = words.map((w, idx) => {
+  const transformedWords = words.map((w) => {
     // If the word ends with a Cyrillic letter, allow Russian case endings (0 to 4 letters)
     if (/[а-яё]$/i.test(w)) {
       return `${w}[а-яё]{0,4}`;

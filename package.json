@@ -6,7 +6,13 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "auth": "node auth.js"
+    "auth": "node auth.js",
+    "test": "node --test test/worker.test.js",
+    "test:all": "node --test test/worker.test.js",
+    "lint": "node --check server.js auth.js && npm --prefix web run lint",
+    "lint:all": "node --check server.js auth.js && npm --prefix web run lint",
+    "typecheck": "npm --prefix web run typecheck",
+    "build:all": "npm --prefix web run build"
   },
   "dependencies": {
     "dotenv": "^16.4.7",

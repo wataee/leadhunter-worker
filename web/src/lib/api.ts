@@ -140,7 +140,7 @@ export interface TgFeedResponse {
 }
 
 async function handleApiResponse<T>(res: Response): Promise<T> {
-  let data: Record<string, unknown> | null = null;
+  let data: Record<string, unknown> | null;
   try {
     data = await res.json();
   } catch {
