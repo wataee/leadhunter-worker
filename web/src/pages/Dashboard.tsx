@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLeadsStore } from '../store/leadsStore';
 import { useVacanciesStore } from '../store/vacanciesStore';
@@ -24,6 +24,9 @@ import {
   ArrowRight,
   Clock,
   Flame,
+  TrendingUp,
+  DollarSign,
+  Award,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -74,6 +77,90 @@ export const Dashboard: React.FC = () => {
       l.status !== 'rejected' &&
       (isOverdue(l.nextTouchAt) || isToday(l.nextTouchAt))
   );
+
+  // 5.5 Funnel conversion rates
+  const messagedTotal = leads.filter((l) => ['messaged', 'replied', 'call', 'closed', 'rejected'].includes(l.status)).length;
+  const repliedTotal = leads.filter((l) => ['replied', 'call', 'closed'].includes(l.status)).length;
+  const callTotal = leads.filter((l) => ['call', 'closed'].includes(l.status)).length;
+  const closedTotal = leads.filter((l) => l.status === 'closed').length;
+
+  const convReply = messagedTotal > 0 ? Math.round((repliedTotal / messagedTotal) * 100) : 0;
+  const convCall = repliedTotal > 0 ? Math.round((callTotal / repliedTotal) * 100) : 0;
+  const convClose = callTotal > 0 ? Math.round((closedTotal / callTotal) * 100) : 0;
+
+  // 5.5 Average budget by format
+  const budgetByFormat = useMemo(() => {
+    let shortSum = 0;
+    let shortCount = 0;
+    let longSum = 0;
+    let longCount = 0;
+    for (const v of vacancies) {
+      const b = v.budget?.max ?? v.budget?.min;
+      if (typeof b === 'number' && b > 0 && v.budget?.currency === 'RUB') {
+        if (v.formatTag === 'short' || /shorts|reels|тикто/i.test(v.text)) {
+          shortSum += b;
+          shortCount++;
+        } else {
+          longSum += b;
+          longCount++;
+        }
+      }
+    }
+    return {
+      shortAvg: shortCount > 0 ? Math.round(shortSum / shortCount) : 3500,
+      longAvg: longCount > 0 ? Math.round(longSum / longCount) : 15000,
+      totalCount: shortCount + longCount,
+    };
+  }, [vacancies]);
+
+  // 5.5 Top channels by lead volume and quality
+  const topSources = useMemo(() => {
+    const map = new Map<string, { total: number; great: number }>();
+    for (const v of vacancies) {
+      const ch = v.channel.replace(/^@/, '');
+      const cur = map.get(ch) || { total: 0, great: 0 };
+      cur.total++;
+      if (v.qualityTier === 'great' || v.relevance >= 75) cur.great++;
+      map.set(ch, cur);
+    }
+    return Array.from(map.entries())
+      .map(([channel, stats]) => ({
+        channel,
+        total: stats.total,
+        qualityRate: Math.round((stats.great / Math.max(1, stats.total)) * 100),
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5);
+  }, [vacancies]);
+
+  // 5.5 Peak publication hours (0..23)
+  const hourlyData = useMemo(() => {
+    const hours = Array.from({ length: 24 }, (_, i) => ({
+      hour: `${i}:00`,
+      count: 0,
+    }));
+    for (const v of vacancies) {
+      if (v.postedAt) {
+        const h = new Date(v.postedAt).getHours();
+        if (h >= 0 && h < 24) {
+          hours[h].count++;
+        }
+      }
+    }
+    return hours;
+  }, [vacancies]);
+
+  const peakHour = useMemo(() => {
+    let bestHour = '14:00';
+    let maxCount = -1;
+    for (const item of hourlyData) {
+      if (item.count > maxCount) {
+        maxCount = item.count;
+        bestHour = item.hour;
+      }
+    }
+    return { hour: bestHour, count: maxCount };
+  }, [hourlyData]);
 
   // Latest 5 vacancies
   const freshVacancies = vacancies.filter((v) => !v.hidden).slice(0, 5);
@@ -462,6 +549,170 @@ export const Dashboard: React.FC = () => {
           >
             Открыть канбан-доску
           </button>
+        </div>
+      </div>
+
+      {/* 5.5 Funnel Step Conversion Cards */}
+      <div className="bg-surface rounded-card p-5 border border-border space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingUp size={18} className="text-accent" />
+            <h3 className="text-sm font-semibold text-text">
+              Сквозная воронка конверсии: Отклик → Ответ → Тестовое → Оплата
+            </h3>
+          </div>
+          <span className="text-xs text-text-muted font-mono">
+            Общая конверсия: {messagedTotal > 0 ? ((closedTotal / messagedTotal) * 100).toFixed(1) : 0}%
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <div className="p-3.5 bg-surface-2/60 rounded-control border border-border space-y-1">
+            <span className="text-text-muted text-[11px] font-medium block">1. Отправлено откликов</span>
+            <div className="text-xl font-bold font-mono text-text">{messagedTotal}</div>
+            <span className="text-[10px] text-muted">первичных контактов</span>
+          </div>
+
+          <div className="p-3.5 bg-surface-2/60 rounded-control border border-border space-y-1">
+            <span className="text-text-muted text-[11px] font-medium block">2. Получено ответов</span>
+            <div className="text-xl font-bold font-mono text-emerald-400 flex items-baseline gap-1.5">
+              <span>{repliedTotal}</span>
+              <span className="text-xs font-normal text-text-muted">({convReply}%)</span>
+            </div>
+            <span className="text-[10px] text-muted">конверсия в диалог</span>
+          </div>
+
+          <div className="p-3.5 bg-surface-2/60 rounded-control border border-border space-y-1">
+            <span className="text-text-muted text-[11px] font-medium block">3. Тестовое / Созвон</span>
+            <div className="text-xl font-bold font-mono text-accent flex items-baseline gap-1.5">
+              <span>{callTotal}</span>
+              <span className="text-xs font-normal text-text-muted">({convCall}%)</span>
+            </div>
+            <span className="text-[10px] text-muted">перешли к проверке</span>
+          </div>
+
+          <div className="p-3.5 bg-surface-2/60 rounded-control border border-border space-y-1">
+            <span className="text-text-muted text-[11px] font-medium block">4. Оплата / Сделка</span>
+            <div className="text-xl font-bold font-mono text-amber-400 flex items-baseline gap-1.5">
+              <span>{closedTotal}</span>
+              <span className="text-xs font-normal text-text-muted">({convClose}%)</span>
+            </div>
+            <span className="text-[10px] text-muted">закрыто в оплату</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 5.5 Market & Vacancy Intelligence Row: Rates, Top Channels, Peak Hours */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Rates & First Response Speed */}
+        <div className="bg-surface rounded-card p-5 border border-border space-y-4">
+          <div className="flex items-center gap-2">
+            <DollarSign size={16} className="text-accent" />
+            <h3 className="text-sm font-semibold text-text">Средний чек по форматам</h3>
+          </div>
+
+          <div className="space-y-3 text-xs">
+            <div className="p-3 bg-surface-2/50 rounded-control border border-border flex items-center justify-between">
+              <div>
+                <span className="font-semibold text-text block">Короткие форматы (Shorts/Reels)</span>
+                <span className="text-[10px] text-muted">динамичный вертикальный монтаж</span>
+              </div>
+              <div className="text-right">
+                <span className="font-mono font-bold text-accent text-sm">
+                  ~{budgetByFormat.shortAvg.toLocaleString('ru-RU')} ₽
+                </span>
+                <span className="text-[10px] text-muted block">за ролик</span>
+              </div>
+            </div>
+
+            <div className="p-3 bg-surface-2/50 rounded-control border border-border flex items-center justify-between">
+              <div>
+                <span className="font-semibold text-text block">Длинные форматы (YouTube)</span>
+                <span className="text-[10px] text-muted">полноценные выпуски / подкасты</span>
+              </div>
+              <div className="text-right">
+                <span className="font-mono font-bold text-accent text-sm">
+                  ~{budgetByFormat.longAvg.toLocaleString('ru-RU')} ₽
+                </span>
+                <span className="text-[10px] text-muted block">за выпуск</span>
+              </div>
+            </div>
+
+            <div className="p-3 bg-accent/5 rounded-control border border-accent/20 flex items-center gap-2.5">
+              <Clock size={16} className="text-accent shrink-0" />
+              <div className="text-[11px] text-text-muted leading-tight">
+                <strong className="text-text">Скорость первого отклика:</strong> целевое окно &lt;15 минут. 80% горячих заявок закрываются первыми ответившими.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top Channels by Volume & Quality */}
+        <div className="bg-surface rounded-card p-5 border border-border space-y-3">
+          <div className="flex items-center gap-2">
+            <Award size={16} className="text-warning" />
+            <h3 className="text-sm font-semibold text-text">Топ-источники вакансий</h3>
+          </div>
+
+          <div className="space-y-2 text-xs">
+            {topSources.length === 0 ? (
+              <p className="text-muted text-[11px] italic p-3 bg-surface-2/30 rounded">
+                Сбор статистики каналов начнётся после загрузки вакансий.
+              </p>
+            ) : (
+              topSources.map((source, idx) => (
+                <div
+                  key={source.channel}
+                  className="p-2.5 bg-surface-2/50 rounded-control border border-border flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-mono text-muted text-[10px]">#{idx + 1}</span>
+                    <span className="font-semibold text-text truncate">@{source.channel}</span>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 font-mono text-[11px]">
+                    <span className="text-text-muted">{source.total} вакансий</span>
+                    <span className="text-emerald-400 font-medium">🎯 {source.qualityRate}% топ</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Peak Publication Hours (24h distribution) */}
+        <div className="bg-surface rounded-card p-5 border border-border space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Clock size={16} className="text-accent" />
+              <h3 className="text-sm font-semibold text-text">Часы пик публикаций</h3>
+            </div>
+            <span className="text-[11px] font-mono text-accent bg-accent-soft px-2 py-0.5 rounded border border-accent/20">
+              Пик: {peakHour.hour}
+            </span>
+          </div>
+
+          <p className="text-xs text-muted">
+            Распределение вакансий по часам суток (по времени постов)
+          </p>
+
+          <div className="h-44 w-full pt-1">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={hourlyData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                <XAxis dataKey="hour" stroke="#5E6370" fontSize={8} interval={3} tickLine={false} />
+                <YAxis stroke="#5E6370" fontSize={9} tickLine={false} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#14161C',
+                    borderColor: '#23262F',
+                    borderRadius: '8px',
+                    fontSize: '11px',
+                    color: '#E8E9ED',
+                  }}
+                />
+                <Bar dataKey="count" fill="#60A5FA" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
