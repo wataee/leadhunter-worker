@@ -12,6 +12,7 @@ import { LeadDrawer } from '../components/LeadDrawer';
 import { PitchGeneratorModal } from '../components/PitchGeneratorModal';
 import { EmptyState } from '../components/EmptyState';
 import { formatDate, isOverdue, isToday } from '../lib/time';
+import { notifyFollowUps } from '../lib/reminders';
 import {
   Users,
   MessageCircle,
@@ -27,6 +28,7 @@ import {
   TrendingUp,
   DollarSign,
   Award,
+  BellRing,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -49,6 +51,8 @@ export const Dashboard: React.FC = () => {
   const dailyGoal = useSettingsStore((s) => s.dailyGoal);
   const todaySentCount = useSettingsStore((s) => s.todaySentCount);
   const incrementSentCount = useSettingsStore((s) => s.incrementSentCount);
+  const duplicateToTelegram = useSettingsStore((s) => s.duplicateToTelegram);
+  const notificationsEnabled = useSettingsStore((s) => s.notificationsEnabled);
   const addToast = useToastStore((s) => s.addToast);
 
   const [activePitchLead, setActivePitchLead] = useState<Lead | null>(null);
@@ -211,6 +215,23 @@ export const Dashboard: React.FC = () => {
     });
   };
 
+  const handleTriggerReminders = async () => {
+    if (followUpLeads.length === 0) {
+      addToast({ type: 'info', message: 'На сегодня нет горящих напоминаний.' });
+      return;
+    }
+    const count = await notifyFollowUps(followUpLeads, {
+      sendBrowser: notificationsEnabled,
+      sendTelegram: duplicateToTelegram,
+      onLeadClick: (l) => setSelectedLeadId(l.id),
+    });
+    addToast({
+      type: 'success',
+      title: 'Напоминания отправлены',
+      message: `Оповещено по ${count} контактам (браузер / Telegram).`,
+    });
+  };
+
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
       {/* Greeting Row */}
@@ -312,9 +333,22 @@ export const Dashboard: React.FC = () => {
                 Напоминания на сегодня (повторно)
               </h2>
             </div>
-            <span className="font-mono text-xs font-semibold text-muted bg-surface-2 px-2 py-0.5 rounded border border-border">
-              {followUpLeads.length}
-            </span>
+            <div className="flex items-center gap-2">
+              {followUpLeads.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleTriggerReminders}
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-warning bg-warning/10 hover:bg-warning/20 rounded border border-warning/30 transition-colors"
+                  title="Отправить браузерные и Telegram уведомления"
+                >
+                  <BellRing size={12} />
+                  <span>Напомнить</span>
+                </button>
+              )}
+              <span className="font-mono text-xs font-semibold text-muted bg-surface-2 px-2 py-0.5 rounded border border-border">
+                {followUpLeads.length}
+              </span>
+            </div>
           </div>
 
           <div className="p-4 flex-1 overflow-y-auto space-y-2.5 max-h-[380px]">
@@ -356,17 +390,28 @@ export const Dashboard: React.FC = () => {
 
                     <div className="flex items-center gap-1.5 shrink-0">
                       <button
+                        onClick={() => {
+                          setActivePitchLead(lead);
+                          setActiveOpeningAngle('followup_1');
+                        }}
+                        className="px-2.5 py-1 text-xs text-white bg-accent hover:bg-accent-hover rounded font-semibold transition-colors flex items-center gap-1"
+                        title="Подготовить фоллоу-ап"
+                      >
+                        <Send size={11} />
+                        <span>Фоллоу-ап</span>
+                      </button>
+                      <button
                         onClick={() => setSelectedLeadId(lead.id)}
-                        className="px-2.5 py-1 text-xs text-text bg-surface-2 hover:bg-surface-3 rounded border border-border transition-colors"
+                        className="px-2 py-1 text-xs text-text bg-surface-2 hover:bg-surface-3 rounded border border-border transition-colors"
                       >
                         Открыть
                       </button>
                       <button
                         onClick={() => handleDoneTouch(lead)}
                         title="Сделано: перенести на +2 дня"
-                        className="px-2.5 py-1 text-xs text-accent bg-accent-soft hover:bg-accent/20 rounded border border-accent/20 font-medium transition-colors"
+                        className="px-2 py-1 text-xs text-accent bg-accent-soft hover:bg-accent/20 rounded border border-accent/20 font-medium transition-colors"
                       >
-                        +2 дня
+                        +2д
                       </button>
                       <button
                         onClick={() => handlePostponeTouch(lead)}
