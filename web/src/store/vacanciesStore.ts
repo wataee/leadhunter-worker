@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Vacancy } from '../types';
+import { Vacancy, SavedSearchPreset } from '../types';
 import KEYWORDS from '../shared/keywords.js';
 import { parseBudget, BudgetResult } from '../shared/budget.js';
 
@@ -18,6 +18,9 @@ interface VacanciesState {
   lastRefreshedAt: string | null;
   isLoading: boolean;
   selectedVacancyForPitch: Vacancy | null;
+  savedPresets: SavedSearchPreset[];
+  hiddenChannels: string[];
+  filterFavoritesOnly: boolean;
 
   // Actions
   setSelectedVacancyForPitch: (vacancy: Vacancy | null) => void;
@@ -29,6 +32,13 @@ interface VacanciesState {
   mergeNewVacancies: (incoming: Vacancy[]) => { newCount: number; hotCount: number };
   markSeen: (id: string) => void;
   hideVacancy: (id: string) => void;
+  toggleFavorite: (id: string) => void;
+  hideChannel: (channel: string) => void;
+  unhideChannel: (channel: string) => void;
+  setFilterFavoritesOnly: (val: boolean) => void;
+
+  addSavedPreset: (preset: Omit<SavedSearchPreset, 'id' | 'createdAt'>) => void;
+  removeSavedPreset: (id: string) => void;
 
   addIncludeKeyword: (kw: string) => void;
   removeIncludeKeyword: (kw: string) => void;
@@ -224,6 +234,9 @@ export const useVacanciesStore = create<VacanciesState>()(
       lastRefreshedAt: null,
       isLoading: false,
       selectedVacancyForPitch: null,
+      savedPresets: [],
+      hiddenChannels: [],
+      filterFavoritesOnly: false,
 
       setSelectedVacancyForPitch: (vacancy) => set({ selectedVacancyForPitch: vacancy }),
 
@@ -311,6 +324,47 @@ export const useVacanciesStore = create<VacanciesState>()(
       hideVacancy: (id) =>
         set((state) => ({
           vacancies: state.vacancies.map((v) => (v.id === id ? { ...v, hidden: true } : v)),
+        })),
+
+      toggleFavorite: (id) =>
+        set((state) => ({
+          vacancies: state.vacancies.map((v) =>
+            v.id === id ? { ...v, isFavorite: !v.isFavorite } : v
+          ),
+        })),
+
+      hideChannel: (channel) => {
+        const clean = channel.toLowerCase().replace(/^@/, '').trim();
+        if (!clean) return;
+        set((state) => ({
+          hiddenChannels: Array.from(new Set([...state.hiddenChannels, clean])),
+        }));
+      },
+
+      unhideChannel: (channel) => {
+        const clean = channel.toLowerCase().replace(/^@/, '').trim();
+        set((state) => ({
+          hiddenChannels: state.hiddenChannels.filter((c) => c !== clean),
+        }));
+      },
+
+      setFilterFavoritesOnly: (val) => set({ filterFavoritesOnly: val }),
+
+      addSavedPreset: (preset) =>
+        set((state) => ({
+          savedPresets: [
+            ...state.savedPresets,
+            {
+              ...preset,
+              id: `preset_${Date.now()}`,
+              createdAt: new Date().toISOString(),
+            },
+          ],
+        })),
+
+      removeSavedPreset: (id) =>
+        set((state) => ({
+          savedPresets: state.savedPresets.filter((p) => p.id !== id),
         })),
 
       addIncludeKeyword: (kw) => {

@@ -99,6 +99,17 @@ export interface Vacancy {
   fromWorker?: boolean;
 }
 
+export interface SavedSearchPreset {
+  id: string;
+  name: string;
+  filterHotOnly: boolean;
+  filterFormat: string;
+  filterQuality: string;
+  createdAt: string;
+  sendTelegramDigest?: boolean;
+  digestIntervalHours?: number;
+}
+
 export type TemplateType =
   | 'shotgun'
   | 'sniper'

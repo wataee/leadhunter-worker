@@ -67,7 +67,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   return (
     <div
       className={`group bg-surface hover:bg-surface-2/60 border ${
-        vacancy.statusBadge === 'hot'
+        vacancy.statusBadge === 'hot' || isHot
           ? 'border-danger/40 shadow-[0_0_15px_rgba(248,113,113,0.08)]'
           : vacancy.isFavorite
           ? 'border-amber-400/40 bg-amber-400/5'
