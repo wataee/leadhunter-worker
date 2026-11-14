@@ -404,7 +404,19 @@ export const useVacanciesStore = create<VacanciesState>()(
     }),
     {
       name: 'leadhunter_vacancies',
+      version: 2,
       storage: safeLocalStorage as any,
+      migrate: (persistedState: any, version: number) => {
+        if (version < 2 && persistedState) {
+          // Миграция со старой версии: чистим устаревшие поля
+          if (Array.isArray(persistedState.vacancies)) {
+            persistedState.vacancies = persistedState.vacancies
+              .filter((v: any) => v && typeof v === 'object' && !v.id?.startsWith('demo_'))
+              .slice(0, 300);
+          }
+        }
+        return persistedState;
+      },
       onRehydrateStorage: () => (state) => {
         if (state && Array.isArray(state.vacancies)) {
           const now = Date.now();
@@ -414,7 +426,7 @@ export const useVacanciesStore = create<VacanciesState>()(
                 !v.id?.startsWith('demo_') &&
                 now - new Date(v.postedAt).getTime() <= FOURTEEN_DAYS_MS
             )
-            .slice(0, 500);
+            .slice(0, 300);
         }
       },
     }

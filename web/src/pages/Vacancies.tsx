@@ -687,22 +687,35 @@ export const Vacancies: React.FC = () => {
           <div className="flex items-center gap-2.5">
             <AlertTriangle size={18} className="text-warning shrink-0" />
             <div className="leading-relaxed">
-              <strong>Воркер недоступен (Render):</strong> Telegram-воркер не отвечает по WEBHOOK_URL. Лента работает в резервном режиме веб-скрейпинга.
+              <strong>Воркер не на связи (Render):</strong> Telegram-воркер временно недоступен или переподключается. Лента работает через веб-скрейпинг.
             </div>
           </div>
           <button
             onClick={handleRefreshFeed}
-            className="px-3 py-1 bg-warning/20 hover:bg-warning/30 text-warning font-semibold rounded text-xs shrink-0 border border-warning/30 min-h-[36px]"
+            className="px-3 py-1 bg-warning/20 hover:bg-warning/30 text-warning font-semibold rounded text-xs shrink-0 border border-warning/30 min-h-[36px] flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-warning"
+            aria-label="Проверить статус воркера"
           >
-            Повторить
+            <RefreshCcw size={12} />
+            <span>Проверить</span>
           </button>
         </div>
       ) : (
-        <div className="p-3 bg-success-soft/30 border border-success/30 rounded-card flex items-center gap-2.5 text-xs text-text">
-          <span className="w-2.5 h-2.5 rounded-full bg-success animate-pulse shrink-0" />
-          <div className="leading-relaxed">
-            <strong>Облачный мониторинг 24/7 активен:</strong> вакансии из ваших Telegram-каналов и чатов перехватываются непрерывно в облаке, даже когда вкладка браузера закрыта.
+        <div className="p-3 bg-success-soft/30 border border-success/30 rounded-card flex items-center justify-between gap-2.5 text-xs text-text">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-success animate-pulse shrink-0" />
+            <div className="leading-relaxed">
+              <strong>Облачный мониторинг 24/7 активен:</strong> вакансии из Telegram-каналов и чатов перехватываются непрерывно в облаке.
+            </div>
           </div>
+          <button
+            onClick={handleRefreshFeed}
+            className="text-text-muted hover:text-text text-[11px] font-medium shrink-0 flex items-center gap-1 px-2 py-1 rounded bg-surface-2 border border-border"
+            title="Проверить состояние подключения"
+            aria-label="Проверить состояние подключения воркера"
+          >
+            <RefreshCcw size={11} className={isLoading ? 'animate-spin' : ''} />
+            <span>Проверить</span>
+          </button>
         </div>
       )}
 
@@ -857,8 +870,8 @@ export const Vacancies: React.FC = () => {
           {!isLoading && displayedVacancies.length === 0 && (
             <EmptyState
               icon={Radio}
-              title="Вакансий пока нет, ждём новые..."
-              description="Мониторинг слушает Telegram 24/7 в реальном времени. Новые вакансии монтажёра появятся здесь автоматически."
+              title="Вакансий пока нет"
+              description="Добавьте каналы в настройках или подождите, пока воркер поймает новые вакансии."
               actionText="Обновить ленту"
               onAction={handleRefreshFeed}
             />

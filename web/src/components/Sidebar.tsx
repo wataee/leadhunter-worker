@@ -7,14 +7,12 @@ import {
   Kanban,
   FileText,
   Settings,
-  Sparkles,
   HelpCircle,
   Database,
 } from 'lucide-react';
 import { useLeadsStore } from '../store/leadsStore';
 import { useVacanciesStore } from '../store/vacanciesStore';
 import { useSettingsStore } from '../store/settingsStore';
-import { useToastStore } from '../store/toastStore';
 
 interface SidebarProps {
   onOpenShortcuts: () => void;

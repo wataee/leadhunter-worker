@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../store/settingsStore';
 import { useLeadsStore } from '../store/leadsStore';
 import { useVacanciesStore } from '../store/vacanciesStore';
-import { useTemplatesStore } from '../store/templatesStore';
 import { useToastStore } from '../store/toastStore';
 import { checkApiHealth, HealthStatus } from '../lib/api';
 import { exportLeadsToCsv } from '../lib/csv';
@@ -18,9 +17,7 @@ import {
   Trash2,
   CheckCircle2,
   AlertCircle,
-  HelpCircle,
   Sparkles,
-  ExternalLink,
 } from 'lucide-react';
 
 export const Settings: React.FC = () => {
@@ -35,13 +32,11 @@ export const Settings: React.FC = () => {
     updateProfile,
     setDailyGoal,
     setFollowUpIntervals,
-    resetAllSettings,
     resetQuota,
   } = useSettingsStore();
 
   const { leads, clearAllLeads, importLeads } = useLeadsStore();
   const { clearAllVacancies } = useVacanciesStore();
-  const { resetToDefaults } = useTemplatesStore();
   const addToast = useToastStore((s) => s.addToast);
 
   const evaluatedLeadsCount = leads.filter((l) => l.aiScore !== undefined).length;
@@ -117,7 +112,7 @@ export const Settings: React.FC = () => {
         } else {
           throw new Error('Некорректная структура файла');
         }
-      } catch (err: unknown) {
+      } catch {
         addToast({
           type: 'error',
           title: 'Ошибка импорта',

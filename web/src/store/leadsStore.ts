@@ -385,10 +385,21 @@ export const useLeadsStore = create<LeadsState>()(
     }),
     {
       name: 'leadhunter_leads',
+      version: 2,
+      migrate: (persistedState: any, version: number) => {
+        if (version < 2 && persistedState) {
+          if (Array.isArray(persistedState.leads)) {
+            persistedState.leads = persistedState.leads.filter(
+              (l: any) => l && typeof l === 'object' && !l.id?.startsWith('demo_')
+            );
+          }
+        }
+        return persistedState;
+      },
       // Automatically purge any old demo leads from localStorage
       onRehydrateStorage: () => (state) => {
         if (state && Array.isArray(state.leads)) {
-          state.leads = state.leads.filter((l) => !l.id?.startsWith('demo_'));
+          state.leads = state.leads.filter((l) => !l.id?.startsWith('demo_')).slice(0, 500);
         }
       },
     }

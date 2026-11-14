@@ -15,15 +15,7 @@ import {
   Kanban,
   Table as TableIcon,
   Search,
-  Filter,
   Download,
-  Plus,
-  Trash2,
-  ExternalLink,
-  Calendar,
-  Sparkles,
-  Send,
-  SlidersHorizontal,
 } from 'lucide-react';
 
 export const Leads: React.FC = () => {
@@ -32,7 +24,6 @@ export const Leads: React.FC = () => {
     selectedLeadId,
     setSelectedLeadId,
     updateLeadStatus,
-    updateLeadTier,
     bulkUpdateStatus,
     bulkUpdateTier,
     deleteLeads,

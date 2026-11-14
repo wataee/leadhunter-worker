@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTemplatesStore } from '../store/templatesStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
-import { PitchTemplate, TemplateType } from '../types';
+import { TemplateType } from '../types';
 import {
   substituteVariables,
   analyzePitchQuality,
@@ -18,7 +18,6 @@ import {
   Eye,
   Check,
   AlertTriangle,
-  Info,
 } from 'lucide-react';
 
 export const Templates: React.FC = () => {

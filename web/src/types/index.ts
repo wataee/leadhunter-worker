@@ -94,7 +94,8 @@ export interface Vacancy {
   budget?: {
     min: number | null;
     max: number | null;
-    currency: 'RUB' | 'USD' | 'EUR' | 'KZT' | 'NEGOTIABLE';
+    currency: 'RUB' | 'USD' | 'EUR' | 'KZT' | 'UAH' | 'NEGOTIABLE';
+    unit?: 'per_video' | 'per_month' | 'per_hour' | 'per_minute' | 'project';
   } | null;
   fromWorker?: boolean;
 }

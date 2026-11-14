@@ -8,11 +8,10 @@ import { Lead, Vacancy } from '../types';
 import { StatCard } from '../components/StatCard';
 import { ProgressRing } from '../components/ProgressRing';
 import { TierBadge } from '../components/TierBadge';
-import { ScoreBar } from '../components/ScoreBar';
 import { LeadDrawer } from '../components/LeadDrawer';
 import { PitchGeneratorModal } from '../components/PitchGeneratorModal';
 import { EmptyState } from '../components/EmptyState';
-import { formatDate, isOverdue, isToday, addDays } from '../lib/time';
+import { formatDate, isOverdue, isToday } from '../lib/time';
 import {
   Users,
   MessageCircle,
@@ -21,7 +20,6 @@ import {
   Plus,
   Send,
   Radio,
-  Calendar,
   Sparkles,
   ArrowRight,
   Clock,
@@ -42,7 +40,6 @@ export const Dashboard: React.FC = () => {
   const setSelectedLeadId = useLeadsStore((s) => s.setSelectedLeadId);
   const selectedLeadId = useLeadsStore((s) => s.selectedLeadId);
   const scheduleNextTouch = useLeadsStore((s) => s.scheduleNextTouch);
-  const updateLeadStatus = useLeadsStore((s) => s.updateLeadStatus);
 
   const vacancies = useVacanciesStore((s) => s.vacancies);
   const profile = useSettingsStore((s) => s.profile);

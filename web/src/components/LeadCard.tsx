@@ -5,10 +5,8 @@ import { ScoreBar } from './ScoreBar';
 import { formatDate, isToday, isOverdue } from '../lib/time';
 import {
   Send,
-  Mail,
   Calendar,
   Sparkles,
-  ExternalLink,
   Flame,
 } from 'lucide-react';
 

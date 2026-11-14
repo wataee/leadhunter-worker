@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Lead, LeadStatus, LeadTier } from '../types';
 import { useLeadsStore } from '../store/leadsStore';
 import { useToastStore } from '../store/toastStore';
-import { TierBadge } from './TierBadge';
 import { ScoreBar } from './ScoreBar';
 import { formatDate, formatDateTime } from '../lib/time';
 import { scoreLeadsWithAi } from '../lib/api';
@@ -12,18 +11,13 @@ import {
   Mail,
   Send,
   Calendar,
-  Tag,
   Plus,
   Trash2,
   Clock,
   Sparkles,
-  DollarSign,
-  MessageSquare,
   Copy,
   Archive,
   RotateCw,
-  Lightbulb,
-  CheckCircle,
 } from 'lucide-react';
 
 interface LeadDrawerProps {

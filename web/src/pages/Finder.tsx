@@ -6,13 +6,12 @@ import { searchYouTubeChannels, YouTubeSearchResponse, scoreLeadsWithAi, checkAp
 import { formatDate } from '../lib/time';
 import { TierBadge } from '../components/TierBadge';
 import { ScoreBar } from '../components/ScoreBar';
-import { CardSkeleton, TableRowSkeleton } from '../components/Skeleton';
+import { CardSkeleton } from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
 import { PitchGeneratorModal } from '../components/PitchGeneratorModal';
 import { Lead } from '../types';
 import {
   Search,
-  SlidersHorizontal,
   ExternalLink,
   Plus,
   Flame,
@@ -22,7 +21,6 @@ import {
   Instagram,
   Check,
   Ban,
-  Clock,
   Sparkles,
   History,
   AlertCircle,
