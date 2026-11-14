@@ -2,6 +2,8 @@ import React from 'react';
 import { Vacancy } from '../types';
 import { formatRelativeTime } from '../lib/time';
 import { BudgetBadge } from './BudgetBadge';
+import { computeProfileFit } from '../lib/profileFit';
+import { useSettingsStore } from '../store/settingsStore';
 import {
   ExternalLink,
   Send,
@@ -34,6 +36,8 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   onHideChannel,
   highlightWords = [],
 }) => {
+  const profile = useSettingsStore((s) => s.profile);
+  const fitScore = vacancy.profileFit ?? computeProfileFit(vacancy, profile);
   const isHot = vacancy.statusBadge === 'hot' || Date.now() - new Date(vacancy.postedAt).getTime() < 20 * 60 * 1000;
 
   // Render text with highlighted keywords
@@ -121,9 +125,19 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
             </span>
           )}
 
-          {/* Relevance score */}
-          <span className="text-[11px] font-mono text-muted bg-surface-2 px-1.5 py-0.5 rounded border border-border">
-            🎯 {vacancy.relevance}%
+          {/* Fit score badge */}
+          <span
+            className={`inline-flex items-center gap-1 text-[11px] font-mono font-medium px-2 py-0.5 rounded border ${
+              fitScore >= 75
+                ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30'
+                : fitScore >= 50
+                ? 'text-amber-400 bg-amber-400/10 border-amber-400/30'
+                : 'text-muted bg-surface-2 border-border'
+            }`}
+            title={`Совпадение с вашим профилем: ${fitScore}%`}
+          >
+            <span>🎯 {fitScore}%</span>
+            <span className="hidden sm:inline">совпадение</span>
           </span>
 
           {/* Favorite toggle button */}

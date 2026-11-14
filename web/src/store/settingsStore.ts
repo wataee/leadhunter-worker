@@ -27,6 +27,10 @@ const DEFAULT_PROFILE: UserProfile = {
   portfolioUrl: 'https://fleur-editor.netlify.app/ru/',
   email: 'editor.timur@gmail.com',
   sampleUrl: 'https://youtu.be/sample_edit',
+  formats: ['YouTube', 'Shorts/Reels', 'Подкасты'],
+  skills: ['Premiere Pro', 'After Effects', 'DaVinci Resolve', 'CapCut'],
+  minRate: 3000,
+  minRateCurrency: 'RUB',
 };
 
 export const useSettingsStore = create<SettingsState>()(

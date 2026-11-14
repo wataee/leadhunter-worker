@@ -236,6 +236,110 @@ export const Settings: React.FC = () => {
               placeholder="https://youtu.be/sample_edit"
             />
           </div>
+
+          {/* Min Rate and Currency */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-text-muted mb-1 font-medium">
+                Мин. ставка (за проект / ролик)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="500"
+                value={profile.minRate ?? 3000}
+                onChange={(e) => updateProfile({ minRate: Number(e.target.value) || 0 })}
+                className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent font-mono"
+                placeholder="3000"
+              />
+            </div>
+            <div>
+              <label className="block text-text-muted mb-1 font-medium">
+                Валюта ставки
+              </label>
+              <select
+                value={profile.minRateCurrency ?? 'RUB'}
+                onChange={(e) => updateProfile({ minRateCurrency: e.target.value as 'RUB' | 'USD' })}
+                className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent"
+              >
+                <option value="RUB">RUB (₽)</option>
+                <option value="USD">USD ($)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Formats and Skills */}
+        <div className="pt-2 border-t border-border space-y-3 text-xs">
+          <div>
+            <label className="block text-text-muted mb-1.5 font-medium">
+              Целевые форматы видео
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {(['YouTube', 'Shorts/Reels', 'Подкасты', 'Реклама'] as const).map((fmt) => {
+                const currentFormats = profile.formats || ['YouTube', 'Shorts/Reels', 'Подкасты'];
+                const isSelected = currentFormats.includes(fmt);
+                return (
+                  <button
+                    key={fmt}
+                    type="button"
+                    onClick={() => {
+                      const updated = isSelected
+                        ? currentFormats.filter((f) => f !== fmt)
+                        : [...currentFormats, fmt];
+                      updateProfile({ formats: updated });
+                    }}
+                    className={`px-3 py-1.5 rounded-control text-xs font-medium border transition-colors ${
+                      isSelected
+                        ? 'bg-accent/20 border-accent text-accent'
+                        : 'bg-surface-2 border-border text-text-muted hover:border-accent/40'
+                    }`}
+                  >
+                    {isSelected ? '✓ ' : '+ '}{fmt}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-text-muted mb-1.5 font-medium">
+              Используемый софт и навыки (для скоринга вакансий)
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                'Premiere Pro',
+                'After Effects',
+                'DaVinci Resolve',
+                'CapCut',
+                'Blender',
+                'Photoshop',
+                'Final Cut Pro',
+              ].map((skill) => {
+                const currentSkills = profile.skills || ['Premiere Pro', 'After Effects', 'DaVinci Resolve', 'CapCut'];
+                const isSelected = currentSkills.includes(skill);
+                return (
+                  <button
+                    key={skill}
+                    type="button"
+                    onClick={() => {
+                      const updated = isSelected
+                        ? currentSkills.filter((s) => s !== skill)
+                        : [...currentSkills, skill];
+                      updateProfile({ skills: updated });
+                    }}
+                    className={`px-3 py-1.5 rounded-control text-xs font-medium border transition-colors ${
+                      isSelected
+                        ? 'bg-accent/20 border-accent text-accent'
+                        : 'bg-surface-2 border-border text-text-muted hover:border-accent/40'
+                    }`}
+                  >
+                    {isSelected ? '✓ ' : '+ '}{skill}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 

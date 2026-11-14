@@ -85,6 +85,8 @@ export interface Vacancy {
   matchedKeywords: string[];
   skills?: string[];
   relevance: number;
+  profileFit?: number;
+  risks?: string[];
   formatTag?: 'short' | 'long' | 'both';
   qualityTier?: 'great' | 'fair' | 'shady';
   statusBadge?: 'new' | 'hot' | 'shady';
@@ -130,6 +132,10 @@ export interface PitchTemplate {
 export interface UserProfile {
   name: string;
   specialization: string;
+  formats?: Array<'YouTube' | 'Shorts/Reels' | 'Подкасты' | 'Реклама'>;
+  skills?: string[];
+  minRate?: number;
+  minRateCurrency?: 'RUB' | 'USD';
   telegram: string;
   portfolioUrl: string;
   email: string;

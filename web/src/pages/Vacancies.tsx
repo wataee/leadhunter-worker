@@ -16,6 +16,7 @@ import { PitchGeneratorModal } from '../components/PitchGeneratorModal';
 import { EmptyState } from '../components/EmptyState';
 import { CardSkeleton } from '../components/Skeleton';
 import { Vacancy, SavedSearchPreset } from '../types';
+import { computeProfileFit } from '../lib/profileFit';
 import {
   Radio,
   Plus,
@@ -71,6 +72,7 @@ export const Vacancies: React.FC = () => {
 
   const addLead = useLeadsStore((s) => s.addLead);
   const {
+    profile,
     autoRefreshInterval,
     setAutoRefreshInterval,
     soundEnabled,
@@ -84,6 +86,8 @@ export const Vacancies: React.FC = () => {
   const filterHotOnly = searchParams.get('hot') === '1';
   const filterFormat = searchParams.get('format') || 'all';
   const filterQuality = searchParams.get('quality') || 'all';
+  const filterFit = searchParams.get('fit') || 'all';
+  const sortBy = searchParams.get('sort') || 'date';
 
   const setFilterParam = (key: string, value: string | boolean) => {
     setSearchParams((prev) => {
@@ -355,27 +359,46 @@ export const Vacancies: React.FC = () => {
   };
 
   // Filtered vacancies honoring hidden channels & favorites
-  const displayedVacancies = vacancies.filter((v) => {
-    if (v.hidden) return false;
-    const cleanCh = v.channel.toLowerCase().replace(/^@/, '').trim();
-    if (hiddenChannels.includes(cleanCh)) return false;
-    if (filterFavoritesOnly && !v.isFavorite) return false;
+  const displayedVacancies = vacancies
+    .filter((v) => {
+      if (v.hidden) return false;
+      const cleanCh = v.channel.toLowerCase().replace(/^@/, '').trim();
+      if (hiddenChannels.includes(cleanCh)) return false;
+      if (filterFavoritesOnly && !v.isFavorite) return false;
 
-    if (filterHotOnly) {
-      const isHot = v.statusBadge === 'hot' || Date.now() - new Date(v.postedAt).getTime() < 20 * 60 * 1000;
-      if (!isHot) return false;
-    }
-    if (filterFormat !== 'all') {
-      if (v.formatTag && v.formatTag !== 'both' && v.formatTag !== filterFormat) {
-        return false;
+      if (filterHotOnly) {
+        const isHot = v.statusBadge === 'hot' || Date.now() - new Date(v.postedAt).getTime() < 20 * 60 * 1000;
+        if (!isHot) return false;
       }
-    }
-    if (filterQuality !== 'all') {
-      if (filterQuality === 'great' && v.qualityTier !== 'great') return false;
-      if (filterQuality === 'fair_or_great' && v.qualityTier === 'shady') return false;
-    }
-    return true;
-  });
+      if (filterFormat !== 'all') {
+        if (v.formatTag && v.formatTag !== 'both' && v.formatTag !== filterFormat) {
+          return false;
+        }
+      }
+      if (filterQuality !== 'all') {
+        if (filterQuality === 'great' && v.qualityTier !== 'great') return false;
+        if (filterQuality === 'fair_or_great' && v.qualityTier === 'shady') return false;
+      }
+      if (filterFit !== 'all') {
+        const minFit = Number(filterFit);
+        const fit = v.profileFit ?? computeProfileFit(v, profile);
+        if (fit < minFit) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'fit') {
+        const fitA = a.profileFit ?? computeProfileFit(a, profile);
+        const fitB = b.profileFit ?? computeProfileFit(b, profile);
+        return fitB - fitA;
+      }
+      if (sortBy === 'budget') {
+        const bA = a.budget?.max ?? a.budget?.min ?? 0;
+        const bB = b.budget?.max ?? b.budget?.min ?? 0;
+        return bB - bA;
+      }
+      return new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime();
+    });
 
   const renderFiltersSidebar = () => (
     <div className="space-y-5">
@@ -842,6 +865,30 @@ export const Vacancies: React.FC = () => {
                 <option value="all">Все оценки</option>
                 <option value="great">🟢 Только отличные</option>
                 <option value="fair_or_great">🟡 Приемлемые и выше</option>
+              </select>
+
+              {/* Profile Fit Filter */}
+              <select
+                value={filterFit}
+                onChange={(e) => setFilterParam('fit', e.target.value)}
+                className="bg-surface-2 text-text border border-border rounded-control px-2.5 py-1.5 text-xs min-h-[36px] focus-visible:ring-2 focus-visible:ring-accent"
+                aria-label="Фильтр по совпадению с профилем"
+              >
+                <option value="all">Любое совпадение</option>
+                <option value="70">🎯 Подходит от 70%</option>
+                <option value="50">🎯 Подходит от 50%</option>
+              </select>
+
+              {/* Sort By */}
+              <select
+                value={sortBy}
+                onChange={(e) => setFilterParam('sort', e.target.value)}
+                className="bg-surface-2 text-text border border-border rounded-control px-2.5 py-1.5 text-xs min-h-[36px] focus-visible:ring-2 focus-visible:ring-accent font-medium text-accent"
+                aria-label="Сортировка вакансий"
+              >
+                <option value="date">⏱ По дате (новые)</option>
+                <option value="fit">🎯 По совпадению (fit)</option>
+                <option value="budget">💰 По бюджету</option>
               </select>
             </div>
 
