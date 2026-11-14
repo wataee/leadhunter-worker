@@ -5,6 +5,7 @@ import { DEFAULT_TEMPLATES } from '../lib/templates';
 
 interface TemplatesState {
   templates: PitchTemplate[];
+  setTemplates: (templates: PitchTemplate[]) => void;
   addTemplate: (template: Omit<PitchTemplate, 'id'>) => void;
   updateTemplate: (id: string, updates: Partial<PitchTemplate>) => void;
   duplicateTemplate: (id: string) => void;
@@ -16,6 +17,8 @@ export const useTemplatesStore = create<TemplatesState>()(
   persist(
     (set) => ({
       templates: DEFAULT_TEMPLATES,
+
+      setTemplates: (templates) => set({ templates }),
 
       addTemplate: (template) =>
         set((state) => ({

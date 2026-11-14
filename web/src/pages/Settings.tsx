@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../store/settingsStore';
 import { useLeadsStore } from '../store/leadsStore';
 import { useVacanciesStore } from '../store/vacanciesStore';
+import { useTemplatesStore } from '../store/templatesStore';
 import { useToastStore } from '../store/toastStore';
 import { checkApiHealth, HealthStatus } from '../lib/api';
 import { exportLeadsToCsv } from '../lib/csv';
@@ -25,6 +26,10 @@ export const Settings: React.FC = () => {
     profile,
     dailyGoal,
     followUpIntervals,
+    duplicateToTelegram,
+    autoRefreshInterval,
+    soundEnabled,
+    notificationsEnabled,
     useAiQualification,
     aiTopNCount,
     setUseAiQualification,
@@ -32,10 +37,15 @@ export const Settings: React.FC = () => {
     updateProfile,
     setDailyGoal,
     setFollowUpIntervals,
+    setDuplicateToTelegram,
+    setAutoRefreshInterval,
+    setSoundEnabled,
+    setNotificationsEnabled,
     resetQuota,
   } = useSettingsStore();
 
   const { leads, clearAllLeads, importLeads } = useLeadsStore();
+  const { templates, setTemplates } = useTemplatesStore();
   const { clearAllVacancies } = useVacanciesStore();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -67,12 +77,21 @@ export const Settings: React.FC = () => {
 
   const handleExportJson = () => {
     const backupData = {
-      version: '1.0',
+      schemaVersion: 2,
       exportedAt: new Date().toISOString(),
       leads,
-      profile,
-      dailyGoal,
-      followUpIntervals,
+      templates,
+      settings: {
+        profile,
+        dailyGoal,
+        followUpIntervals,
+        duplicateToTelegram,
+        autoRefreshInterval,
+        soundEnabled,
+        notificationsEnabled,
+        useAiQualification,
+        aiTopNCount,
+      },
     };
 
     const blob = new Blob([JSON.stringify(backupData, null, 2)], {
@@ -81,14 +100,14 @@ export const Settings: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `leadhunter_backup_${Date.now()}.json`;
+    a.download = `leadhunter_backup_v2_${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
 
     addToast({
       type: 'success',
-      title: 'Резервная копия создана',
-      message: 'Все лиды, настройки и контакты выгружены в JSON.',
+      title: 'Резервная копия создана (v2)',
+      message: `Выгружено ${leads.length} лидов, ${templates.length} шаблонов и все настройки.`,
     });
   };
 
@@ -100,18 +119,42 @@ export const Settings: React.FC = () => {
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
+        if (!parsed || typeof parsed !== 'object') {
+          throw new Error('Некорректный JSON');
+        }
+
+        let importedLeadsCount = 0;
+        let importedTemplatesCount = 0;
+
+        // 1. Leads
         if (Array.isArray(parsed.leads)) {
           importLeads(parsed.leads);
-          if (parsed.profile) updateProfile(parsed.profile);
-          if (parsed.dailyGoal) setDailyGoal(parsed.dailyGoal);
-          addToast({
-            type: 'success',
-            title: 'Данные успешно импортированы',
-            message: `Загружено ${parsed.leads.length} лидов из резервной копии.`,
-          });
-        } else {
-          throw new Error('Некорректная структура файла');
+          importedLeadsCount = parsed.leads.length;
         }
+
+        // 2. Templates (v2)
+        if (Array.isArray(parsed.templates)) {
+          setTemplates(parsed.templates);
+          importedTemplatesCount = parsed.templates.length;
+        }
+
+        // 3. Settings (handles both v2 format and flat v1 format)
+        const cfg = parsed.settings || parsed;
+        if (cfg.profile) updateProfile(cfg.profile);
+        if (typeof cfg.dailyGoal === 'number') setDailyGoal(cfg.dailyGoal);
+        if (Array.isArray(cfg.followUpIntervals)) setFollowUpIntervals(cfg.followUpIntervals);
+        if (typeof cfg.duplicateToTelegram === 'boolean') setDuplicateToTelegram(cfg.duplicateToTelegram);
+        if (typeof cfg.autoRefreshInterval === 'number') setAutoRefreshInterval(cfg.autoRefreshInterval);
+        if (typeof cfg.soundEnabled === 'boolean') setSoundEnabled(cfg.soundEnabled);
+        if (typeof cfg.notificationsEnabled === 'boolean') setNotificationsEnabled(cfg.notificationsEnabled);
+        if (typeof cfg.useAiQualification === 'boolean') setUseAiQualification(cfg.useAiQualification);
+        if (typeof cfg.aiTopNCount === 'number') setAiTopNCount(cfg.aiTopNCount);
+
+        addToast({
+          type: 'success',
+          title: 'Данные успешно импортированы',
+          message: `Восстановлено: ${importedLeadsCount} лидов, ${importedTemplatesCount} шаблонов и конфигурация.`,
+        });
       } catch {
         addToast({
           type: 'error',
