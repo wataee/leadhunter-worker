@@ -13,6 +13,7 @@ const Vacancies = lazy(() => import('./pages/Vacancies').then(m => ({ default: m
 const Leads = lazy(() => import('./pages/Leads').then(m => ({ default: m.Leads })));
 const Templates = lazy(() => import('./pages/Templates').then(m => ({ default: m.Templates })));
 const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
+const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
 
 const PageLoadingFallback: React.FC = () => (
   <div className="p-6 max-w-6xl mx-auto space-y-4">
@@ -124,7 +125,7 @@ const AppContent: React.FC = () => {
               <Route path="/leads" element={<Leads />} />
               <Route path="/templates" element={<Templates />} />
               <Route path="/settings" element={<Settings />} />
-              <Route path="*" element={<Dashboard />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
         </main>

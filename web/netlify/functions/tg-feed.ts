@@ -23,6 +23,8 @@ interface ParsedMessage {
   url: string;
   postedAt: string;
   views: string;
+  budget?: any;
+  fromWorker?: boolean;
 }
 
 interface ChannelFeedResult {
@@ -38,7 +40,13 @@ async function fetchChannelMessages(
   channelUsername: string,
   before?: string
 ): Promise<ChannelFeedResult> {
-  const cleanUsername = channelUsername.trim().replace(/^@/, '').replace(/^(?:https?:\/\/)?(?:t\.me|telegram\.me)\/(?:s\/)?/, '').replace(/\/$/, '');
+  const cleanUsername = channelUsername
+    .trim()
+    .replace(/^@/, '')
+    .replace(/^(?:https?:\/\/)?(?:t\.me|telegram\.me)\/(?:s\/)?/, '')
+    .replace(/\/$/, '')
+    .toLowerCase();
+
   if (!cleanUsername) {
     return { channel: channelUsername, messages: [], error: 'Пустой юзернейм канала' };
   }
@@ -57,12 +65,11 @@ async function fetchChannelMessages(
           Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
           'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
         },
-        redirect: 'manual', // Detect preview redirect
+        redirect: 'manual',
       },
-      8000
+      6000
     );
 
-    // If redirected to t.me/username without /s/, preview is disabled
     if (res.status === 301 || res.status === 302) {
       const loc = res.headers.get('location') || '';
       if (!loc.includes('/s/')) {
@@ -84,62 +91,64 @@ async function fetchChannelMessages(
     const html = await res.text();
     const $ = cheerio.load(html);
 
-    // Check if channel exists or telegram error page
     const emptyNotice = $('.tgme_channel_info_header_title').text();
     if (!emptyNotice && html.includes('If you have Telegram, you can view and join')) {
-      // Empty or no messages
+      return {
+        channel: cleanUsername,
+        messages: [],
+        error: 'Канал не существует или заблокирован',
+      };
     }
 
     const messages: ParsedMessage[] = [];
+
     $('.tgme_widget_message_wrap').each((_, elem) => {
       const $el = $(elem);
       const $msg = $el.find('.tgme_widget_message');
       const dataPost = $msg.attr('data-post'); // e.g. "jobchannel/1234"
       if (!dataPost) return;
 
-      const postId = dataPost.replace('/', '_');
+      const [postChannel, postMsgId] = dataPost.split('/');
+      const cleanCh = (postChannel || cleanUsername).toLowerCase();
+      const numId = postMsgId || dataPost;
+      const normalizedId = `tg_${cleanCh}_${numId}`;
       const postUrl = `https://t.me/${dataPost}`;
 
-      // Extract text
       const $textEl = $msg.find('.tgme_widget_message_text');
-      // Replace <br> with newlines for clean formatting
       $textEl.find('br').replaceWith('\n');
       const text = $textEl.text().trim();
 
-      if (!text) return; // skip photo-only without caption
+      if (!text) return;
 
-      // Time
       const $timeEl = $msg.find('time.time');
       const rawDate = $timeEl.attr('datetime') || new Date().toISOString();
-
-      // Views
       const views = $msg.find('.tgme_widget_message_views').text().trim() || '0';
 
       messages.push({
-        id: `tg_${postId}`,
+        id: normalizedId,
         channel: cleanUsername,
         text,
         url: postUrl,
         postedAt: rawDate,
         views,
+        fromWorker: false,
       });
     });
 
     return {
       channel: cleanUsername,
-      messages: messages.reverse(), // latest first
+      messages: messages.reverse(),
     };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Ошибка запроса к Telegram';
     return {
       channel: cleanUsername,
       messages: [],
-      error: msg.includes('aborted') ? 'Таймаут подключения к Telegram (8 сек)' : msg,
+      error: msg.includes('aborted') ? 'Таймаут подключения к Telegram' : msg,
     };
   }
 }
 
-// Chunk helper for max 5 parallel requests
 async function runInPool<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
   const results: R[] = [];
   for (let i = 0; i < items.length; i += limit) {
@@ -148,6 +157,46 @@ async function runInPool<T, R>(items: T[], limit: number, fn: (item: T) => Promi
     results.push(...chunkResults);
   }
   return results;
+}
+
+// 1. Параллельный опрос воркера (Таймаут 6s)
+async function fetchWorkerLeads(
+  workerUrl: string,
+  secret?: string
+): Promise<{ active: boolean; leads: ParsedMessage[] }> {
+  try {
+    const headers: Record<string, string> = {};
+    if (secret) {
+      headers['X-Webhook-Secret'] = secret;
+    }
+
+    const workerRes = await fetchWithTimeout(`${workerUrl.replace(/\/$/, '')}/recent`, { headers }, 6000);
+    if (!workerRes.ok) {
+      return { active: false, leads: [] };
+    }
+
+    const data = await workerRes.json();
+    const leads: ParsedMessage[] = [];
+
+    if (Array.isArray(data.leads)) {
+      for (const l of data.leads) {
+        leads.push({
+          id: l.id || `tg_worker_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          channel: l.channel || 'Telegram Chat',
+          text: l.text || '',
+          url: l.url || '',
+          postedAt: l.postedAt || new Date().toISOString(),
+          views: 'MTProto 24/7',
+          budget: l.budget || null,
+          fromWorker: true,
+        });
+      }
+    }
+
+    return { active: true, leads };
+  } catch {
+    return { active: false, leads: [] };
+  }
 }
 
 export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
@@ -164,9 +213,9 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     event.headers?.['x-forwarded-for'] ||
     'anonymous';
 
-  const rateCheck = checkRateLimit(clientIp, 60, 60_000);
+  const rateCheck = checkRateLimit(clientIp, 60, 60 * 1000);
   if (!rateCheck.allowed) {
-    return errorResponse(429, 'Слишком много запросов. Пожалуйста, подождите минуту.', null, origin);
+    return errorResponse(429, 'Слишком много запросов. Подождите минуту.', null, origin);
   }
 
   // Проверка размера тела запроса (макс 32 КБ)
@@ -198,72 +247,59 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return errorResponse(405, 'Метод не поддерживается', null, origin);
   }
 
+  const workerUrl = process.env.TG_WORKER_URL?.trim();
+  const workerSecret = process.env.WEBHOOK_SECRET?.trim();
+
+  // Параллельный опрос воркера и скрейпинга через Promise.allSettled с общим бюджетом ≤ 8с
+  const workerPromise = workerUrl
+    ? fetchWorkerLeads(workerUrl, workerSecret)
+    : Promise.resolve({ active: false, leads: [] });
+
+  const uniqueChannels = Array.from(new Set(channels.map((c) => c.trim().toLowerCase()))).slice(0, 15);
+  const scrapingPromise =
+    uniqueChannels.length > 0
+      ? runInPool(uniqueChannels, 5, (ch) => fetchChannelMessages(ch, before))
+      : Promise.resolve([]);
+
+  const [workerSettled, scrapingSettled] = await Promise.allSettled([workerPromise, scrapingPromise]);
+
+  let workerActive = false;
   const allMessages: ParsedMessage[] = [];
   const errors: { channel: string; error: string }[] = [];
   const results: ChannelFeedResult[] = [];
 
-  // 1. Fetch live leads captured by 24/7 Telegram Worker (MTProto on Render)
-  const workerUrl = process.env.TG_WORKER_URL;
-  let workerActive = false;
-
-  if (workerUrl) {
-    try {
-      const secret = process.env.WEBHOOK_SECRET?.trim();
-      const headers: Record<string, string> = {};
-      if (secret) {
-        headers['X-Webhook-Secret'] = secret;
-      }
-
-      const workerRes = await fetchWithTimeout(`${workerUrl.replace(/\/$/, '')}/recent`, { headers }, 5000);
-      if (workerRes.ok) {
-        workerActive = true;
-        const data = await workerRes.json();
-        if (Array.isArray(data.leads) && data.leads.length > 0) {
-          for (const l of data.leads) {
-            allMessages.push({
-              id: l.id || `worker_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-              channel: l.channel || 'Telegram Chat',
-              text: l.text || '',
-              url: l.url || '',
-              postedAt: l.postedAt || new Date().toISOString(),
-              views: 'MTProto 24/7',
-            });
-          }
-        }
-      }
-    } catch {
-      // Worker offline or unreachable
-    }
+  // Обработка ответа воркера
+  if (workerSettled.status === 'fulfilled') {
+    workerActive = workerSettled.value.active;
+    allMessages.push(...workerSettled.value.leads);
   }
 
-  // 2. Optional: Direct web fetch for requested public channels
-  if (channels.length > 0) {
-    // Deduplicate channels
-    const uniqueChannels = Array.from(new Set(channels.map((c) => c.trim().toLowerCase()))).slice(0, 15);
-    const webResults = await runInPool(uniqueChannels, 5, (ch) => fetchChannelMessages(ch, before));
-
-    for (const r of webResults) {
+  // Обработка результатов веб-скрейпинга
+  if (scrapingSettled.status === 'fulfilled') {
+    for (const r of scrapingSettled.value) {
       results.push(r);
-      if (r.error) {
-        // If worker is running, suppress annoying web-preview redirect errors
-        if (!r.error.includes('редирект с /s/')) {
-          errors.push({ channel: r.channel, error: r.error });
-        }
+      if (r.error && !r.error.includes('редирект с /s/')) {
+        errors.push({ channel: r.channel, error: r.error });
       }
       allMessages.push(...r.messages);
     }
   }
 
-  // Deduplicate messages by id or text content
+  // Дедупликация: по стабильному id и по нормализованному началу текста
   const seenIds = new Set<string>();
-  const uniqueMessages = allMessages.filter((m) => {
-    if (seenIds.has(m.id) || seenIds.has(m.text.slice(0, 80))) return false;
-    seenIds.add(m.id);
-    seenIds.add(m.text.slice(0, 80));
-    return true;
-  });
+  const seenTexts = new Set<string>();
+  const uniqueMessages: ParsedMessage[] = [];
 
-  // Sort combined messages by date descending
+  for (const m of allMessages) {
+    const normText = m.text.toLowerCase().replace(/\s+/g, ' ').slice(0, 80);
+    if (seenIds.has(m.id) || seenTexts.has(normText)) {
+      continue;
+    }
+    seenIds.add(m.id);
+    seenTexts.add(normText);
+    uniqueMessages.push(m);
+  }
+
   uniqueMessages.sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime());
 
   return jsonResponse(

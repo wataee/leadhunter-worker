@@ -28,17 +28,12 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     youtube: hasYoutube,
     telegram: hasTelegram,
     ai: hasAi,
-    aiProvider: hasGemini ? 'gemini' : hasGroq ? 'groq' : hasOpenRouter ? 'openrouter' : hasAnthropic ? 'anthropic' : null,
+    activeProvider: hasGemini ? 'gemini' : hasGroq ? 'groq' : hasOpenRouter ? 'openrouter' : hasAnthropic ? 'anthropic' : null,
     providers: {
-      gemini: hasGemini,
-      groq: hasGroq,
-      openrouter: hasOpenRouter,
-      anthropic: hasAnthropic,
-    },
-    models: {
-      gemini: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
-      groq: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
-      openrouter: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free',
+      gemini: { configured: hasGemini, model: process.env.GEMINI_MODEL || 'gemini-2.5-flash' },
+      groq: { configured: hasGroq, model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile' },
+      openrouter: { configured: hasOpenRouter, model: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free' },
+      anthropic: { configured: hasAnthropic, model: process.env.ANTHROPIC_MODEL || 'claude-3-5-haiku-20241022' },
     },
     timestamp: new Date().toISOString(),
   });

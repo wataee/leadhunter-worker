@@ -4,9 +4,9 @@ import {
   handleOptions,
   checkRateLimit,
   validatePayloadSize,
-  fetchWithTimeout,
   type NetlifyResponse,
 } from './_shared/response';
+import { generateAiCompletion, sanitizeInput } from './_shared/ai';
 
 interface HandlerEvent {
   httpMethod: string;
@@ -67,14 +67,14 @@ function buildUserPrompt(leads: LeadInput[], examples?: ScoreRequestBody['exampl
     if (examples.good && examples.good.length > 0) {
       prompt += 'Примеры лидов, которые ответили (целевые):\n';
       examples.good.slice(0, 3).forEach((ex, i) => {
-        prompt += `${i + 1}. Название: "${ex.title}", Ниша: "${ex.niche || '—'}", Сабов: ${ex.subscribers}, Описание: "${(ex.description || '').slice(0, 150)}"\n`;
+        prompt += `${i + 1}. Название: "${sanitizeInput(ex.title, 100)}", Ниша: "${sanitizeInput(ex.niche || '—', 50)}", Сабов: ${ex.subscribers}, Описание: "${sanitizeInput(ex.description || '', 150)}"\n`;
       });
       prompt += '\n';
     }
     if (examples.bad && examples.bad.length > 0) {
       prompt += 'Примеры лидов, которые не подошли (нецелевые / без ответа):\n';
       examples.bad.slice(0, 3).forEach((ex, i) => {
-        prompt += `${i + 1}. Название: "${ex.title}", Ниша: "${ex.niche || '—'}", Сабов: ${ex.subscribers}, Описание: "${(ex.description || '').slice(0, 150)}"\n`;
+        prompt += `${i + 1}. Название: "${sanitizeInput(ex.title, 100)}", Ниша: "${sanitizeInput(ex.niche || '—', 50)}", Сабов: ${ex.subscribers}, Описание: "${sanitizeInput(ex.description || '', 150)}"\n`;
       });
       prompt += '\n';
     }
@@ -84,16 +84,16 @@ function buildUserPrompt(leads: LeadInput[], examples?: ScoreRequestBody['exampl
   leads.forEach((l, idx) => {
     prompt += `--- КАНАЛ ${idx + 1} ---\n`;
     prompt += `channelId: "${l.channelId}"\n`;
-    prompt += `Название: "${l.title}"\n`;
+    prompt += `Название: "${sanitizeInput(l.title, 150)}"\n`;
     prompt += `Подписчики: ${l.subscribers}\n`;
     prompt += `Частота: ~${l.uploadsPerMonth || 1} видео/мес\n`;
     prompt += `Есть ключевые слова продукта: ${l.hasProductKeywords ? 'Да' : 'Нет'}\n`;
-    prompt += `Ссылки: ${(l.links || []).join(', ') || 'нет'}\n`;
-    prompt += `Описание канала: "${(l.description || '').slice(0, 350)}"\n`;
+    prompt += `Ссылки: ${(l.links || []).map((link) => sanitizeInput(link, 150)).join(', ') || 'нет'}\n`;
+    prompt += `Описание канала: "${sanitizeInput(l.description || '', 350)}"\n`;
     if (l.lastVideos && l.lastVideos.length > 0) {
       prompt += 'Последние видео:\n';
       l.lastVideos.slice(0, 3).forEach((v, vIdx) => {
-        prompt += `  ${vIdx + 1}) "${v.title}" (${v.publishedAt ? v.publishedAt.slice(0, 10) : ''}) — ${(v.description || '').slice(0, 150)}\n`;
+        prompt += `  ${vIdx + 1}) "${sanitizeInput(v.title, 150)}" (${v.publishedAt ? v.publishedAt.slice(0, 10) : ''}) — ${sanitizeInput(v.description || '', 150)}\n`;
       });
     }
     prompt += '\n';
@@ -104,16 +104,12 @@ function buildUserPrompt(leads: LeadInput[], examples?: ScoreRequestBody['exampl
 
 function parseAndValidateResults(rawText: string, leads: LeadInput[]): AiLeadResult[] {
   let clean = rawText.trim();
-
-  // Strip markdown code fences if model enclosed in ```json ... ```
   clean = clean.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
 
-  // If wrapped in an object like { "leads": [...] } or { "scores": [...] }
   let parsed: unknown;
   try {
     parsed = JSON.parse(clean);
   } catch {
-    // Try to extract bracketed array [ ... ]
     const arrayMatch = clean.match(/\[\s*\{[\s\S]*\}\s*\]/);
     if (arrayMatch) {
       parsed = JSON.parse(arrayMatch[0]);
@@ -139,7 +135,6 @@ function parseAndValidateResults(rawText: string, leads: LeadInput[]): AiLeadRes
     ) as Record<string, unknown> | undefined;
 
     if (!found) {
-      // Fallback matching by index if model omitted channelId
       const fallbackItem = items[results.length] as Record<string, unknown> | undefined;
       if (fallbackItem) {
         results.push(normalizeItem(lead.channelId, fallbackItem));
@@ -201,144 +196,6 @@ function normalizeItem(channelId: string, obj: Record<string, unknown>): AiLeadR
   };
 }
 
-/* Call Gemini API with internal model resilience */
-async function callGemini(
-  apiKey: string,
-  modelName: string,
-  userPrompt: string
-): Promise<string> {
-  const modelsToTry = [
-    modelName,
-    'gemini-3.1-flash-lite',
-    'gemini-flash-latest',
-    'gemini-3.8-flash',
-  ].filter((m, idx, arr) => arr.indexOf(m) === idx);
-
-  let lastStatus = 0;
-
-  for (const mod of modelsToTry) {
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${mod}:generateContent`;
-    try {
-      const res = await fetchWithTimeout(
-        geminiUrl,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey,
-          },
-          body: JSON.stringify({
-            system_instruction: {
-              parts: [{ text: SYSTEM_PROMPT }],
-            },
-            contents: [
-              {
-                role: 'user',
-                parts: [{ text: userPrompt }],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.2,
-              maxOutputTokens: 2000,
-              responseMimeType: 'application/json',
-            },
-          }),
-        },
-        15000
-      );
-
-      if (res.ok) {
-        const data = await res.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) return text;
-      }
-      lastStatus = res.status;
-    } catch {
-      // Continue to next model in list
-    }
-  }
-
-  throw new Error(`Gemini HTTP ${lastStatus || 500}`);
-}
-
-/* Call Groq API */
-async function callGroq(
-  apiKey: string,
-  modelName: string,
-  userPrompt: string
-): Promise<string> {
-  const res = await fetchWithTimeout(
-    'https://api.groq.com/openai/v1/chat/completions',
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: modelName,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.2,
-        max_tokens: 2000,
-        response_format: { type: 'json_object' },
-      }),
-    },
-    15000
-  );
-
-  if (!res.ok) {
-    throw new Error(`Groq HTTP ${res.status}`);
-  }
-
-  const data = await res.json();
-  const text = data?.choices?.[0]?.message?.content;
-  if (!text) throw new Error('Пустой ответ от Groq');
-  return text;
-}
-
-/* Call OpenRouter API */
-async function callOpenRouter(
-  apiKey: string,
-  modelName: string,
-  userPrompt: string
-): Promise<string> {
-  const res = await fetchWithTimeout(
-    'https://openrouter.ai/api/v1/chat/completions',
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://fleurleads-work.netlify.app',
-        'X-Title': 'LeadHunter',
-      },
-      body: JSON.stringify({
-        model: modelName,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.2,
-        max_tokens: 2000,
-        response_format: { type: 'json_object' },
-      }),
-    },
-    15000
-  );
-
-  if (!res.ok) {
-    throw new Error(`OpenRouter HTTP ${res.status}`);
-  }
-
-  const data = await res.json();
-  const text = data?.choices?.[0]?.message?.content;
-  if (!text) throw new Error('Пустой ответ от OpenRouter');
-  return text;
-}
-
 export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   const origin = event.headers?.origin || event.headers?.Origin;
 
@@ -368,12 +225,14 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return errorResponse(400, sizeValidation.error || 'Слишком большой запрос', null, origin);
   }
 
-  const geminiKey = process.env.GEMINI_API_KEY?.trim();
-  const groqKey = process.env.GROQ_API_KEY?.trim();
-  const openRouterKey = process.env.OPENROUTER_API_KEY?.trim();
+  const hasAiKey = Boolean(
+    process.env.GEMINI_API_KEY?.trim() ||
+    process.env.GROQ_API_KEY?.trim() ||
+    process.env.OPENROUTER_API_KEY?.trim() ||
+    process.env.ANTHROPIC_API_KEY?.trim()
+  );
 
-  // If no keys configured, return { enabled: false } without error!
-  if (!geminiKey && !groqKey && !openRouterKey) {
+  if (!hasAiKey) {
     return jsonResponse(200, { enabled: false }, origin);
   }
 
@@ -391,71 +250,22 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   const userPrompt = buildUserPrompt(leads, body.examples);
 
-  // Chain: 1) Gemini -> 2) Groq -> 3) OpenRouter
-  const chain: Array<{
-    name: string;
-    fn: () => Promise<string>;
-  }> = [];
-
-  if (geminiKey) {
-    const model = process.env.GEMINI_MODEL?.trim() || 'gemini-3.1-flash-lite';
-    chain.push({
-      name: 'gemini',
-      fn: () => callGemini(geminiKey, model, userPrompt),
-    });
+  let completionResult;
+  try {
+    completionResult = await generateAiCompletion(SYSTEM_PROMPT, userPrompt);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Все настроенные AI-провайдеры вернули ошибку.';
+    return errorResponse(502, msg, null, origin);
   }
 
-  if (groqKey) {
-    const model = process.env.GROQ_MODEL?.trim() || 'llama-3.3-70b-versatile';
-    chain.push({
-      name: 'groq',
-      fn: () => callGroq(groqKey, model, userPrompt),
-    });
-  }
-
-  if (openRouterKey) {
-    const model = process.env.OPENROUTER_MODEL?.trim() || 'meta-llama/llama-3.3-70b-instruct:free';
-    chain.push({
-      name: 'openrouter',
-      fn: () => callOpenRouter(openRouterKey, model, userPrompt),
-    });
-  }
-
-  let lastError: unknown = null;
-  let successfulProvider = '';
-  let rawResponseText = '';
-
-  for (const provider of chain) {
-    try {
-      rawResponseText = await provider.fn();
-      successfulProvider = provider.name;
-      break;
-    } catch (err: unknown) {
-      lastError = err;
-      // Continue to next provider in fallback chain
-    }
-  }
-
-  if (!rawResponseText) {
-    return errorResponse(
-      502,
-      'Все настроенные AI-провайдеры вернули ошибку или исчерпали лимит.',
-      null,
-      origin
-    );
-  }
-
-  // Safe parsing with 1 retry attempt if JSON is slightly malformed
   let results: AiLeadResult[];
   try {
-    results = parseAndValidateResults(rawResponseText, leads);
+    results = parseAndValidateResults(completionResult.text, leads);
   } catch {
-    // 1 retry attempt with cleanup
     try {
-      const fixed = rawResponseText.replace(/,\s*([\]}])/g, '$1');
+      const fixed = completionResult.text.replace(/,\s*([\]}])/g, '$1');
       results = parseAndValidateResults(fixed, leads);
     } catch {
-      // If parsing failed completely, return baseline scores with error note per lead
       results = leads.map((l) => ({
         channelId: l.channelId,
         is_business: l.hasProductKeywords || false,
@@ -475,7 +285,8 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     200,
     {
       enabled: true,
-      provider: successfulProvider,
+      provider: completionResult.provider,
+      model: completionResult.model,
       scores: results,
     },
     origin

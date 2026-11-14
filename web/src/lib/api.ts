@@ -119,6 +119,8 @@ export interface TgFeedResponse {
       url: string;
       postedAt: string;
       views: string;
+      budget?: any;
+      fromWorker?: boolean;
     }>;
     error?: string;
   }>;
@@ -129,9 +131,12 @@ export interface TgFeedResponse {
     url: string;
     postedAt: string;
     views: string;
+    budget?: any;
+    fromWorker?: boolean;
   }>;
   errors: Array<{ channel: string; error: string }>;
   totalMessages: number;
+  workerActive?: boolean;
 }
 
 async function handleApiResponse<T>(res: Response): Promise<T> {

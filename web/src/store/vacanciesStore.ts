@@ -141,6 +141,39 @@ export function computeVacancyRelevance(
   };
 }
 
+const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
+
+const safeLocalStorage = {
+  getItem: (name: string): string | null => {
+    try {
+      return localStorage.getItem(name);
+    } catch {
+      return null;
+    }
+  },
+  setItem: (name: string, value: string): void => {
+    try {
+      localStorage.setItem(name, value);
+    } catch (err: any) {
+      if (err?.name === 'QuotaExceededError' || err?.code === 22) {
+        console.warn('[LocalStorage] QuotaExceededError, сокращаем кэш вакансий...');
+        try {
+          const parsed = JSON.parse(value);
+          if (parsed?.state?.vacancies?.length > 100) {
+            parsed.state.vacancies = parsed.state.vacancies.slice(0, 100);
+            localStorage.setItem(name, JSON.stringify(parsed));
+          }
+        } catch {}
+      }
+    }
+  },
+  removeItem: (name: string): void => {
+    try {
+      localStorage.removeItem(name);
+    } catch {}
+  },
+};
+
 export const useVacanciesStore = create<VacanciesState>()(
   persist(
     (set, get) => ({
@@ -191,29 +224,39 @@ export const useVacanciesStore = create<VacanciesState>()(
           ),
         })),
 
-      setVacancies: (vacancies) => set({ vacancies }),
+      setVacancies: (vacancies) =>
+        set({
+          vacancies: vacancies
+            .filter((v) => Date.now() - new Date(v.postedAt).getTime() <= FOURTEEN_DAYS_MS)
+            .slice(0, 500),
+        }),
 
       mergeNewVacancies: (incoming) => {
         const current = get().vacancies;
         const currentIds = new Set(current.map((v) => v.id));
         const newOnes: Vacancy[] = [];
         let hotCount = 0;
-        const twentyMinsAgo = Date.now() - 20 * 60 * 1000;
+        const now = Date.now();
+        const twentyMinsAgo = now - 20 * 60 * 1000;
 
         for (const item of incoming) {
+          const itemTime = new Date(item.postedAt).getTime();
+          // TTL 14 дней
+          if (now - itemTime > FOURTEEN_DAYS_MS) continue;
+
           if (!currentIds.has(item.id)) {
             newOnes.push(item);
-            const postedTime = new Date(item.postedAt).getTime();
-            if (postedTime >= twentyMinsAgo) {
+            if (itemTime >= twentyMinsAgo) {
               hotCount++;
             }
           }
         }
 
         if (newOnes.length > 0) {
-          const merged = [...newOnes, ...current].sort(
-            (a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime()
-          );
+          const merged = [...newOnes, ...current]
+            .filter((v) => now - new Date(v.postedAt).getTime() <= FOURTEEN_DAYS_MS)
+            .sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime())
+            .slice(0, 500); // Лимит не более 500 в кэше
           set({ vacancies: merged });
         }
 
@@ -263,10 +306,17 @@ export const useVacanciesStore = create<VacanciesState>()(
     }),
     {
       name: 'leadhunter_vacancies',
-      // Automatically purge any old demo vacancies from localStorage
+      storage: safeLocalStorage as any,
       onRehydrateStorage: () => (state) => {
         if (state && Array.isArray(state.vacancies)) {
-          state.vacancies = state.vacancies.filter((v) => !v.id?.startsWith('demo_'));
+          const now = Date.now();
+          state.vacancies = state.vacancies
+            .filter(
+              (v) =>
+                !v.id?.startsWith('demo_') &&
+                now - new Date(v.postedAt).getTime() <= FOURTEEN_DAYS_MS
+            )
+            .slice(0, 500);
         }
       },
     }
