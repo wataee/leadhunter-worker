@@ -1,5 +1,14 @@
+export function isQuietHours(startHour = 23, endHour = 8): boolean {
+  const currentHour = new Date().getHours();
+  if (startHour > endHour) {
+    return currentHour >= startHour || currentHour < endHour;
+  }
+  return currentHour >= startHour && currentHour < endHour;
+}
+
 // Web Audio API beep
-export function playNotificationBeep(): void {
+export function playNotificationBeep(checkQuiet = false, quietStart = 23, quietEnd = 8): void {
+  if (checkQuiet && isQuietHours(quietStart, quietEnd)) return;
   try {
     const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextClass) return;
@@ -35,7 +44,15 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return res === 'granted';
 }
 
-export function sendBrowserNotification(title: string, body: string, onClick?: () => void): void {
+export function sendBrowserNotification(
+  title: string,
+  body: string,
+  onClick?: () => void,
+  checkQuiet = false,
+  quietStart = 23,
+  quietEnd = 8
+): void {
+  if (checkQuiet && isQuietHours(quietStart, quietEnd)) return;
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
   try {

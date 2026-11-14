@@ -157,4 +157,9 @@ export interface UserSettings {
   // AI Settings
   useAiQualification: boolean;
   aiTopNCount: number; // Top N leads to qualify with AI (default 30)
+
+  // Quiet Hours (5.9)
+  quietHoursEnabled?: boolean;
+  quietHoursStart?: number; // 0..23, default 23
+  quietHoursEnd?: number; // 0..23, default 8
 }

@@ -15,6 +15,7 @@ interface SettingsState extends UserSettings {
   setNotificationsEnabled: (enabled: boolean) => void;
   setUseAiQualification: (enabled: boolean) => void;
   setAiTopNCount: (count: number) => void;
+  setQuietHours: (enabled: boolean, start?: number, end?: number) => void;
   addQuotaUsed: (units: number) => void;
   resetQuota: () => void;
   resetAllSettings: () => void;
@@ -48,6 +49,9 @@ export const useSettingsStore = create<SettingsState>()(
       sessionQuotaUsed: 0,
       useAiQualification: true,
       aiTopNCount: 30,
+      quietHoursEnabled: false,
+      quietHoursStart: 23,
+      quietHoursEnd: 8,
 
       updateProfile: (updates) =>
         set((state) => ({
@@ -80,6 +84,8 @@ export const useSettingsStore = create<SettingsState>()(
       setNotificationsEnabled: (notificationsEnabled) => set({ notificationsEnabled }),
       setUseAiQualification: (useAiQualification) => set({ useAiQualification }),
       setAiTopNCount: (aiTopNCount) => set({ aiTopNCount }),
+      setQuietHours: (quietHoursEnabled, quietHoursStart = 23, quietHoursEnd = 8) =>
+        set({ quietHoursEnabled, quietHoursStart, quietHoursEnd }),
 
       addQuotaUsed: (units) =>
         set((state) => ({

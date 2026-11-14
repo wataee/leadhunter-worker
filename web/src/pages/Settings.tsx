@@ -30,10 +30,14 @@ export const Settings: React.FC = () => {
     autoRefreshInterval,
     soundEnabled,
     notificationsEnabled,
+    quietHoursEnabled,
+    quietHoursStart,
+    quietHoursEnd,
     useAiQualification,
     aiTopNCount,
     setUseAiQualification,
     setAiTopNCount,
+    setQuietHours,
     updateProfile,
     setDailyGoal,
     setFollowUpIntervals,
@@ -441,6 +445,48 @@ export const Settings: React.FC = () => {
               По умолчанию: через 2 дня, еще через 2 дня, затем через 3 дня.
             </p>
           </div>
+        </div>
+
+        {/* 5.9 Quiet Hours Setting */}
+        <div className="pt-3 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer font-medium text-text">
+              <input
+                type="checkbox"
+                checked={quietHoursEnabled ?? false}
+                onChange={(e) => setQuietHours(e.target.checked, quietHoursStart ?? 23, quietHoursEnd ?? 8)}
+                className="rounded bg-surface-2 border-border text-accent focus:ring-accent w-4 h-4"
+              />
+              <span>Тихие часы (не беспокоить звуками и уведомлениями ночью)</span>
+            </label>
+            <p className="text-[11px] text-muted pl-6 mt-0.5">
+              В этот период звуковые сигналы и всплывающие окна блокируются.
+            </p>
+          </div>
+
+          {quietHoursEnabled && (
+            <div className="flex items-center gap-2 pl-6 sm:pl-0 font-mono text-xs">
+              <span className="text-text-muted">С</span>
+              <input
+                type="number"
+                min="0"
+                max="23"
+                value={quietHoursStart ?? 23}
+                onChange={(e) => setQuietHours(true, Number(e.target.value), quietHoursEnd ?? 8)}
+                className="w-14 bg-surface-2 border border-border rounded p-1 text-center text-text"
+              />
+              <span className="text-text-muted">:00 до</span>
+              <input
+                type="number"
+                min="0"
+                max="23"
+                value={quietHoursEnd ?? 8}
+                onChange={(e) => setQuietHours(true, quietHoursStart ?? 23, Number(e.target.value))}
+                className="w-14 bg-surface-2 border border-border rounded p-1 text-center text-text"
+              />
+              <span className="text-text-muted">:00</span>
+            </div>
+          )}
         </div>
       </div>
 
