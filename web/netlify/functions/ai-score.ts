@@ -2,11 +2,11 @@ import {
   jsonResponse,
   errorResponse,
   handleOptions,
-  checkRateLimit,
+  checkDistributedRateLimit,
   validatePayloadSize,
   type NetlifyResponse,
 } from './_shared/response';
-import { generateAiCompletion, sanitizeInput } from './_shared/ai';
+import { generateAiCompletion, sanitizeInput, wrapUserData, PROMPT_INJECTION_DEFENSE } from './_shared/ai';
 import { requireAuth } from './_shared/auth';
 
 interface HandlerEvent {
@@ -59,7 +59,9 @@ export interface AiLeadResult {
 }
 
 const SYSTEM_PROMPT =
-  "Ты оцениваешь YouTube-каналы как потенциальных клиентов для фриланс-видеомонтажёра, который монтирует длинные ролики и подкасты. Платёжеспособный клиент: автор с реальным бизнесом (курсы, консалтинг, SaaS, услуги, b2b), регулярно выпускающий видео, с аудиторией 5-50 тысяч. Развлекательные каналы без продукта оценивай низко. Оценивай ТОЛЬКО по предоставленным данным, ничего не выдумывай, качество монтажа по тексту определить нельзя, не утверждай о нём. Верни JSON-массив объектов: {channelId, is_business:boolean, monetization:'product'|'ads_only'|'unclear', fit_score:0-100, has_editor_signals:boolean, awareness:'unaware'|'problem'|'solution'|'product', pain_hypotheses:string[] (до 3, формулируй как гипотезы), reason:string (одно предложение), opening_angle:string (идея первой строки сообщения, конкретная и без лести)}.";
+  "Ты оцениваешь YouTube-каналы как потенциальных клиентов для фриланс-видеомонтажёра, который монтирует длинные ролики и подкасты. Платёжеспособный клиент: автор с реальным бизнесом (курсы, консалтинг, SaaS, услуги, b2b), регулярно выпускающий видео, с аудиторией 5-50 тысяч. Развлекательные каналы без продукта оценивай низко. Оценивай ТОЛЬКО по предоставленным данным, ничего не выдумывай, качество монтажа по тексту определить нельзя, не утверждай о нём. " +
+  PROMPT_INJECTION_DEFENSE +
+  " Верни JSON-массив объектов: {channelId, is_business:boolean, monetization:'product'|'ads_only'|'unclear', fit_score:0-100, has_editor_signals:boolean, awareness:'unaware'|'problem'|'solution'|'product', pain_hypotheses:string[] (до 3, формулируй как гипотезы), reason:string (одно предложение), opening_angle:string (идея первой строки сообщения, конкретная и без лести)}.";
 
 function buildUserPrompt(leads: LeadInput[], examples?: ScoreRequestBody['examples']): string {
   let prompt = '';
@@ -83,21 +85,26 @@ function buildUserPrompt(leads: LeadInput[], examples?: ScoreRequestBody['exampl
 
   prompt += 'Оцени следующие YouTube-каналы (верни строго JSON-массив объектов):\n';
   leads.forEach((l, idx) => {
-    prompt += `--- КАНАЛ ${idx + 1} ---\n`;
-    prompt += `channelId: "${l.channelId}"\n`;
-    prompt += `Название: "${sanitizeInput(l.title, 150)}"\n`;
-    prompt += `Подписчики: ${l.subscribers}\n`;
-    prompt += `Частота: ~${l.uploadsPerMonth || 1} видео/мес\n`;
-    prompt += `Есть ключевые слова продукта: ${l.hasProductKeywords ? 'Да' : 'Нет'}\n`;
-    prompt += `Ссылки: ${(l.links || []).map((link) => sanitizeInput(link, 150)).join(', ') || 'нет'}\n`;
-    prompt += `Описание канала: "${sanitizeInput(l.description || '', 350)}"\n`;
-    if (l.lastVideos && l.lastVideos.length > 0) {
-      prompt += 'Последние видео:\n';
-      l.lastVideos.slice(0, 3).forEach((v, vIdx) => {
-        prompt += `  ${vIdx + 1}) "${sanitizeInput(v.title, 150)}" (${v.publishedAt ? v.publishedAt.slice(0, 10) : ''}) — ${sanitizeInput(v.description || '', 150)}\n`;
-      });
-    }
-    prompt += '\n';
+    const rawData = [
+      `channelId: "${l.channelId}"`,
+      `Название: "${sanitizeInput(l.title, 150)}"`,
+      `Подписчики: ${l.subscribers}`,
+      `Частота: ~${l.uploadsPerMonth || 1} видео/мес`,
+      `Есть ключевые слова продукта: ${l.hasProductKeywords ? 'Да' : 'Нет'}`,
+      `Ссылки: ${(l.links || []).map((link) => sanitizeInput(link, 150)).join(', ') || 'нет'}`,
+      `Описание канала: "${sanitizeInput(l.description || '', 350)}"`,
+      l.lastVideos && l.lastVideos.length > 0
+        ? 'Последние видео:\n' +
+          l.lastVideos
+            .slice(0, 3)
+            .map((v, vIdx) => `  ${vIdx + 1}) "${sanitizeInput(v.title, 150)}" (${v.publishedAt ? v.publishedAt.slice(0, 10) : ''}) — ${sanitizeInput(v.description || '', 150)}`)
+            .join('\n')
+        : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    prompt += `--- КАНАЛ ${idx + 1} ---\n${wrapUserData(rawData, `CHANNEL_${idx + 1}`)}\n\n`;
   });
 
   return prompt;
@@ -214,14 +221,14 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return errorResponse(405, 'Метод не поддерживается. Используйте POST.', null, origin);
   }
 
-  // Rate Limiting по IP
+  // Rate Limiting по IP (распределённый через Upstash Redis или in-memory)
   const clientIp =
     event.headers?.['x-nf-client-connection-ip'] ||
     event.headers?.['client-ip'] ||
     event.headers?.['x-forwarded-for'] ||
     'anonymous';
 
-  const rateCheck = checkRateLimit(clientIp, 30, 60_000);
+  const rateCheck = await checkDistributedRateLimit(clientIp, 30, 60_000);
   if (!rateCheck.allowed) {
     return errorResponse(429, 'Слишком много запросов к AI. Пожалуйста, подождите минуту.', null, origin);
   }

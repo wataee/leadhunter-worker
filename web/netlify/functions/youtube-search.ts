@@ -2,7 +2,7 @@ import {
   jsonResponse,
   errorResponse,
   handleOptions,
-  checkRateLimit,
+  checkDistributedRateLimit,
   validatePayloadSize,
   fetchWithTimeout,
   type NetlifyResponse,
@@ -93,14 +93,14 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return errorResponse(405, 'Метод не поддерживается. Используйте POST.', null, origin);
   }
 
-  // Rate Limiting по IP
+  // Rate Limiting по IP (распределённый через Upstash Redis или in-memory)
   const clientIp =
     event.headers?.['x-nf-client-connection-ip'] ||
     event.headers?.['client-ip'] ||
     event.headers?.['x-forwarded-for'] ||
     'anonymous';
 
-  const rateCheck = checkRateLimit(clientIp, 30, 60_000);
+  const rateCheck = await checkDistributedRateLimit(clientIp, 30, 60_000);
   if (!rateCheck.allowed) {
     return errorResponse(429, 'Слишком много поисковых запросов. Пожалуйста, подождите минуту.', null, origin);
   }

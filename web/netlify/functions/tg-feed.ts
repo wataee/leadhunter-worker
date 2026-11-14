@@ -3,7 +3,7 @@ import {
   jsonResponse,
   errorResponse,
   handleOptions,
-  checkRateLimit,
+  checkDistributedRateLimit,
   validatePayloadSize,
   fetchWithTimeout,
   type NetlifyResponse,
@@ -150,9 +150,18 @@ async function fetchChannelMessages(
   }
 }
 
-async function runInPool<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+async function runInPoolWithDeadline<T, R>(
+  items: T[],
+  limit: number,
+  deadlineTs: number,
+  fn: (item: T) => Promise<R>
+): Promise<R[]> {
   const results: R[] = [];
   for (let i = 0; i < items.length; i += limit) {
+    if (Date.now() >= deadlineTs) {
+      console.warn(`[tg-feed] Достигнут лимит 7.5с, остановлен опрос оставшихся ${items.length - i} каналов`);
+      break;
+    }
     const chunk = items.slice(i, i + limit);
     const chunkResults = await Promise.all(chunk.map(fn));
     results.push(...chunkResults);
@@ -213,14 +222,14 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return errorResponse(auth.statusCode || 401, auth.error || 'Требуется авторизация', null, origin);
   }
 
-  // Rate Limiting по IP
+  // Rate Limiting по IP (распределённый через Upstash Redis или in-memory)
   const clientIp =
     event.headers?.['x-nf-client-connection-ip'] ||
     event.headers?.['client-ip'] ||
     event.headers?.['x-forwarded-for'] ||
     'anonymous';
 
-  const rateCheck = checkRateLimit(clientIp, 60, 60 * 1000);
+  const rateCheck = await checkDistributedRateLimit(clientIp, 60, 60 * 1000);
   if (!rateCheck.allowed) {
     return errorResponse(429, 'Слишком много запросов. Подождите минуту.', null, origin);
   }
@@ -261,67 +270,94 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return errorResponse(503, 'WEBHOOK_SECRET не настроен на сервере для связи с воркером', null, origin);
   }
 
-  // Параллельный опрос воркера и скрейпинга через Promise.allSettled с общим бюджетом ≤ 8с
-  const workerPromise = workerUrl
-    ? fetchWorkerLeads(workerUrl, workerSecret)
-    : Promise.resolve({ active: false, leads: [] });
+  const startTime = Date.now();
+  const deadlineTs = startTime + 7500; // 7.5s порог для скрейпинга
 
-  const uniqueChannels = Array.from(new Set(channels.map((c) => c.trim().toLowerCase()))).slice(0, 15);
-  const scrapingPromise =
-    uniqueChannels.length > 0
-      ? runInPool(uniqueChannels, 5, (ch) => fetchChannelMessages(ch, before))
-      : Promise.resolve([]);
+  // 3.1 Общий дедлайн 8.0с через AbortController + Promise.race
+  const timeoutPromise = new Promise<{ timeout: true }>((resolve) =>
+    setTimeout(() => resolve({ timeout: true }), 8000)
+  );
 
-  const [workerSettled, scrapingSettled] = await Promise.allSettled([workerPromise, scrapingPromise]);
+  const executeFeedJob = async () => {
+    // Параллельный опрос воркера и скрейпинга через Promise.allSettled
+    const workerPromise = workerUrl
+      ? fetchWorkerLeads(workerUrl, workerSecret)
+      : Promise.resolve({ active: false, leads: [] });
 
-  let workerActive = false;
-  const allMessages: ParsedMessage[] = [];
-  const errors: { channel: string; error: string }[] = [];
-  const results: ChannelFeedResult[] = [];
+    const uniqueChannels = Array.from(new Set(channels.map((c) => c.trim().toLowerCase()))).slice(0, 15);
+    const scrapingPromise =
+      uniqueChannels.length > 0
+        ? runInPoolWithDeadline(uniqueChannels, 5, deadlineTs, (ch) => fetchChannelMessages(ch, before))
+        : Promise.resolve([]);
 
-  // Обработка ответа воркера
-  if (workerSettled.status === 'fulfilled') {
-    workerActive = workerSettled.value.active;
-    allMessages.push(...workerSettled.value.leads);
-  }
+    const [workerSettled, scrapingSettled] = await Promise.allSettled([workerPromise, scrapingPromise]);
 
-  // Обработка результатов веб-скрейпинга
-  if (scrapingSettled.status === 'fulfilled') {
-    for (const r of scrapingSettled.value) {
-      results.push(r);
-      if (r.error && !r.error.includes('редирект с /s/')) {
-        errors.push({ channel: r.channel, error: r.error });
+    let workerActive = false;
+    const allMessages: ParsedMessage[] = [];
+    const errors: { channel: string; error: string }[] = [];
+    const results: ChannelFeedResult[] = [];
+
+    // Обработка ответа воркера
+    if (workerSettled.status === 'fulfilled') {
+      workerActive = workerSettled.value.active;
+      allMessages.push(...workerSettled.value.leads);
+    }
+
+    // Обработка результатов веб-скрейпинга
+    if (scrapingSettled.status === 'fulfilled') {
+      for (const r of scrapingSettled.value) {
+        results.push(r);
+        if (r.error && !r.error.includes('редирект с /s/')) {
+          errors.push({ channel: r.channel, error: r.error });
+        }
+        allMessages.push(...r.messages);
       }
-      allMessages.push(...r.messages);
     }
-  }
 
-  // Дедупликация: по стабильному id и по нормализованному началу текста
-  const seenIds = new Set<string>();
-  const seenTexts = new Set<string>();
-  const uniqueMessages: ParsedMessage[] = [];
+    // Дедупликация: по стабильному id и по нормализованному началу текста
+    const seenIds = new Set<string>();
+    const seenTexts = new Set<string>();
+    const uniqueMessages: ParsedMessage[] = [];
 
-  for (const m of allMessages) {
-    const normText = m.text.toLowerCase().replace(/\s+/g, ' ').slice(0, 80);
-    if (seenIds.has(m.id) || seenTexts.has(normText)) {
-      continue;
+    for (const m of allMessages) {
+      const normText = m.text.toLowerCase().replace(/\s+/g, ' ').slice(0, 80);
+      if (seenIds.has(m.id) || seenTexts.has(normText)) {
+        continue;
+      }
+      seenIds.add(m.id);
+      seenTexts.add(normText);
+      uniqueMessages.push(m);
     }
-    seenIds.add(m.id);
-    seenTexts.add(normText);
-    uniqueMessages.push(m);
-  }
 
-  uniqueMessages.sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime());
+    uniqueMessages.sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime());
 
-  return jsonResponse(
-    200,
-    {
+    return {
       results,
       allMessages: uniqueMessages,
       errors,
       totalMessages: uniqueMessages.length,
       workerActive,
-    },
-    origin
-  );
+    };
+  };
+
+  const raceResult = await Promise.race([executeFeedJob(), timeoutPromise]);
+
+  let payload;
+  if ('timeout' in raceResult) {
+    console.warn('[tg-feed] Превышен общий таймаут 8.0с, отдаём частичные данные');
+    payload = {
+      results: [],
+      allMessages: [],
+      errors: [{ channel: 'all', error: 'Превышен таймаут ответа 8 секунд' }],
+      totalMessages: 0,
+      workerActive: false,
+    };
+  } else {
+    payload = raceResult;
+  }
+
+  const response = jsonResponse(200, payload, origin);
+  // 3.1 Кэширование ответа на 20-30 секунд
+  response.headers['Cache-Control'] = 'public, max-age=20, stale-while-revalidate=10';
+  return response;
 }

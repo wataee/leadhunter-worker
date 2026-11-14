@@ -2,11 +2,11 @@ import {
   jsonResponse,
   errorResponse,
   handleOptions,
-  checkRateLimit,
+  checkDistributedRateLimit,
   validatePayloadSize,
   type NetlifyResponse,
 } from './_shared/response';
-import { generateAiCompletion, sanitizeInput } from './_shared/ai';
+import { generateAiCompletion, sanitizeInput, wrapUserData, PROMPT_INJECTION_DEFENSE } from './_shared/ai';
 import { requireAuth } from './_shared/auth';
 
 interface HandlerEvent {
@@ -25,7 +25,9 @@ interface RewriteBody {
 }
 
 const SYSTEM_PROMPT =
-  "Ты помогаешь видеомонтажёру писать холодные сообщения. Сделай текст короче, конкретнее, без лести и без слов 'услуги монтажа'. Сохрани все факты, таймкоды и вопрос в конце. Верни только готовый текст сообщения.";
+  "Ты помогаешь видеомонтажёру писать холодные сообщения. Сделай текст короче, конкретнее, без лести и без слов 'услуги монтажа'. Сохрани все факты, таймкоды и вопрос в конце. " +
+  PROMPT_INJECTION_DEFENSE +
+  " Верни только готовый текст сообщения.";
 
 export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   const origin = event.headers?.origin || event.headers?.Origin;
@@ -44,14 +46,14 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return errorResponse(405, 'Метод не поддерживается. Используйте POST.', null, origin);
   }
 
-  // Rate Limiting по IP
+  // Rate Limiting по IP (распределённый через Upstash Redis или in-memory)
   const clientIp =
     event.headers?.['x-nf-client-connection-ip'] ||
     event.headers?.['client-ip'] ||
     event.headers?.['x-forwarded-for'] ||
     'anonymous';
 
-  const rateCheck = checkRateLimit(clientIp, 30, 60_000);
+  const rateCheck = await checkDistributedRateLimit(clientIp, 30, 60_000);
   if (!rateCheck.allowed) {
     return errorResponse(429, 'Слишком много запросов. Пожалуйста, подождите минуту.', null, origin);
   }
@@ -76,9 +78,9 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   const cleanText = sanitizeInput(body.text, 5000);
   const clientName = body.leadContext?.name ? sanitizeInput(body.leadContext.name, 100) : '';
 
-  const userPrompt = `Улучши следующий текст сообщения для клиента${
+  const userPrompt = `Улучши следующее сообщение для клиента${
     clientName ? ` (Клиент: ${clientName})` : ''
-  }:\n\n${cleanText}`;
+  }:\n\n${wrapUserData(cleanText, 'PITCH_DRAFT')}`;
 
   try {
     const result = await generateAiCompletion(SYSTEM_PROMPT, userPrompt);

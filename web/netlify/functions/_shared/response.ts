@@ -118,6 +118,50 @@ export function checkRateLimit(
   return { allowed: true, remaining: maxRequests - record.count };
 }
 
+// 3.2 Распределённый rate limiting через Upstash Redis REST с фоллбеком на in-memory
+export async function checkDistributedRateLimit(
+  clientIp: string,
+  maxRequests = 40,
+  windowMs = 60_000
+): Promise<{ allowed: boolean; remaining: number }> {
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+
+  if (redisUrl && redisToken) {
+    try {
+      const windowKey = Math.floor(Date.now() / windowMs);
+      const cleanIp = (clientIp || 'unknown').replace(/[^a-zA-Z0-9:._-]/g, '');
+      const key = `leadhunter:ratelimit:${cleanIp}:${windowKey}`;
+      const expireSec = Math.ceil(windowMs / 1000) * 2;
+
+      const res = await fetch(`${redisUrl.replace(/\/$/, '')}/pipeline`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${redisToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([
+          ['INCR', key],
+          ['EXPIRE', key, String(expireSec)],
+        ]),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const currentCount = parseInt(data?.[0]?.result || '1', 10);
+        if (currentCount > maxRequests) {
+          return { allowed: false, remaining: 0 };
+        }
+        return { allowed: true, remaining: Math.max(0, maxRequests - currentCount) };
+      }
+    } catch {
+      // При ошибке связи с Redis — мягкий фоллбек на in-memory
+    }
+  }
+
+  return checkRateLimit(clientIp, maxRequests, windowMs);
+}
+
 export function validatePayloadSize(
   body: string | null,
   maxBytes = 32 * 1024
