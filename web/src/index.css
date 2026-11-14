@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: #0D0E12;
+    color: #E8E9ED;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Custom dark scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0D0E12;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #23262F;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #323743;
+  }
+}
+
+/* Custom focus ring utility for accessibility (WCAG AA) */
+*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #0D0E12, 0 0 0 4px #8B7CFF !important;
+}
