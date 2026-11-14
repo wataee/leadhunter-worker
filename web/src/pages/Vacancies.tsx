@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useVacanciesStore, computeVacancyRelevance } from '../store/vacanciesStore';
+import { useVacanciesStore, computeVacancyRelevance, TelegramSource } from '../store/vacanciesStore';
 import { useLeadsStore } from '../store/leadsStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
 import { fetchTelegramFeed } from '../lib/api';
+import { formatRelativeTime } from '../lib/time';
 import {
   playNotificationBeep,
   requestNotificationPermission,
@@ -36,6 +37,13 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { VacancyStatsModal } from '../components/VacancyStatsModal';
+import { Modal } from '../components/Modal';
+
+interface ChannelHealthItem extends TelegramSource {
+  count7d: number;
+  lastPostMs: number | null;
+  status: 'ok' | 'no_access' | 'inactive';
+}
 
 export const Vacancies: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -115,6 +123,66 @@ export const Vacancies: React.FC = () => {
   const [presetDigestEnabled, setPresetDigestEnabled] = useState(false);
   const [presetDigestHours, setPresetDigestHours] = useState(4);
   const [showStatsModal, setShowStatsModal] = useState(false);
+  const [showDisableInactiveModal, setShowDisableInactiveModal] = useState(false);
+
+  // 5.6 Channel Health Monitor
+  const channelHealth: ChannelHealthItem[] = useMemo(() => {
+    const now = Date.now();
+    const sevenDaysAgo = now - 7 * 24 * 3600 * 1000;
+    const thirtyDaysAgo = now - 30 * 24 * 3600 * 1000;
+
+    const statsMap = new Map<string, { count7d: number; lastPostMs: number | null }>();
+
+    for (const v of vacancies) {
+      const ch = v.channel.toLowerCase().replace(/^@/, '').trim();
+      const cur = statsMap.get(ch) || { count7d: 0, lastPostMs: null };
+      const postMs = new Date(v.postedAt).getTime();
+      if (!isNaN(postMs)) {
+        if (postMs >= sevenDaysAgo) {
+          cur.count7d++;
+        }
+        if (cur.lastPostMs === null || postMs > cur.lastPostMs) {
+          cur.lastPostMs = postMs;
+        }
+      }
+      statsMap.set(ch, cur);
+    }
+
+    return sources.map((s: TelegramSource): ChannelHealthItem => {
+      const clean = s.username.toLowerCase().replace(/^@/, '').trim();
+      const stat = statsMap.get(clean) || { count7d: 0, lastPostMs: null };
+
+      let status: 'ok' | 'no_access' | 'inactive' = 'ok';
+      if (stat.lastPostMs === null || stat.lastPostMs < thirtyDaysAgo) {
+        status = 'inactive';
+      } else if (stat.count7d > 0) {
+        status = 'ok';
+      }
+
+      return {
+        ...s,
+        count7d: stat.count7d,
+        lastPostMs: stat.lastPostMs,
+        status,
+      };
+    });
+  }, [sources, vacancies]);
+
+  const inactiveEnabledSources = useMemo(() => {
+    return channelHealth.filter((s: ChannelHealthItem) => s.enabled && s.status === 'inactive');
+  }, [channelHealth]);
+
+  const handleConfirmDisableInactive = () => {
+    for (const s of inactiveEnabledSources) {
+      toggleSource(s.username);
+    }
+    setShowDisableInactiveModal(false);
+    addToast({
+      type: 'info',
+      title: 'Неактивные каналы отключены',
+      message: `Отключено ${inactiveEnabledSources.length} каналов без публикаций за 30+ дней.`,
+    });
+  };
 
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -433,39 +501,69 @@ export const Vacancies: React.FC = () => {
         </form>
 
         {/* Sources List */}
-        <div className="space-y-1.5 max-h-48 overflow-y-auto">
-          {sources.length === 0 ? (
+        <div className="space-y-1.5 max-h-56 overflow-y-auto">
+          {channelHealth.length === 0 ? (
             <div className="text-[11px] text-muted italic p-3 bg-surface-2/30 rounded-control border border-border/50">
               <p>Добавьте каналы или группы для мониторинга.</p>
             </div>
           ) : (
-            sources.map((s) => (
+            channelHealth.map((s: ChannelHealthItem) => (
               <div
                 key={s.username}
-                className="flex items-center justify-between p-2 bg-surface-2/50 rounded-control border border-border text-xs min-h-[44px]"
+                className="p-2 bg-surface-2/50 rounded-control border border-border text-xs min-h-[44px] space-y-1"
               >
-                <label className="flex items-center gap-2 min-w-0 cursor-pointer flex-1">
-                  <input
-                    type="checkbox"
-                    checked={s.enabled}
-                    onChange={() => toggleSource(s.username)}
-                    className="rounded bg-surface-2 border-border text-accent focus:ring-accent w-4 h-4"
-                    aria-label={`Включить канал @${s.username}`}
-                  />
-                  <span className="font-semibold text-text truncate">@{s.username}</span>
-                </label>
+                <div className="flex items-center justify-between gap-1">
+                  <label className="flex items-center gap-2 min-w-0 cursor-pointer flex-1">
+                    <input
+                      type="checkbox"
+                      checked={s.enabled}
+                      onChange={() => toggleSource(s.username)}
+                      className="rounded bg-surface-2 border-border text-accent focus:ring-accent w-4 h-4"
+                      aria-label={`Включить канал @${s.username}`}
+                    />
+                    <span className="font-semibold text-text truncate">@{s.username}</span>
+                  </label>
 
-                <button
-                  onClick={() => removeSource(s.username)}
-                  className="text-muted hover:text-danger p-2 rounded min-w-[36px] min-h-[36px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-danger"
-                  aria-label={`Удалить канал @${s.username}`}
-                >
-                  <Trash2 size={14} />
-                </button>
+                  <button
+                    onClick={() => removeSource(s.username)}
+                    className="text-muted hover:text-danger p-1.5 rounded min-w-[32px] min-h-[32px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-danger"
+                    aria-label={`Удалить канал @${s.username}`}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+
+                {/* Health indicator */}
+                <div className="flex items-center justify-between text-[10px] pl-6 text-muted font-mono">
+                  <span>
+                    {s.status === 'ok' && (
+                      <span className="text-emerald-400 font-medium">● {s.count7d} лидов за 7 дн.</span>
+                    )}
+                    {s.status === 'inactive' && (
+                      <span className="text-text-muted">○ {s.lastPostMs ? `пост ${formatRelativeTime(new Date(s.lastPostMs).toISOString())}` : 'нет вакансий'}</span>
+                    )}
+                    {s.status === 'no_access' && (
+                      <span className="text-danger">● нет доступа</span>
+                    )}
+                  </span>
+                  <span>{s.enabled ? 'активен' : 'выкл'}</span>
+                </div>
               </div>
             ))
           )}
         </div>
+
+        {/* 5.6 Auto-disable inactive channels button */}
+        {inactiveEnabledSources.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowDisableInactiveModal(true)}
+            className="w-full py-1.5 px-2 bg-surface-2 hover:bg-surface-3 text-text-muted hover:text-warning text-[11px] font-medium rounded border border-border/80 flex items-center justify-center gap-1.5 transition-colors"
+          >
+            <AlertTriangle size={12} className="text-warning" />
+            <span>Отключить неактивные ({inactiveEnabledSources.length})</span>
+          </button>
+        )}
       </div>
 
       {/* Hidden Channels Management (5.3) */}
@@ -1045,6 +1143,43 @@ export const Vacancies: React.FC = () => {
         onClose={() => setShowStatsModal(false)}
         vacancies={vacancies}
       />
+
+      {/* 5.6 Confirm Disable Inactive Channels Modal */}
+      <Modal
+        isOpen={showDisableInactiveModal}
+        onClose={() => setShowDisableInactiveModal(false)}
+        title="Отключение неактивных каналов"
+      >
+        <div className="space-y-4 text-xs">
+          <p className="text-text-muted leading-relaxed">
+            Следующие каналы не публиковали вакансий более 30 дней. Хотите отключить их из активного мониторинга для экономии запросов?
+          </p>
+          <div className="max-h-48 overflow-y-auto space-y-1 p-2.5 bg-surface-2 rounded-control border border-border">
+            {inactiveEnabledSources.map((s: ChannelHealthItem) => (
+              <div key={s.username} className="flex items-center justify-between font-mono text-[11px] py-0.5">
+                <span className="text-text">@{s.username}</span>
+                <span className="text-muted">{s.lastPostMs ? `пост ${formatRelativeTime(new Date(s.lastPostMs).toISOString())}` : 'нет вакансий'}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+            <button
+              type="button"
+              onClick={() => setShowDisableInactiveModal(false)}
+              className="px-3 py-1.5 bg-surface-2 hover:bg-surface-3 text-text rounded font-medium border border-border"
+            >
+              Отмена
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmDisableInactive}
+              className="px-4 py-1.5 bg-warning hover:bg-warning/90 text-bg font-bold rounded shadow-subtle"
+            >
+              Отключить ({inactiveEnabledSources.length})
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Mobile Drawer Slide-over */}
       {mobileDrawerOpen && (
