@@ -16,6 +16,7 @@ interface HandlerEvent {
 }
 
 interface NotifyBody {
+  id?: string;
   title?: string;
   text: string;
   url: string;
@@ -132,6 +133,9 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   ].join('\n');
 
   try {
+    const channelSlug = (body.channel || '').replace(/^@/, '').slice(0, 40);
+    const leadSlug = (body.id || channelSlug || 'lead').slice(0, 40);
+
     const res = await fetchWithTimeout(
       `https://api.telegram.org/bot${token}/sendMessage`,
       {
@@ -144,6 +148,15 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
           text: message,
           parse_mode: 'HTML',
           disable_web_page_preview: false,
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: '🔗 Открыть', url: cleanUrl },
+                { text: '🙈 Скрыть источник', callback_data: `hide:${channelSlug}` },
+                { text: '📥 В воронку', callback_data: `lead:${leadSlug}` },
+              ],
+            ],
+          },
         }),
       },
       8000
