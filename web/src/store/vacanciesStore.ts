@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { Vacancy, SavedSearchPreset } from '../types';
 import KEYWORDS from '../shared/keywords.js';
 import { parseBudget, BudgetResult } from '../shared/budget.js';
-import { matchesVacancy } from '../shared/filter.js';
+import { matchesVacancy, detectVacancyRisks } from '../shared/filter.js';
 
 export interface TelegramSource {
   username: string;
@@ -83,6 +83,7 @@ export function computeVacancyRelevance(
   qualityTier: 'great' | 'fair' | 'shady';
   statusBadge?: 'new' | 'hot' | 'shady';
   budget?: BudgetResult | null;
+  risks?: string[];
 } {
   const lower = text.toLowerCase();
 
@@ -98,6 +99,7 @@ export function computeVacancyRelevance(
       qualityTier: 'shady',
       statusBadge: 'shady',
       budget: null,
+      risks: ['Текст содержит исключённые стоп-слова'],
     };
   }
 
@@ -148,13 +150,14 @@ export function computeVacancyRelevance(
       lower
     );
 
+  const budget = parseBudget(text);
+  const riskCheck = detectVacancyRisks(text, budget);
+
   if (isGreat) {
     qualityTier = 'great';
-  } else if (isShady) {
+  } else if (isShady || riskCheck.isRisky) {
     qualityTier = 'shady';
   }
-
-  const budget = parseBudget(text);
 
   let score = isWorkerLead ? 60 : 40 + matchedKeywords.length * 8;
   score += Math.min(24, skills.length * 8);
@@ -192,6 +195,7 @@ export function computeVacancyRelevance(
     qualityTier,
     statusBadge,
     budget,
+    risks: riskCheck.reasons,
   };
 }
 

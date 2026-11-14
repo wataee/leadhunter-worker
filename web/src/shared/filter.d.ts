@@ -4,6 +4,11 @@ export interface VacancyMatchResult {
   reason?: string;
 }
 
+export interface VacancyRiskResult {
+  isRisky: boolean;
+  reasons: string[];
+}
+
 export declare function escapeRegex(str: string): string;
 export declare function buildWordBoundaryRegex(phrase: string): RegExp;
 export declare function normalizeText(text: string): string;
@@ -15,3 +20,8 @@ export declare function buildPostUrl(
   messageId: string | number
 ): string;
 export declare function matchesVacancy(text: string): VacancyMatchResult;
+export declare function detectVacancyRisks(
+  text: string,
+  budget?: object | null,
+  options?: { isDuplicateAccount?: boolean }
+): VacancyRiskResult;

@@ -225,3 +225,54 @@ export function matchesVacancy(text) {
     reason: 'no_hiring_intent_within_proximity',
   };
 }
+
+/**
+ * 5.4 Risk Detector: identifies shady vacancies based on explicit warning rules
+ * @param {string} text
+ * @param {object|null} budget
+ * @param {{ isDuplicateAccount?: boolean }} [options]
+ * @returns {{ isRisky: boolean, reasons: string[] }}
+ */
+export function detectVacancyRisks(text, budget = null, options = {}) {
+  const reasons = [];
+  if (!text || typeof text !== 'string') {
+    return { isRisky: false, reasons };
+  }
+
+  // 1. "За опыт" / без оплаты
+  if (/(?:за\s+опыт|ради\s+опыта|в\s+портфолио|для\s+кейса|бесплатно|без\s+оплаты|на\s+энтузиазме)/iu.test(text)) {
+    reasons.push('Работа без оплаты («за опыт / для кейса / бесплатно»)');
+  }
+
+  // 2. Процент вместо фиксированной оплаты
+  if (/(?:процент\s+от\s+(?:прибыли|дохода|монетизации|продаж)|%?\s*от\s+монетизации|за\s+долю\s+в\s+проекте|доля\s+от\s+прибыли)/iu.test(text)) {
+    reasons.push('Процент от будущей монетизации/прибыли вместо оплаты');
+  }
+
+  // 3. Бесплатное тестовое на целый ролик
+  if (/(?:тестов(?:ое|ый)?\s*(?:на\s+полный|полный|целый|целиком|весь)\s*(?:ролик|видео)|бесплатн(?:ое|ый)\s+тестов(?:ое|ый)|тестов(?:ое|ый)\s+без\s+оплаты)/iu.test(text)) {
+    reasons.push('Требование сделать бесплатное тестовое задание на весь ролик');
+  }
+
+  // 4. Подозрение на скам (страховой взнос, покупка софта/курса)
+  if (/(?:взнос\s+за\s+материалы|страховой\s+депозит|купить\s+обучение|оплатите\s+доступ|предоплата\s+с\s+вашей\s+стороны)/iu.test(text)) {
+    reasons.push('Подозрение на скам: требование взноса или покупки');
+  }
+
+  // 5. Символический / отсутствующий бюджет
+  if (/(?:бюджет(?:а)?\s*(?:нет|минимальн|скромн|чисто\s+символическ)|оплата\s+символическая)/iu.test(text)) {
+    reasons.push('Отсутствующий или символический бюджет');
+  } else if (budget && budget.max !== null && budget.max > 0 && budget.max < 500 && budget.currency === 'RUB') {
+    reasons.push(`Крайне низкая ставка (${budget.max} ₽)`);
+  }
+
+  // 6. Одинаковый текст от разных аккаунтов / спам
+  if (options.isDuplicateAccount) {
+    reasons.push('Одинаковый текст рассылается с разных аккаунтов (спам-сетка)');
+  }
+
+  return {
+    isRisky: reasons.length > 0,
+    reasons,
+  };
+}

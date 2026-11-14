@@ -180,10 +180,13 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
               <span>Новое</span>
             </span>
           )}
-          {vacancy.statusBadge === 'shady' && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-warning bg-warning/15 px-2 py-0.5 rounded border border-warning/30">
+          {(vacancy.statusBadge === 'shady' || (vacancy.risks && vacancy.risks.length > 0)) && (
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-warning bg-warning/15 px-2 py-0.5 rounded border border-warning/30 cursor-help"
+              title={`⚠️ Риск-факторы:\n${(vacancy.risks || ['Сомнительные условия сотрудничества']).map((r) => `• ${r}`).join('\n')}`}
+            >
               <AlertTriangle size={12} />
-              <span>Сомнительное</span>
+              <span>Сомнительно</span>
             </span>
           )}
 
@@ -224,6 +227,21 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
       <div className="text-xs text-text leading-relaxed whitespace-pre-wrap line-clamp-5 select-text font-sans">
         {renderHighlightedText(vacancy.text)}
       </div>
+
+      {/* 5.4 Risk Warning Callout */}
+      {vacancy.risks && vacancy.risks.length > 0 && (
+        <div className="flex items-start gap-2 p-2.5 bg-warning-soft/30 border border-warning/30 rounded-control text-[11px] text-text">
+          <AlertTriangle size={14} className="shrink-0 mt-0.5 text-warning" />
+          <div className="space-y-0.5">
+            <span className="font-semibold text-warning">Подозрительные условия:</span>
+            <ul className="list-disc list-inside space-y-0.5 text-text-muted text-[11px]">
+              {vacancy.risks.map((r, i) => (
+                <li key={i}>{r}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* 5.3 Quick Pitch Draft for Hot Vacancies (<15 min) */}
       {isHot && (
