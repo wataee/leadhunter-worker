@@ -185,6 +185,21 @@ export const Vacancies: React.FC = () => {
   };
 
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const channelCacheRef = useRef<Map<string, number>>(new Map());
+  const [rotationProgress, setRotationProgress] = useState<{ updated: number; total: number; nextInSec: number } | null>(null);
+
+  // Countdown timer for next rotation batch
+  useEffect(() => {
+    if (!rotationProgress || rotationProgress.nextInSec <= 0) return;
+    const interval = setInterval(() => {
+      setRotationProgress((prev) => {
+        if (!prev) return null;
+        if (prev.nextInSec <= 1) return null;
+        return { ...prev, nextInSec: prev.nextInSec - 1 };
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [rotationProgress]);
 
   // Load / Refresh Feed with useCallback to prevent stale closures
   const handleRefreshFeed = useCallback(async () => {
@@ -197,11 +212,62 @@ export const Vacancies: React.FC = () => {
       return;
     }
 
+    // 6.7 Ротация клиентов (пачками до 15 источников, курсор в localStorage)
+    const BATCH_SIZE = 15;
+    let channelsToFetch: string[] = [];
+
+    if (activeChannels.length <= BATCH_SIZE) {
+      channelsToFetch = activeChannels;
+    } else {
+      let cursor = 0;
+      try {
+        const savedCursor = localStorage.getItem('leadhunter_tg_feed_cursor');
+        if (savedCursor) cursor = parseInt(savedCursor, 10) || 0;
+      } catch {}
+
+      if (cursor >= activeChannels.length) cursor = 0;
+
+      for (let i = 0; i < BATCH_SIZE && i < activeChannels.length; i++) {
+        channelsToFetch.push(activeChannels[(cursor + i) % activeChannels.length]);
+      }
+
+      const nextCursor = (cursor + channelsToFetch.length) % activeChannels.length;
+      try {
+        localStorage.setItem('leadhunter_tg_feed_cursor', String(nextCursor));
+      } catch {}
+    }
+
+    // Client cache: don't request same channel more than once per 25 seconds
+    const now = Date.now();
+    const uncachedChannels = channelsToFetch.filter((ch) => {
+      const last = channelCacheRef.current.get(ch.toLowerCase()) || 0;
+      return now - last >= 25000;
+    });
+
+    if (uncachedChannels.length === 0 && channelsToFetch.length > 0) {
+      setRotationProgress({
+        updated: channelsToFetch.length,
+        total: activeChannels.length,
+        nextInSec: 25,
+      });
+      return;
+    }
+
+    const batch = uncachedChannels.length > 0 ? uncachedChannels : channelsToFetch;
+
     setLoading(true);
     setNetworkError(null);
 
     try {
-      const res = await fetchTelegramFeed(activeChannels);
+      const res = await fetchTelegramFeed(batch);
+      for (const ch of batch) {
+        channelCacheRef.current.set(ch.toLowerCase(), now);
+      }
+      setRotationProgress({
+        updated: batch.length,
+        total: activeChannels.length,
+        nextInSec: 30,
+      });
       setWorkerActive(Boolean(res.workerActive));
 
       const processed: Vacancy[] = [];
@@ -837,6 +903,30 @@ export const Vacancies: React.FC = () => {
             <RefreshCcw size={11} className={isLoading ? 'animate-spin' : ''} />
             <span>Проверить</span>
           </button>
+        </div>
+      )}
+
+      {/* 6.7 Client Rotation Progress Badge */}
+      {rotationProgress && rotationProgress.total > 15 && (
+        <div className="p-2.5 px-3.5 bg-surface-2 border border-border rounded-card flex items-center justify-between gap-3 text-xs text-text-muted">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+            <span>
+              Обновлено <strong className="text-text">{rotationProgress.updated}</strong> из{' '}
+              <strong className="text-text">{rotationProgress.total}</strong> источников
+              {rotationProgress.nextInSec > 0 && (
+                <span className="text-muted"> (следующие через {rotationProgress.nextInSec} с)</span>
+              )}
+            </span>
+          </div>
+          <div className="w-24 h-1.5 bg-surface-3 rounded-full overflow-hidden shrink-0">
+            <div
+              className="h-full bg-accent transition-all duration-300"
+              style={{
+                width: `${Math.round((rotationProgress.updated / rotationProgress.total) * 100)}%`,
+              }}
+            />
+          </div>
         </div>
       )}
 

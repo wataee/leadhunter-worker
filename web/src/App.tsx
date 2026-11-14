@@ -10,6 +10,7 @@ import { CardSkeleton } from './components/Skeleton';
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const Finder = lazy(() => import('./pages/Finder').then(m => ({ default: m.Finder })));
 const Vacancies = lazy(() => import('./pages/Vacancies').then(m => ({ default: m.Vacancies })));
+const Sources = lazy(() => import('./pages/Sources').then(m => ({ default: m.Sources })));
 const Leads = lazy(() => import('./pages/Leads').then(m => ({ default: m.Leads })));
 const Templates = lazy(() => import('./pages/Templates').then(m => ({ default: m.Templates })));
 const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
@@ -83,6 +84,9 @@ const AppContent: React.FC = () => {
         } else if (e.key === 'v') {
           e.preventDefault();
           navigate('/vacancies');
+        } else if (e.key === 'c') {
+          e.preventDefault();
+          navigate('/sources');
         } else if (e.key === 'l') {
           e.preventDefault();
           navigate('/leads');
@@ -138,6 +142,7 @@ const AppContent: React.FC = () => {
               <Route path="/" element={<Dashboard />} />
               <Route path="/finder" element={<Finder />} />
               <Route path="/vacancies" element={<Vacancies />} />
+              <Route path="/sources" element={<Sources />} />
               <Route path="/leads" element={<Leads />} />
               <Route path="/templates" element={<Templates />} />
               <Route path="/settings" element={<Settings />} />

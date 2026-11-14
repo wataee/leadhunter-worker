@@ -15,6 +15,7 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
         { keys: ['g', 'd'], desc: 'Перейти на Дашборд' },
         { keys: ['g', 'f'], desc: 'Открыть Поиск каналов' },
         { keys: ['g', 'v'], desc: 'Открыть Монитор вакансий' },
+        { keys: ['g', 'c'], desc: 'Открыть Каталог источников' },
         { keys: ['g', 'l'], desc: 'Открыть Воронку клиентов' },
         { keys: ['g', 't'], desc: 'Открыть Шаблоны сообщений' },
         { keys: ['g', 's'], desc: 'Открыть Настройки' },

@@ -1,0 +1,546 @@
+[
+  {
+    "id": "search_infografika",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 411)",
+    "discoveredFrom": "https://tgstat.ru/channel/@search_infografika",
+    "checkedAt": "2026-11-14T22:05:46.783Z"
+  },
+  {
+    "id": "motion_hub",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 159)",
+    "discoveredFrom": "https://t.me/motion_hub",
+    "checkedAt": "2026-11-14T22:05:46.785Z"
+  },
+  {
+    "id": "montazh_pro",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 82)",
+    "discoveredFrom": "https://t.me/montazh_pro",
+    "checkedAt": "2026-11-14T22:05:46.786Z"
+  },
+  {
+    "id": "tvjobs",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 897)",
+    "discoveredFrom": "https://t.me/tvjobs",
+    "checkedAt": "2026-11-14T22:05:46.787Z"
+  },
+  {
+    "id": "cgeducation",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1065)",
+    "discoveredFrom": "https://t.me/cgeducation",
+    "checkedAt": "2026-11-14T22:05:46.788Z"
+  },
+  {
+    "id": "kinomod",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1554)",
+    "discoveredFrom": "https://t.me/kinomod",
+    "checkedAt": "2026-11-14T22:05:46.788Z"
+  },
+  {
+    "id": "youtube_jobs",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1178)",
+    "discoveredFrom": "https://t.me/youtube_jobs",
+    "checkedAt": "2026-11-14T22:05:46.796Z"
+  },
+  {
+    "id": "videomakers",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 577)",
+    "discoveredFrom": "https://t.me/videomakers",
+    "checkedAt": "2026-11-14T22:05:46.798Z"
+  },
+  {
+    "id": "reels_hunter",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 542)",
+    "discoveredFrom": "https://t.me/reels_hunter",
+    "checkedAt": "2026-11-14T22:05:46.812Z"
+  },
+  {
+    "id": "camera_crew",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1300)",
+    "discoveredFrom": "https://t.me/camera_crew",
+    "checkedAt": "2026-11-14T22:05:46.814Z"
+  },
+  {
+    "id": "videomontazh_pro",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "No preview messages available and no member info",
+    "discoveredFrom": "https://t.me/videomontazh_pro",
+    "checkedAt": "2026-11-14T22:05:46.814Z"
+  },
+  {
+    "id": "reels_makers_hub",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "No preview messages available and no member info",
+    "discoveredFrom": "https://t.me/reels_makers_hub",
+    "checkedAt": "2026-11-14T22:05:46.814Z"
+  },
+  {
+    "id": "freelance_orders",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1259)",
+    "discoveredFrom": "https://t.me/freelance_orders",
+    "checkedAt": "2026-11-14T22:05:46.870Z"
+  },
+  {
+    "id": "freelancetavern",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 132)",
+    "discoveredFrom": "https://t.me/freelancetavern",
+    "checkedAt": "2026-11-14T22:05:46.871Z"
+  },
+  {
+    "id": "remote_ru",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1330)",
+    "discoveredFrom": "https://t.me/remote_ru",
+    "checkedAt": "2026-11-14T22:05:46.871Z"
+  },
+  {
+    "id": "online_work",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 87)",
+    "discoveredFrom": "https://t.me/online_work",
+    "checkedAt": "2026-11-14T22:05:46.872Z"
+  },
+  {
+    "id": "telework",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1103)",
+    "discoveredFrom": "https://t.me/telework",
+    "checkedAt": "2026-11-14T22:05:46.873Z"
+  },
+  {
+    "id": "freelance_leads",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1628)",
+    "discoveredFrom": "https://t.me/freelance_leads",
+    "checkedAt": "2026-11-14T22:05:46.873Z"
+  },
+  {
+    "id": "creative_freelance",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 119)",
+    "discoveredFrom": "https://t.me/creative_freelance",
+    "checkedAt": "2026-11-14T22:05:46.876Z"
+  },
+  {
+    "id": "freelancers_club",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 2604)",
+    "discoveredFrom": "https://t.me/freelancers_club",
+    "checkedAt": "2026-11-14T22:05:46.877Z"
+  },
+  {
+    "id": "remote_career",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 936)",
+    "discoveredFrom": "https://t.me/remote_career",
+    "checkedAt": "2026-11-14T22:05:46.877Z"
+  },
+  {
+    "id": "gig_economy",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1360)",
+    "discoveredFrom": "https://t.me/gig_economy",
+    "checkedAt": "2026-11-14T22:05:46.878Z"
+  },
+  {
+    "id": "workzavr",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1230)",
+    "discoveredFrom": "https://tgstat.ru/channel/@workzavr",
+    "checkedAt": "2026-11-14T22:05:46.884Z"
+  },
+  {
+    "id": "remotejobs_ru",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 80)",
+    "discoveredFrom": "https://t.me/remotejobs_ru",
+    "checkedAt": "2026-11-14T22:05:46.892Z"
+  },
+  {
+    "id": "remote_work_ru",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 198)",
+    "discoveredFrom": "https://t.me/remote_work_ru",
+    "checkedAt": "2026-11-14T22:05:46.893Z"
+  },
+  {
+    "id": "digital_freelance",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 3283)",
+    "discoveredFrom": "https://t.me/digital_freelance",
+    "checkedAt": "2026-11-14T22:05:46.893Z"
+  },
+  {
+    "id": "freelance_order",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "No preview messages available and no member info",
+    "discoveredFrom": "https://t.me/freelance_order",
+    "checkedAt": "2026-11-14T22:05:46.897Z"
+  },
+  {
+    "id": "freelance_leads_ru",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "No preview messages available and no member info",
+    "discoveredFrom": "https://t.me/freelance_leads_ru",
+    "checkedAt": "2026-11-14T22:05:46.900Z"
+  },
+  {
+    "id": "remote_work_hub_ru",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "No preview messages available and no member info",
+    "discoveredFrom": "https://t.me/remote_work_hub_ru",
+    "checkedAt": "2026-11-14T22:05:46.900Z"
+  },
+  {
+    "id": "editing_tips",
+    "category": "editors_community",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 243)",
+    "discoveredFrom": "https://t.me/editing_tips",
+    "checkedAt": "2026-11-14T22:05:46.907Z"
+  },
+  {
+    "id": "cgi_chat",
+    "category": "editors_community",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1007)",
+    "discoveredFrom": "https://t.me/cgi_chat",
+    "checkedAt": "2026-11-14T22:05:46.909Z"
+  },
+  {
+    "id": "video_community",
+    "category": "editors_community",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 227)",
+    "discoveredFrom": "https://t.me/video_community",
+    "checkedAt": "2026-11-14T22:05:46.912Z"
+  },
+  {
+    "id": "animation_ru",
+    "category": "editors_community",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1393)",
+    "discoveredFrom": "https://t.me/animation_ru",
+    "checkedAt": "2026-11-14T22:05:46.917Z"
+  },
+  {
+    "id": "capcut_masters",
+    "category": "editors_community",
+    "status": "dead",
+    "reason": "No preview messages available and no member info",
+    "discoveredFrom": "https://t.me/capcut_masters",
+    "checkedAt": "2026-11-14T22:05:46.917Z"
+  },
+  {
+    "id": "reels_for_business",
+    "category": "clients_entrepreneurs",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1953)",
+    "discoveredFrom": "https://t.me/reels_for_business",
+    "checkedAt": "2026-11-14T22:05:46.920Z"
+  },
+  {
+    "id": "cryptojobs",
+    "category": "international_en",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1144)",
+    "discoveredFrom": "https://t.me/cryptojobs",
+    "checkedAt": "2026-11-14T22:05:46.936Z"
+  },
+  {
+    "id": "crypto_jobs",
+    "category": "international_en",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 185)",
+    "discoveredFrom": "https://t.me/crypto_jobs",
+    "checkedAt": "2026-11-14T22:05:46.937Z"
+  },
+  {
+    "id": "techjobs_daily",
+    "category": "international_en",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 416)",
+    "discoveredFrom": "https://t.me/techjobs_daily",
+    "checkedAt": "2026-11-14T22:05:46.945Z"
+  },
+  {
+    "id": "global_work",
+    "category": "international_en",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1045)",
+    "discoveredFrom": "https://t.me/global_work",
+    "checkedAt": "2026-11-14T22:05:46.947Z"
+  },
+  {
+    "id": "english_jobs",
+    "category": "international_en",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 159)",
+    "discoveredFrom": "https://t.me/english_jobs",
+    "checkedAt": "2026-11-14T22:05:46.948Z"
+  },
+  {
+    "id": "freelancers",
+    "category": "international_en",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 81)",
+    "discoveredFrom": "https://t.me/freelancers",
+    "checkedAt": "2026-11-14T22:05:46.950Z"
+  },
+  {
+    "id": "capcut_futazhi",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 311)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.952Z"
+  },
+  {
+    "id": "freelanceanchor",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 424)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.953Z"
+  },
+  {
+    "id": "videoediting_ideas",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 300)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.953Z"
+  },
+  {
+    "id": "reelsbypushkareva",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 82)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.957Z"
+  },
+  {
+    "id": "vfx_artist",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 384)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.961Z"
+  },
+  {
+    "id": "reels_montazh",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 377)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.963Z"
+  },
+  {
+    "id": "montazh_rabota",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 716)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.964Z"
+  },
+  {
+    "id": "creators_market",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1692)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.965Z"
+  },
+  {
+    "id": "cg_jobs",
+    "category": "jobs_video",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 154)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.966Z"
+  },
+  {
+    "id": "blender_3d_ru",
+    "category": "editors_community",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1290)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.967Z"
+  },
+  {
+    "id": "uiux_job",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 528)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.974Z"
+  },
+  {
+    "id": "workhome",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 112)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.975Z"
+  },
+  {
+    "id": "work_remote_ru",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 393)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.992Z"
+  },
+  {
+    "id": "freelance_tg",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1230)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.993Z"
+  },
+  {
+    "id": "remote_work_it",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 385)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.993Z"
+  },
+  {
+    "id": "digital_jobs_ru",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 212)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.995Z"
+  },
+  {
+    "id": "frilans_zakazy",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1271)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.999Z"
+  },
+  {
+    "id": "birzha_freelance",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1752)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:46.999Z"
+  },
+  {
+    "id": "rabota_tut_ru",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 641)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:47.003Z"
+  },
+  {
+    "id": "freelance_hub_ru",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 339)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:47.004Z"
+  },
+  {
+    "id": "digital_tender",
+    "category": "jobs_remote_freelance",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 908)",
+    "discoveredFrom": "https://tgstat.ru",
+    "checkedAt": "2026-11-14T22:05:47.006Z"
+  },
+  {
+    "id": "remote_tech_jobs",
+    "category": "international_en",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 518)",
+    "discoveredFrom": "https://tgstat.com",
+    "checkedAt": "2026-11-14T22:05:47.014Z"
+  },
+  {
+    "id": "cryptojobsdaily",
+    "category": "international_en",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 721)",
+    "discoveredFrom": "https://tgstat.com",
+    "checkedAt": "2026-11-14T22:05:47.015Z"
+  },
+  {
+    "id": "web3_remote",
+    "category": "international_en",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 690)",
+    "discoveredFrom": "https://tgstat.com",
+    "checkedAt": "2026-11-14T22:05:47.016Z"
+  },
+  {
+    "id": "it_jobs_remote",
+    "category": "international_en",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1694)",
+    "discoveredFrom": "https://tgstat.com",
+    "checkedAt": "2026-11-14T22:05:47.020Z"
+  },
+  {
+    "id": "remotedevjobs",
+    "category": "international_en",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1741)",
+    "discoveredFrom": "https://tgstat.com",
+    "checkedAt": "2026-11-14T22:05:47.026Z"
+  },
+  {
+    "id": "web3gigs",
+    "category": "international_en",
+    "status": "dead",
+    "reason": "Status is dead (days since last post: 1362)",
+    "discoveredFrom": "https://tgstat.com",
+    "checkedAt": "2026-11-14T22:05:47.030Z"
+  }
+]

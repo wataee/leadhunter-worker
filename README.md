@@ -87,7 +87,9 @@ flowchart LR
 | `WEBHOOK_URL` | Нет | `https://fleurleads-work.netlify.app/api/tg-notify` |
 | `WEBHOOK_SECRET` | Рекомендуется | `super-secret-random-token` (Защита эндпоинтов `/recent` и вебхука) |
 | `ALLOWED_CHATS` | Нет | `work_videoedit,kinovideojob,1234567890` (Белый список каналов/id через запятую) |
+| `ALLOWED_CHATS_FILE` | Нет | `/data/allowed-chats.txt` (Путь к файлу со списком чатов, перечитывается каждые 10 минут) |
 | `RATE_LIMIT_PER_MINUTE` | Нет | `5` (Макс. количество мгновенных уведомлений в минуту, далее дайджест) |
+| `JOIN_DAILY_LIMIT` | Нет | `15` (Суточный лимит вступлений в чаты для `scripts/join-sources.js`) |
 | `PORT` | Нет | `8080` (Порт встроенного HTTP сервера) |
 | `RENDER_EXTERNAL_URL` | Нет | `https://leadhunter-worker.onrender.com` (Включает самопинг каждые 10 минут) |
 
@@ -149,3 +151,25 @@ npm run lint
 # Сборка продакшн-бандла фронтенда
 npm run build:all
 ```
+
+---
+
+## 📡 Каталог Telegram-источников (150+ каналов и чатов)
+
+Раздел **/sources** (горячая клавиша `g c`) предоставляет проверенную базу Telegram-каналов и сообществ:
+
+- **152 проверенных источника** в 5 категориях:
+  - `jobs_video` (42): вакансии и проектные заказы для монтажёров, рилсмейкеров, моушн-дизайнеров;
+  - `jobs_remote_freelance` (44): агрегаторы удалённой работы и биржи фриланса;
+  - `editors_community` (26): чаты монтажёров (Premiere Pro, DaVinci, After Effects, Blender);
+  - `clients_entrepreneurs` (27): сообщества предпринимателей, экспертов, YouTube и маркетплейсов;
+  - `international_en` (13): международные англоязычные каналы с вакансиями.
+- **Метрики качества (Quality Score 0–100)**: оценка активности, свежести постов, доли вакансий и фильтрация спама/резюме.
+- **Пакетное управление**: включение 15 рекомендованных одной кнопкой, выборка, экспорт в JSON/TXT, импорт своих списков.
+- **Проверка каналов**: модальное окно с обращением к Netlify Function `/api/source-check` для моментальной валидации любого `@username`.
+- **Клиентская ротация в `/vacancies`**: защита от таймаутов через батчинг по 15 источников с round-robin курсором и 25-секундным кэшем.
+- **Скрипты автоматизации**:
+  - `node scripts/verify-sources.mjs` — валидация источников, веб-превью и расчёт скоринга (запускается еженедельно по понедельникам в 03:00 UTC через `.github/workflows/verify-sources.yml`).
+  - `node scripts/discover-sources.js` — поиск публичных каналов через MTProto API.
+  - `node scripts/join-sources.js` — безопасное вступление в чаты с суточным лимитом (до 15/сутки) и задержкой 45–120 с (по умолчанию `--dry-run`).
+  - Подробный отчёт и правила безопасности аккаунта см. в [CATALOG_REPORT.md](file:///C:/Users/timur/.gemini/antigravity/scratch/leadhunter/tg-worker/CATALOG_REPORT.md).

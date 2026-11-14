@@ -3,5 +3,7 @@ node_modules
 .env.local
 *.session
 dist
-data/
+data/*
+!data/sources.candidates.json
+!data/candidates.unverified.json
 .netlify

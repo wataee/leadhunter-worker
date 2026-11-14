@@ -54,6 +54,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       shortcut: 'g v',
     },
     {
+      to: '/sources',
+      label: 'Каталог источников',
+      icon: Database,
+      shortcut: 'g c',
+    },
+    {
       to: '/leads',
       label: 'Воронка клиентов',
       icon: Kanban,

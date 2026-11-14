@@ -49,11 +49,51 @@ if (!WEBHOOK_SECRET || WEBHOOK_SECRET.length < 16) {
   process.exit(1);
 }
 
-const ALLOWED_CHATS = ALLOWED_CHATS_RAW
-  ? ALLOWED_CHATS_RAW.split(',')
+const ALLOWED_CHATS_FILE = process.env.ALLOWED_CHATS_FILE?.trim() || '';
+
+let allowedChatsSet = null;
+
+function loadAllowedChats() {
+  const chats = new Set();
+  // 1. From env ALLOWED_CHATS
+  if (ALLOWED_CHATS_RAW) {
+    ALLOWED_CHATS_RAW.split(',')
       .map((s) => s.trim().toLowerCase().replace(/^@/, ''))
       .filter(Boolean)
-  : null;
+      .forEach((c) => chats.add(c));
+  }
+  // 2. From ALLOWED_CHATS_FILE (reloaded every 10 mins)
+  if (ALLOWED_CHATS_FILE && fs.existsSync(ALLOWED_CHATS_FILE)) {
+    try {
+      const content = fs.readFileSync(ALLOWED_CHATS_FILE, 'utf8');
+      content
+        .split(/[\r\n,]+/)
+        .map((s) => s.trim().toLowerCase().replace(/^@/, ''))
+        .filter((s) => Boolean(s) && !s.startsWith('#'))
+        .forEach((c) => chats.add(c));
+    } catch (err) {
+      console.error(`[AllowedChats] Ошибка чтения файла ${ALLOWED_CHATS_FILE}:`, err.message);
+    }
+  }
+
+  if (chats.size > 0) {
+    allowedChatsSet = chats;
+    console.log(`[AllowedChats] Белый список активен (${chats.size} чатов/каналов)`);
+  } else {
+    allowedChatsSet = null;
+  }
+}
+
+// Initial load
+loadAllowedChats();
+
+// Auto-reload every 10 minutes if ALLOWED_CHATS_FILE is set
+if (ALLOWED_CHATS_FILE) {
+  setInterval(loadAllowedChats, 10 * 60 * 1000);
+}
+
+// Backward compatibility alias for diagnostics
+const ALLOWED_CHATS = allowedChatsSet ? Array.from(allowedChatsSet) : null;
 
 // 2. Хранилище (Storage abstraction: File or Upstash Redis)
 const storage = createStorage();
@@ -415,10 +455,10 @@ async function connectTelegram() {
 
         const cleanCId = cleanChatId(rawChatId);
 
-        if (ALLOWED_CHATS && ALLOWED_CHATS.length > 0) {
+        if (allowedChatsSet && allowedChatsSet.size > 0) {
           const isAllowed =
-            (chatUsername && ALLOWED_CHATS.includes(chatUsername)) ||
-            (cleanCId && ALLOWED_CHATS.includes(cleanCId));
+            (chatUsername && allowedChatsSet.has(chatUsername)) ||
+            (cleanCId && allowedChatsSet.has(cleanCId));
 
           if (!isAllowed) {
             privacyStats.skippedNotAllowed++;

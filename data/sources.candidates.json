@@ -1,0 +1,2580 @@
+[
+  {
+    "id": "prodjob",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://vc.ru/media/765432-video-jobs",
+    "tags": [
+      "video",
+      "youtube",
+      "production",
+      "premiere"
+    ]
+  },
+  {
+    "id": "editors_video",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@editors_video",
+    "tags": [
+      "editing",
+      "reels",
+      "youtube",
+      "freelance"
+    ]
+  },
+  {
+    "id": "reelsmakervacancy",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@reelsmakervacancy",
+    "tags": [
+      "reels",
+      "shorts",
+      "tiktok",
+      "capcut"
+    ]
+  },
+  {
+    "id": "vakansii_reelsmaker",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@vakansii_reelsmaker",
+    "tags": [
+      "reels",
+      "editing",
+      "video",
+      "urgent"
+    ]
+  },
+  {
+    "id": "motionhunter",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@motionhunter",
+    "tags": [
+      "motion",
+      "aftereffects",
+      "3d",
+      "animation"
+    ]
+  },
+  {
+    "id": "mediajobs_ru",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@mediajobs_ru",
+    "tags": [
+      "media",
+      "tv",
+      "production",
+      "video"
+    ]
+  },
+  {
+    "id": "jump_cut",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/jump_cut",
+    "tags": [
+      "editing",
+      "director",
+      "montage",
+      "community"
+    ]
+  },
+  {
+    "id": "getjob_videoedit",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@getjob_videoedit",
+    "tags": [
+      "editing",
+      "reels",
+      "hiring",
+      "video"
+    ]
+  },
+  {
+    "id": "cgfreelance",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@cgfreelance",
+    "tags": [
+      "cg",
+      "vfx",
+      "motion",
+      "freelance"
+    ]
+  },
+  {
+    "id": "animator_jobs",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@animator_jobs",
+    "tags": [
+      "animation",
+      "2d",
+      "3d",
+      "motion"
+    ]
+  },
+  {
+    "id": "searcheditorr",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@SearchEditorr",
+    "tags": [
+      "video",
+      "editing",
+      "orders",
+      "freelance"
+    ]
+  },
+  {
+    "id": "real_video_client",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@real_video_client",
+    "tags": [
+      "video",
+      "ai",
+      "montage",
+      "hiring"
+    ]
+  },
+  {
+    "id": "designer_work",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@designer_work",
+    "tags": [
+      "design",
+      "animation",
+      "visual",
+      "remote"
+    ]
+  },
+  {
+    "id": "designerworkchat",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@designerworkchat",
+    "tags": [
+      "design",
+      "freelance",
+      "motion",
+      "chat"
+    ]
+  },
+  {
+    "id": "designhunters",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@designhunters",
+    "tags": [
+      "design",
+      "creative",
+      "motion",
+      "video"
+    ]
+  },
+  {
+    "id": "render_ru",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@render_ru",
+    "tags": [
+      "3d",
+      "vfx",
+      "cgi",
+      "motion"
+    ]
+  },
+  {
+    "id": "designbirzha",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@designbirzha",
+    "tags": [
+      "design",
+      "orders",
+      "projects",
+      "freelance"
+    ]
+  },
+  {
+    "id": "fordesigner",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@fordesigner",
+    "tags": [
+      "design",
+      "art",
+      "creative",
+      "video"
+    ]
+  },
+  {
+    "id": "search_infografika",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@search_infografika",
+    "tags": [
+      "infographics",
+      "motion",
+      "orders",
+      "wb"
+    ]
+  },
+  {
+    "id": "motion_hub",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/motion_hub",
+    "tags": [
+      "motion",
+      "animation",
+      "aftereffects"
+    ]
+  },
+  {
+    "id": "montazh_pro",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/montazh_pro",
+    "tags": [
+      "montage",
+      "pro",
+      "editing",
+      "workflow"
+    ]
+  },
+  {
+    "id": "tvjobs",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/tvjobs",
+    "tags": [
+      "tv",
+      "broadcast",
+      "video",
+      "crew"
+    ]
+  },
+  {
+    "id": "cgeducation",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/cgeducation",
+    "tags": [
+      "cg",
+      "education",
+      "vfx",
+      "3d"
+    ]
+  },
+  {
+    "id": "kinomod",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/kinomod",
+    "tags": [
+      "cinema",
+      "video",
+      "editing",
+      "production"
+    ]
+  },
+  {
+    "id": "workasap",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@workasap",
+    "tags": [
+      "media",
+      "digital",
+      "video",
+      "production"
+    ]
+  },
+  {
+    "id": "reels_jobs",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/reels_jobs",
+    "tags": [
+      "reels",
+      "shorts",
+      "vertical",
+      "tiktok"
+    ]
+  },
+  {
+    "id": "youtube_jobs",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/youtube_jobs",
+    "tags": [
+      "youtube",
+      "editing",
+      "production",
+      "hiring"
+    ]
+  },
+  {
+    "id": "sounddesign",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/sounddesign",
+    "tags": [
+      "sound",
+      "audio",
+      "sfx",
+      "video"
+    ]
+  },
+  {
+    "id": "aftereffects",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/aftereffects",
+    "tags": [
+      "aftereffects",
+      "motion",
+      "vfx",
+      "animation"
+    ]
+  },
+  {
+    "id": "capcut_video",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/capcut_video",
+    "tags": [
+      "capcut",
+      "mobile",
+      "reels",
+      "editing"
+    ]
+  },
+  {
+    "id": "videomakers",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/videomakers",
+    "tags": [
+      "videomaker",
+      "clips",
+      "shooting",
+      "production"
+    ]
+  },
+  {
+    "id": "youtube_creators",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/youtube_creators",
+    "tags": [
+      "youtube",
+      "creators",
+      "video",
+      "editing"
+    ]
+  },
+  {
+    "id": "colorpost",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@colorpost",
+    "tags": [
+      "color",
+      "grading",
+      "davinci",
+      "postproduction"
+    ]
+  },
+  {
+    "id": "cinema4dchat",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@Cinema4DChat",
+    "tags": [
+      "c4d",
+      "3d",
+      "motion",
+      "vfx"
+    ]
+  },
+  {
+    "id": "blender_ru_talks",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@blender_ru_talks",
+    "tags": [
+      "blender",
+      "3d",
+      "render",
+      "cgi"
+    ]
+  },
+  {
+    "id": "frilans",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@frilans",
+    "tags": [
+      "freelance",
+      "video",
+      "editing",
+      "design"
+    ]
+  },
+  {
+    "id": "vg_jobs",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@vg_jobs",
+    "tags": [
+      "videography",
+      "editing",
+      "production",
+      "camera"
+    ]
+  },
+  {
+    "id": "motion_design_chat",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/motion_design_chat",
+    "tags": [
+      "motion",
+      "chat",
+      "aftereffects",
+      "freelance"
+    ]
+  },
+  {
+    "id": "vfx_job",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/vfx_job",
+    "tags": [
+      "vfx",
+      "cgi",
+      "compositing",
+      "editing"
+    ]
+  },
+  {
+    "id": "sound_job",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/sound_job",
+    "tags": [
+      "sound",
+      "audio",
+      "sfx",
+      "postproduction"
+    ]
+  },
+  {
+    "id": "video_work",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/video_work",
+    "tags": [
+      "video",
+      "work",
+      "clips",
+      "editing"
+    ]
+  },
+  {
+    "id": "reels_hunter",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/reels_hunter",
+    "tags": [
+      "reels",
+      "ideas",
+      "vertical",
+      "shorts"
+    ]
+  },
+  {
+    "id": "cg_job",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/cg_job",
+    "tags": [
+      "cg",
+      "3d",
+      "animation",
+      "vfx"
+    ]
+  },
+  {
+    "id": "camera_crew",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/camera_crew",
+    "tags": [
+      "camera",
+      "crew",
+      "lighting",
+      "production"
+    ]
+  },
+  {
+    "id": "videomontazh_pro",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/videomontazh_pro",
+    "tags": [
+      "editing",
+      "premiere",
+      "davinci",
+      "video"
+    ]
+  },
+  {
+    "id": "reels_makers_hub",
+    "category": "jobs_video",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/reels_makers_hub",
+    "tags": [
+      "reels",
+      "shorts",
+      "editing",
+      "creators"
+    ]
+  },
+  {
+    "id": "theyseeku",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://vc.ru/theyseeku",
+    "tags": [
+      "remote",
+      "jobs",
+      "digital",
+      "verified"
+    ]
+  },
+  {
+    "id": "normrabota",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://vc.ru/normrabota",
+    "tags": [
+      "digital",
+      "media",
+      "creative",
+      "design"
+    ]
+  },
+  {
+    "id": "tgwork",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://vc.ru/tgwork",
+    "tags": [
+      "remote",
+      "freelance",
+      "projects",
+      "work"
+    ]
+  },
+  {
+    "id": "zapwork",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@zapwork",
+    "tags": [
+      "remote",
+      "work",
+      "freelance",
+      "digital"
+    ]
+  },
+  {
+    "id": "vdhl_good",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@vdhl_good",
+    "tags": [
+      "creative",
+      "media",
+      "design",
+      "culture"
+    ]
+  },
+  {
+    "id": "careerspace",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/careerspace",
+    "tags": [
+      "career",
+      "startups",
+      "remote",
+      "jobs"
+    ]
+  },
+  {
+    "id": "naudalenkebro",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/naudalenkebro",
+    "tags": [
+      "remote",
+      "freelance",
+      "finder",
+      "projects"
+    ]
+  },
+  {
+    "id": "marketing_jobs",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@marketing_jobs",
+    "tags": [
+      "marketing",
+      "content",
+      "smm",
+      "creative"
+    ]
+  },
+  {
+    "id": "zablik_orders",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@zablik_orders",
+    "tags": [
+      "orders",
+      "freelance",
+      "kwork",
+      "flru"
+    ]
+  },
+  {
+    "id": "kwork_market",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@kwork_market",
+    "tags": [
+      "kwork",
+      "freelance",
+      "orders",
+      "bazaar"
+    ]
+  },
+  {
+    "id": "it_vakansii_jobs",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@it_vakansii_jobs",
+    "tags": [
+      "digital",
+      "remote",
+      "seti",
+      "jobs"
+    ]
+  },
+  {
+    "id": "zarubezhom_jobs",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@zarubezhom_jobs",
+    "tags": [
+      "relocation",
+      "remote",
+      "connectable",
+      "global"
+    ]
+  },
+  {
+    "id": "jobforjunior",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@jobforjunior",
+    "tags": [
+      "junior",
+      "remote",
+      "digital",
+      "entry"
+    ]
+  },
+  {
+    "id": "forproducts",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@forproducts",
+    "tags": [
+      "product",
+      "project",
+      "digital",
+      "media"
+    ]
+  },
+  {
+    "id": "foranalysts",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@foranalysts",
+    "tags": [
+      "analytics",
+      "digital",
+      "remote",
+      "data"
+    ]
+  },
+  {
+    "id": "forhr",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@forhr",
+    "tags": [
+      "hr",
+      "recruiting",
+      "remote",
+      "team"
+    ]
+  },
+  {
+    "id": "forallmarketing",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@forallmarketing",
+    "tags": [
+      "marketing",
+      "smm",
+      "pr",
+      "media"
+    ]
+  },
+  {
+    "id": "freelance_orders",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/freelance_orders",
+    "tags": [
+      "freelance",
+      "projects",
+      "orders",
+      "direct"
+    ]
+  },
+  {
+    "id": "freelancetavern",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/freelancetavern",
+    "tags": [
+      "freelance",
+      "tavern",
+      "remote",
+      "gigs"
+    ]
+  },
+  {
+    "id": "freelance_daily",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/freelance_daily",
+    "tags": [
+      "freelance",
+      "daily",
+      "home",
+      "remote"
+    ]
+  },
+  {
+    "id": "remote_ru",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/remote_ru",
+    "tags": [
+      "remote",
+      "vacancies",
+      "online",
+      "premium"
+    ]
+  },
+  {
+    "id": "distantsiya",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/distantsiya",
+    "tags": [
+      "distance",
+      "remote",
+      "projects",
+      "digital"
+    ]
+  },
+  {
+    "id": "online_work",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/online_work",
+    "tags": [
+      "online",
+      "work",
+      "remote",
+      "money"
+    ]
+  },
+  {
+    "id": "telework",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/telework",
+    "tags": [
+      "telework",
+      "telegram",
+      "jobs",
+      "home"
+    ]
+  },
+  {
+    "id": "freelance_leads",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/freelance_leads",
+    "tags": [
+      "leads",
+      "freelance",
+      "gigs",
+      "direct"
+    ]
+  },
+  {
+    "id": "digital_vacancies",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/digital_vacancies",
+    "tags": [
+      "digital",
+      "vacancies",
+      "remote",
+      "chat"
+    ]
+  },
+  {
+    "id": "creative_freelance",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/creative_freelance",
+    "tags": [
+      "creative",
+      "freelance",
+      "motion",
+      "orders"
+    ]
+  },
+  {
+    "id": "freelancers_club",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/freelancers_club",
+    "tags": [
+      "freelancers",
+      "club",
+      "experience",
+      "gigs"
+    ]
+  },
+  {
+    "id": "remote_career",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/remote_career",
+    "tags": [
+      "career",
+      "remote",
+      "jobs",
+      "global"
+    ]
+  },
+  {
+    "id": "gig_economy",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/gig_economy",
+    "tags": [
+      "gig",
+      "economy",
+      "parttime",
+      "freelance"
+    ]
+  },
+  {
+    "id": "freelance_daily_jobs",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/freelance_daily_jobs",
+    "tags": [
+      "freelance",
+      "daily",
+      "orders",
+      "tasks"
+    ]
+  },
+  {
+    "id": "freelance_feed",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/freelance_feed",
+    "tags": [
+      "feed",
+      "orders",
+      "gigs",
+      "direct"
+    ]
+  },
+  {
+    "id": "remote_freelance_ru",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/remote_freelance_ru",
+    "tags": [
+      "freelance",
+      "remote",
+      "russia",
+      "projects"
+    ]
+  },
+  {
+    "id": "workzavr",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@workzavr",
+    "tags": [
+      "workzavr",
+      "freelance",
+      "workzilla",
+      "orders"
+    ]
+  },
+  {
+    "id": "takoyfreelance",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@takoyfreelance",
+    "tags": [
+      "freelance",
+      "remote",
+      "projects",
+      "media"
+    ]
+  },
+  {
+    "id": "remotejobs_ru",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/remotejobs_ru",
+    "tags": [
+      "remote",
+      "jobs",
+      "home",
+      "vacancies"
+    ]
+  },
+  {
+    "id": "remote_work_ru",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/remote_work_ru",
+    "tags": [
+      "remote",
+      "guides",
+      "tools",
+      "work"
+    ]
+  },
+  {
+    "id": "digital_freelance",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/digital_freelance",
+    "tags": [
+      "digital",
+      "freelance",
+      "telegram",
+      "gigs"
+    ]
+  },
+  {
+    "id": "work_from_home",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/work_from_home",
+    "tags": [
+      "wfh",
+      "home",
+      "freelance",
+      "online"
+    ]
+  },
+  {
+    "id": "freelance_order",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/freelance_order",
+    "tags": [
+      "orders",
+      "freelance",
+      "tasks",
+      "contracts"
+    ]
+  },
+  {
+    "id": "designer_jobs",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/designer_jobs",
+    "tags": [
+      "design",
+      "jobs",
+      "freelance",
+      "orders"
+    ]
+  },
+  {
+    "id": "remotelead",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/remotelead",
+    "tags": [
+      "remote",
+      "lead",
+      "tech",
+      "contracts"
+    ]
+  },
+  {
+    "id": "freelance_leads_ru",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/freelance_leads_ru",
+    "tags": [
+      "freelance",
+      "leads",
+      "remote",
+      "clients"
+    ]
+  },
+  {
+    "id": "remote_work_hub_ru",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/remote_work_hub_ru",
+    "tags": [
+      "remote",
+      "hub",
+      "vacancies",
+      "home"
+    ]
+  },
+  {
+    "id": "motiontut",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@MotionTut",
+    "tags": [
+      "motion",
+      "chat",
+      "aftereffects",
+      "3d"
+    ]
+  },
+  {
+    "id": "motiongallerytut",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@MotionGalleryTut",
+    "tags": [
+      "gallery",
+      "motion",
+      "inspiration",
+      "showcase"
+    ]
+  },
+  {
+    "id": "a_study",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/channel/@a_study",
+    "tags": [
+      "tutorials",
+      "aftereffects",
+      "motion",
+      "plugins"
+    ]
+  },
+  {
+    "id": "premierepro_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/premierepro_chat",
+    "tags": [
+      "premiere",
+      "chat",
+      "editing",
+      "troubleshooting"
+    ]
+  },
+  {
+    "id": "aftereffects_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/aftereffects_chat",
+    "tags": [
+      "aftereffects",
+      "expressions",
+      "ae",
+      "motion"
+    ]
+  },
+  {
+    "id": "montazh_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/montazh_chat",
+    "tags": [
+      "montage",
+      "editing",
+      "community",
+      "directors"
+    ]
+  },
+  {
+    "id": "c4d_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/c4d_chat",
+    "tags": [
+      "c4d",
+      "3d",
+      "motion",
+      "octane"
+    ]
+  },
+  {
+    "id": "sound_design_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/sound_design_chat",
+    "tags": [
+      "sound",
+      "audio",
+      "sfx",
+      "mixing"
+    ]
+  },
+  {
+    "id": "davinci_resolve_ru",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/davinci_resolve_ru",
+    "tags": [
+      "davinci",
+      "resolve",
+      "color",
+      "fusion"
+    ]
+  },
+  {
+    "id": "editing_tips",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/editing_tips",
+    "tags": [
+      "editing",
+      "tips",
+      "tutorials",
+      "guides"
+    ]
+  },
+  {
+    "id": "blender_ru",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/blender_ru",
+    "tags": [
+      "blender",
+      "3d",
+      "community",
+      "render"
+    ]
+  },
+  {
+    "id": "motion_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/motion_chat",
+    "tags": [
+      "motion",
+      "cup",
+      "animation",
+      "chat"
+    ]
+  },
+  {
+    "id": "cg_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/cg_chat",
+    "tags": [
+      "cg",
+      "chat",
+      "3d",
+      "vfx"
+    ]
+  },
+  {
+    "id": "filmmakers_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/filmmakers_chat",
+    "tags": [
+      "videographers",
+      "filmmakers",
+      "community",
+      "development"
+    ]
+  },
+  {
+    "id": "motion_community",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/motion_community",
+    "tags": [
+      "motion",
+      "community",
+      "2d",
+      "3d"
+    ]
+  },
+  {
+    "id": "cgi_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/cgi_chat",
+    "tags": [
+      "cgi",
+      "chat",
+      "vfx",
+      "compositing"
+    ]
+  },
+  {
+    "id": "director_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/director_chat",
+    "tags": [
+      "director",
+      "commercial",
+      "production",
+      "chat"
+    ]
+  },
+  {
+    "id": "camera_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/camera_chat",
+    "tags": [
+      "camera",
+      "operators",
+      "lighting",
+      "gear"
+    ]
+  },
+  {
+    "id": "ae_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/ae_chat",
+    "tags": [
+      "aftereffects",
+      "motion",
+      "plugins",
+      "chat"
+    ]
+  },
+  {
+    "id": "blender_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/blender_chat",
+    "tags": [
+      "blender",
+      "modeling",
+      "texturing",
+      "chat"
+    ]
+  },
+  {
+    "id": "audio_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/audio_chat",
+    "tags": [
+      "audio",
+      "sound",
+      "recording",
+      "voice"
+    ]
+  },
+  {
+    "id": "video_community",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/video_community",
+    "tags": [
+      "video",
+      "community",
+      "cinema",
+      "films"
+    ]
+  },
+  {
+    "id": "colorist_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/colorist_chat",
+    "tags": [
+      "colorist",
+      "visual",
+      "craft",
+      "chat"
+    ]
+  },
+  {
+    "id": "davinci_resolve",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/davinci_resolve",
+    "tags": [
+      "davinci",
+      "grading",
+      "color",
+      "pro"
+    ]
+  },
+  {
+    "id": "videoeditors",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/videoeditors",
+    "tags": [
+      "premiere",
+      "montage",
+      "community",
+      "adobe"
+    ]
+  },
+  {
+    "id": "animation_ru",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/animation_ru",
+    "tags": [
+      "animation",
+      "2d",
+      "motion",
+      "cartoons"
+    ]
+  },
+  {
+    "id": "filmmakers_russia",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/filmmakers_russia",
+    "tags": [
+      "filmmakers",
+      "video",
+      "production",
+      "russia"
+    ]
+  },
+  {
+    "id": "capcut_masters",
+    "category": "editors_community",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/capcut_masters",
+    "tags": [
+      "capcut",
+      "video",
+      "mobile",
+      "reels"
+    ]
+  },
+  {
+    "id": "instalogiya_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://exlibris.ru/telegram-chats",
+    "tags": [
+      "bloggers",
+      "clients",
+      "marketing",
+      "reels"
+    ]
+  },
+  {
+    "id": "svobonayakassa",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://exlibris.ru/telegram-chats",
+    "tags": [
+      "advertising",
+      "bloggers",
+      "integration",
+      "media"
+    ]
+  },
+  {
+    "id": "badlistblogger",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://exlibris.ru/telegram-chats",
+    "tags": [
+      "bloggers",
+      "verify",
+      "contracts",
+      "safety"
+    ]
+  },
+  {
+    "id": "reels_for_business",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/reels_for_business",
+    "tags": [
+      "reels",
+      "business",
+      "clients",
+      "sales"
+    ]
+  },
+  {
+    "id": "otzovik_blogger",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://exlibris.ru/telegram-chats",
+    "tags": [
+      "reviews",
+      "bloggers",
+      "reputation",
+      "clients"
+    ]
+  },
+  {
+    "id": "fromberek",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://exlibris.ru/telegram-chats",
+    "tags": [
+      "blogging",
+      "pr",
+      "experts",
+      "content"
+    ]
+  },
+  {
+    "id": "infobiz_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@infobiz_chat",
+    "tags": [
+      "infobiz",
+      "launches",
+      "experts",
+      "funnels"
+    ]
+  },
+  {
+    "id": "wildberries_video",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@wildberries_video",
+    "tags": [
+      "wb",
+      "ozon",
+      "reviews",
+      "catalog"
+    ]
+  },
+  {
+    "id": "biznes_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@biznes_chat",
+    "tags": [
+      "business",
+      "networking",
+      "entrepreneurs",
+      "leads"
+    ]
+  },
+  {
+    "id": "freelead",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@freelead",
+    "tags": [
+      "entrepreneurs",
+      "sales",
+      "marketing",
+      "business"
+    ]
+  },
+  {
+    "id": "infobizz1",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@infobizz1",
+    "tags": [
+      "infobiz",
+      "online_schools",
+      "producers",
+      "getcourse"
+    ]
+  },
+  {
+    "id": "blogerytut",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@blogerytut",
+    "tags": [
+      "bloggers",
+      "creators",
+      "advertising",
+      "collab"
+    ]
+  },
+  {
+    "id": "youtube_blogeri_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@youtube_blogeri_chat",
+    "tags": [
+      "youtube",
+      "bloggers",
+      "hiring",
+      "channel"
+    ]
+  },
+  {
+    "id": "youtube_talks_ru",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@youtube_talks_ru",
+    "tags": [
+      "youtube",
+      "talks",
+      "promotion",
+      "editors"
+    ]
+  },
+  {
+    "id": "infobiz_ru",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@infobiz_ru",
+    "tags": [
+      "infobiz",
+      "work",
+      "projects",
+      "funnels"
+    ]
+  },
+  {
+    "id": "bloggers_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@bloggers_chat",
+    "tags": [
+      "bloggers",
+      "chat",
+      "influence",
+      "content"
+    ]
+  },
+  {
+    "id": "smm_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://tgstat.ru/chat/@smm_chat",
+    "tags": [
+      "smm",
+      "telegram",
+      "instagram",
+      "marketing"
+    ]
+  },
+  {
+    "id": "target_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/target_chat",
+    "tags": [
+      "target",
+      "marketers",
+      "traffic",
+      "creatives"
+    ]
+  },
+  {
+    "id": "wb_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/wb_chat",
+    "tags": [
+      "wildberries",
+      "sellers",
+      "marketplaces",
+      "video"
+    ]
+  },
+  {
+    "id": "ozon_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/ozon_chat",
+    "tags": [
+      "ozon",
+      "sellers",
+      "ecommerce",
+      "creatives"
+    ]
+  },
+  {
+    "id": "business_chat_ru",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/business_chat_ru",
+    "tags": [
+      "business",
+      "networking",
+      "entrepreneurs",
+      "leads"
+    ]
+  },
+  {
+    "id": "startups_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/startups_chat",
+    "tags": [
+      "startups",
+      "pitch",
+      "founders",
+      "video"
+    ]
+  },
+  {
+    "id": "ecommerce_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/ecommerce_chat",
+    "tags": [
+      "ecommerce",
+      "business",
+      "sales",
+      "products"
+    ]
+  },
+  {
+    "id": "reels_community",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/reels_community",
+    "tags": [
+      "reels",
+      "community",
+      "growth",
+      "views"
+    ]
+  },
+  {
+    "id": "podcasts_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/podcasts_chat",
+    "tags": [
+      "podcasts",
+      "audio",
+      "video",
+      "production"
+    ]
+  },
+  {
+    "id": "producers_chat",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/producers_chat",
+    "tags": [
+      "producers",
+      "edtech",
+      "launches",
+      "media"
+    ]
+  },
+  {
+    "id": "infobiz_community",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/infobiz_community",
+    "tags": [
+      "infobiz",
+      "marketing",
+      "experts",
+      "launches"
+    ]
+  },
+  {
+    "id": "youtube_creators_hub",
+    "category": "clients_entrepreneurs",
+    "language": "ru",
+    "discoveredFrom": "https://t.me/youtube_creators_hub",
+    "tags": [
+      "youtube",
+      "creators",
+      "hub",
+      "production"
+    ]
+  },
+  {
+    "id": "remotejobs",
+    "category": "international_en",
+    "language": "en",
+    "discoveredFrom": "https://t.me/remotejobs",
+    "tags": [
+      "remote",
+      "worldwide",
+      "jobs",
+      "contracts"
+    ]
+  },
+  {
+    "id": "cryptojobs",
+    "category": "international_en",
+    "language": "en",
+    "discoveredFrom": "https://t.me/cryptojobs",
+    "tags": [
+      "crypto",
+      "web3",
+      "media",
+      "video"
+    ]
+  },
+  {
+    "id": "crypto_jobs",
+    "category": "international_en",
+    "language": "en",
+    "discoveredFrom": "https://t.me/crypto_jobs",
+    "tags": [
+      "crypto",
+      "jobs",
+      "remote",
+      "blockchain"
+    ]
+  },
+  {
+    "id": "remoteok",
+    "category": "international_en",
+    "language": "en",
+    "discoveredFrom": "https://t.me/remoteok",
+    "tags": [
+      "remoteok",
+      "worldwide",
+      "tech",
+      "creative"
+    ]
+  },
+  {
+    "id": "cryptojobslist",
+    "category": "international_en",
+    "language": "en",
+    "discoveredFrom": "https://t.me/cryptojobslist",
+    "tags": [
+      "web3",
+      "blockchain",
+      "remote",
+      "hiring"
+    ]
+  },
+  {
+    "id": "relocateme",
+    "category": "international_en",
+    "language": "en",
+    "discoveredFrom": "https://t.me/relocateme",
+    "tags": [
+      "relocation",
+      "jobs",
+      "global",
+      "abroad"
+    ]
+  },
+  {
+    "id": "techjobs_daily",
+    "category": "international_en",
+    "language": "en",
+    "discoveredFrom": "https://t.me/techjobs_daily",
+    "tags": [
+      "tech",
+      "daily",
+      "jobs",
+      "remote"
+    ]
+  },
+  {
+    "id": "global_work",
+    "category": "international_en",
+    "language": "en",
+    "discoveredFrom": "https://t.me/global_work",
+    "tags": [
+      "global",
+      "work",
+      "contracts",
+      "freelance"
+    ]
+  },
+  {
+    "id": "english_jobs",
+    "category": "international_en",
+    "language": "en",
+    "discoveredFrom": "https://t.me/english_jobs",
+    "tags": [
+      "english",
+      "international",
+      "jobs",
+      "remote"
+    ]
+  },
+  {
+    "id": "remote_work_global",
+    "category": "international_en",
+    "language": "en",
+    "discoveredFrom": "https://t.me/remote_work_global",
+    "tags": [
+      "remote",
+      "global",
+      "portal",
+      "freelance"
+    ]
+  },
+  {
+    "id": "freelancers",
+    "category": "international_en",
+    "language": "en",
+    "discoveredFrom": "https://t.me/freelancers",
+    "tags": [
+      "freelancers",
+      "worldwide",
+      "gigs",
+      "projects"
+    ]
+  },
+  {
+    "id": "web3jobs",
+    "category": "international_en",
+    "language": "en",
+    "discoveredFrom": "https://t.me/web3jobs",
+    "tags": [
+      "web3",
+      "crypto",
+      "remote",
+      "worldwide"
+    ]
+  },
+  {
+    "id": "dzhmaterials",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "templates",
+      "video",
+      "editing"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "capcut_futazhi",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "capcut",
+      "templates",
+      "reels"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "freelanceanchor",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "video",
+      "freelance",
+      "montage"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "videoediting_ideas",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "video",
+      "ideas",
+      "reels"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "belinkovna",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "reels",
+      "montage",
+      "mobile"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "reelsbypushkareva",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "reels",
+      "video",
+      "montage"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "premierepro_templates",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "premiere",
+      "templates",
+      "video"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "reels_production",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "reels",
+      "production",
+      "video"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "vfx_artist",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "vfx",
+      "cgi",
+      "motion"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "reels_montazh",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "reels",
+      "montazh",
+      "orders"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "montazh_rabota",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "montazh",
+      "rabota",
+      "video"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "creators_market",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "creators",
+      "video",
+      "market"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "cg_jobs",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "cg",
+      "vfx",
+      "animation"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "videoboy_edit",
+    "category": "editors_community",
+    "language": "ru",
+    "tags": [
+      "community",
+      "video",
+      "chat"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "aftereffects_free",
+    "category": "editors_community",
+    "language": "ru",
+    "tags": [
+      "aftereffects",
+      "free",
+      "community"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "blender_3d_ru",
+    "category": "editors_community",
+    "language": "ru",
+    "tags": [
+      "blender",
+      "3d",
+      "community"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "blender3d_chat",
+    "category": "editors_community",
+    "language": "ru",
+    "tags": [
+      "blender",
+      "3d",
+      "chat"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "design_careers",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "design",
+      "careers",
+      "jobs"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "uiux_job",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "design",
+      "uiux",
+      "jobs"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "workhome",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "remote",
+      "freelance",
+      "home"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "freelancce",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "freelance",
+      "remote",
+      "jobs"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "sova_freelance",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "freelance",
+      "orders",
+      "remote"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "easy_wrk",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "freelance",
+      "easy",
+      "remote"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "startfreelancer",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "freelance",
+      "start",
+      "remote"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "work_remote_ru",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "remote",
+      "work",
+      "freelance"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "freelance_tg",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "freelance",
+      "orders",
+      "work"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "remote_work_it",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "remote",
+      "it",
+      "freelance"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "digital_jobs_ru",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "digital",
+      "jobs",
+      "remote"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "remote_russia",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "remote",
+      "russia",
+      "work"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "zakazy_freelance",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "freelance",
+      "zakazy",
+      "remote"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "frilans_zakazy",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "frilans",
+      "zakazy",
+      "work"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "birzha_freelance",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "birzha",
+      "freelance",
+      "orders"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "rabota_tut_ru",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "rabota",
+      "remote",
+      "freelance"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "freelance_chat",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "freelance",
+      "chat",
+      "orders"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "freelance_birzha",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "freelance",
+      "birzha",
+      "chat"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "freelance_hub_ru",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "freelance",
+      "hub",
+      "remote"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "digital_tender",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "digital",
+      "tender",
+      "freelance"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "hiddengurus",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "remote",
+      "tech",
+      "global"
+    ],
+    "discoveredFrom": "https://tgstat.com"
+  },
+  {
+    "id": "remotejobss",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "remote",
+      "jobs",
+      "global"
+    ],
+    "discoveredFrom": "https://telegramchannels.me"
+  },
+  {
+    "id": "remotejobs4u",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "remote",
+      "wfh",
+      "freelance"
+    ],
+    "discoveredFrom": "https://telegramchannels.me"
+  },
+  {
+    "id": "remote_tech_jobs",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "remote",
+      "tech",
+      "jobs"
+    ],
+    "discoveredFrom": "https://tgstat.com"
+  },
+  {
+    "id": "cryptojobsdaily",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "crypto",
+      "jobs",
+      "remote"
+    ],
+    "discoveredFrom": "https://tgstat.com"
+  },
+  {
+    "id": "blockchain_jobs",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "blockchain",
+      "jobs",
+      "web3"
+    ],
+    "discoveredFrom": "https://tgstat.com"
+  },
+  {
+    "id": "web3_remote",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "web3",
+      "remote",
+      "jobs"
+    ],
+    "discoveredFrom": "https://tgstat.com"
+  },
+  {
+    "id": "tech_jobs_remote",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "tech",
+      "jobs",
+      "remote"
+    ],
+    "discoveredFrom": "https://tgstat.com"
+  },
+  {
+    "id": "it_jobs_remote",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "it",
+      "jobs",
+      "remote"
+    ],
+    "discoveredFrom": "https://tgstat.com"
+  },
+  {
+    "id": "devjobs",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "developer",
+      "jobs",
+      "remote"
+    ],
+    "discoveredFrom": "https://tgstat.com"
+  },
+  {
+    "id": "remotedevjobs",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "remote",
+      "developer",
+      "jobs"
+    ],
+    "discoveredFrom": "https://tgstat.com"
+  },
+  {
+    "id": "web3gigs",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "web3",
+      "gigs",
+      "freelance"
+    ],
+    "discoveredFrom": "https://tgstat.com"
+  },
+  {
+    "id": "editcghunter",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "video",
+      "editing",
+      "cgi",
+      "freelance"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "shot_creative",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "creative",
+      "video",
+      "commercial"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "videomaker_chat",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "videomaker",
+      "chat",
+      "production"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "reels_maker",
+    "category": "jobs_video",
+    "language": "ru",
+    "tags": [
+      "reels",
+      "maker",
+      "video"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "frilans_chatik",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "freelance",
+      "chat",
+      "orders"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "zakazy_udalenka",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "zakazy",
+      "udalenka",
+      "remote"
+    ],
+    "discoveredFrom": "https://tgstat.ru"
+  },
+  {
+    "id": "remoteit",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "remote",
+      "it",
+      "jobs"
+    ],
+    "discoveredFrom": "https://habr.com"
+  },
+  {
+    "id": "getitrussia",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "remote",
+      "it",
+      "jobs"
+    ],
+    "discoveredFrom": "https://habr.com"
+  },
+  {
+    "id": "devops_jobs_feed",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "devops",
+      "tech",
+      "remote"
+    ],
+    "discoveredFrom": "https://habr.com"
+  },
+  {
+    "id": "qa_jobs",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "qa",
+      "tech",
+      "remote"
+    ],
+    "discoveredFrom": "https://habr.com"
+  },
+  {
+    "id": "digital_hr",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "digital",
+      "hr",
+      "jobs"
+    ],
+    "discoveredFrom": "https://habr.com"
+  },
+  {
+    "id": "it_recruiter_jobs",
+    "category": "jobs_remote_freelance",
+    "language": "ru",
+    "tags": [
+      "recruiter",
+      "it",
+      "jobs"
+    ],
+    "discoveredFrom": "https://habr.com"
+  },
+  {
+    "id": "tech_remote_jobs",
+    "category": "international_en",
+    "language": "en",
+    "tags": [
+      "tech",
+      "remote",
+      "global"
+    ],
+    "discoveredFrom": "https://tgstat.com"
+  }
+]

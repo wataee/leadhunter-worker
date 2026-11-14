@@ -7,8 +7,8 @@
   "scripts": {
     "start": "node server.js",
     "auth": "node auth.js",
-    "test": "node --experimental-strip-types --test test/worker.test.js test/auth.test.js test/budget.test.js test/filter.test.js && npm --prefix web run test",
-    "test:all": "node --experimental-strip-types --test test/worker.test.js test/auth.test.js test/budget.test.js test/filter.test.js && npm --prefix web run test",
+    "test": "node --experimental-strip-types --test test/worker.test.js test/auth.test.js test/budget.test.js test/filter.test.js test/catalog.test.js && npm --prefix web run test",
+    "test:all": "node --experimental-strip-types --test test/worker.test.js test/auth.test.js test/budget.test.js test/filter.test.js test/catalog.test.js && npm --prefix web run test",
     "lint": "node --check server.js auth.js && npm --prefix web run lint",
     "lint:all": "node --check server.js auth.js && npm --prefix web run lint",
     "typecheck": "npm --prefix web run typecheck",

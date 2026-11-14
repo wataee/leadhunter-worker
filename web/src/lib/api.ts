@@ -255,3 +255,30 @@ export async function scoreLeadsWithAi(payload: {
 
   return handleApiResponse<AiScoreResponse>(res);
 }
+
+export interface SourceCheckResult {
+  ok: boolean;
+  source?: {
+    id: string;
+    username: string;
+    title: string;
+    description: string;
+    type: 'channel' | 'group';
+    url: string;
+    subscribers: number;
+    status: string;
+    lastPostAt?: string | null;
+    daysSinceLastPost?: number | null;
+  };
+  error?: string;
+}
+
+export async function checkSource(username: string): Promise<SourceCheckResult> {
+  const res = await fetch('/api/source-check', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username }),
+  });
+
+  return handleApiResponse<SourceCheckResult>(res);
+}
