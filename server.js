@@ -13,26 +13,55 @@ const PORT = process.env.PORT || 8080;
 const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://fleurleads-work.netlify.app/api/tg-notify';
 
 // Ключевые слова для поиска вакансий монтажёра
-const INCLUDE_KEYWORDS = [
-  'ищу монтажер',
-  'ищу монтажёр',
-  'нужен монтажер',
-  'нужен монтажёр',
-  'требуется монтажер',
-  'ищем монтажер',
-  'вакансия монтажер',
+const CORE_ROLES = [
   'видеомонтажер',
   'видеомонтажёр',
+  'монтажер',
+  'монтажёр',
+  'видеомонтаж',
   'монтаж видео',
   'монтаж ролик',
   'монтаж подкаст',
   'монтаж reels',
   'монтаж shorts',
   'монтажер reels',
-  'видеомонтаж',
+  'рилсмейкер',
+  'reelsмейкер',
   'video editor',
   'editor needed',
   'looking for editor',
+];
+
+const SECONDARY_TERMS = [
+  'монтаж',
+  'reels',
+  'shorts',
+  'подкаст',
+  'видеоролик',
+  'рилс',
+  'premiere',
+  'davinci',
+  'capcut',
+  'after effects',
+];
+
+const HIRING_SIGNALS = [
+  'ищ',
+  'нужн',
+  'требу',
+  'ваканси',
+  'в поиск',
+  'найм',
+  'нанят',
+  'оплат',
+  'платим',
+  'бюджет',
+  'ставк',
+  'отклик',
+  'в команду',
+  'hiring',
+  'looking for',
+  'job',
 ];
 
 // Слова-исключения (резюме соискателей)
@@ -46,6 +75,7 @@ const EXCLUDE_KEYWORDS = [
   'возьму заказ',
   'делаю монтаж',
   'открыт к заказам',
+  'готов к сотрудничеству',
 ];
 
 let stats = {
@@ -126,9 +156,15 @@ async function startListener() {
       const isExcluded = EXCLUDE_KEYWORDS.some((kw) => text.includes(kw));
       if (isExcluded) return;
 
-      // Проверка ключевых слов
-      const matched = INCLUDE_KEYWORDS.filter((kw) => text.includes(kw));
-      if (matched.length === 0) return;
+      // Проверка ключевых слов: либо прямое совпадение роли, либо связка (термин + сигнал найма)
+      const matchedRoles = CORE_ROLES.filter((r) => text.includes(r));
+      const hasSecondary = SECONDARY_TERMS.some((t) => text.includes(t));
+      const hasHiringSignal = HIRING_SIGNALS.some((s) => text.includes(s));
+
+      const isMatch = matchedRoles.length > 0 || (hasSecondary && hasHiringSignal);
+      if (!isMatch) return;
+
+      const matched = matchedRoles.length > 0 ? matchedRoles : ['монтаж (вакансия)'];
 
       stats.leadsFound++;
       stats.lastLeadAt = new Date().toISOString();
@@ -159,7 +195,7 @@ async function startListener() {
       };
 
       recentLeads.unshift(leadItem);
-      if (recentLeads.length > 50) recentLeads.pop();
+      if (recentLeads.length > 200) recentLeads.pop();
 
       // Отправка в вебхук на Netlify (если настроен)
       if (WEBHOOK_URL) {
