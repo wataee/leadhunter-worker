@@ -1,7 +1,6 @@
 import React from 'react';
 import { Vacancy } from '../types';
 import { formatRelativeTime } from '../lib/time';
-import { Badge } from './Badge';
 import {
   ExternalLink,
   Send,
@@ -9,6 +8,10 @@ import {
   EyeOff,
   Flame,
   Eye,
+  Sparkles,
+  AlertTriangle,
+  Star,
+  Ban,
 } from 'lucide-react';
 
 interface VacancyCardProps {
@@ -16,6 +19,8 @@ interface VacancyCardProps {
   onApply: () => void;
   onConvertToLead: () => void;
   onHide: () => void;
+  onToggleFavorite?: () => void;
+  onHideChannel?: (channel: string) => void;
   highlightWords?: string[];
 }
 
@@ -24,10 +29,11 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   onApply,
   onConvertToLead,
   onHide,
+  onToggleFavorite,
+  onHideChannel,
   highlightWords = [],
 }) => {
-  const isHot =
-    Date.now() - new Date(vacancy.postedAt).getTime() < 20 * 60 * 1000;
+  const isHot = vacancy.statusBadge === 'hot' || Date.now() - new Date(vacancy.postedAt).getTime() < 20 * 60 * 1000;
 
   // Render text with highlighted keywords
   const renderHighlightedText = (text: string) => {
@@ -61,12 +67,16 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   return (
     <div
       className={`group bg-surface hover:bg-surface-2/60 border ${
-        isHot ? 'border-danger/40 shadow-[0_0_15px_rgba(248,113,113,0.08)]' : 'border-border'
+        vacancy.statusBadge === 'hot'
+          ? 'border-danger/40 shadow-[0_0_15px_rgba(248,113,113,0.08)]'
+          : vacancy.isFavorite
+          ? 'border-amber-400/40 bg-amber-400/5'
+          : 'border-border'
       } rounded-card p-4 space-y-3 transition-all duration-150`}
     >
       {/* Top Header */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
           <a
             href={vacancy.url}
             target="_blank"
@@ -100,45 +110,45 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {/* Quality Tier Badge */}
-          {vacancy.qualityTier === 'great' && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-success bg-success-soft px-2 py-0.5 rounded border border-success/20">
-              🟢 Отличная
+          {/* Status Badges: Hot / New / Shady */}
+          {vacancy.statusBadge === 'hot' && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-danger bg-danger/15 px-2 py-0.5 rounded border border-danger/30 animate-pulse">
+              <Flame size={12} />
+              <span>Горячее</span>
             </span>
           )}
-          {vacancy.qualityTier === 'fair' && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-warning bg-warning-soft px-2 py-0.5 rounded border border-warning/20">
-              🟡 Приемлемая
+          {vacancy.statusBadge === 'new' && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-accent bg-accent/15 px-2 py-0.5 rounded border border-accent/30">
+              <Sparkles size={12} />
+              <span>Новое</span>
             </span>
           )}
-          {vacancy.qualityTier === 'shady' && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-danger bg-danger-soft px-2 py-0.5 rounded border border-danger/20">
-              🔴 Сомнительная
-            </span>
-          )}
-
-          {/* Format Tag */}
-          {vacancy.formatTag === 'short' && (
-            <span className="text-[10px] font-mono text-accent bg-accent-soft px-2 py-0.5 rounded border border-accent/20">
-              #короткийформат
-            </span>
-          )}
-          {vacancy.formatTag === 'long' && (
-            <span className="text-[10px] font-mono text-info bg-info-soft px-2 py-0.5 rounded border border-info/20">
-              #длинныйформат
-            </span>
-          )}
-          {vacancy.formatTag === 'both' && (
-            <span className="text-[10px] font-mono text-text-muted bg-surface-2 px-2 py-0.5 rounded border border-border">
-              #short & long
+          {vacancy.statusBadge === 'shady' && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-warning bg-warning/15 px-2 py-0.5 rounded border border-warning/30">
+              <AlertTriangle size={12} />
+              <span>Сомнительное</span>
             </span>
           )}
 
-          {isHot && (
-            <Badge variant="danger" size="sm" dot={true} pulsing={true}>
-              <Flame size={12} className="text-danger inline" />
-              <span>Горячая</span>
-            </Badge>
+          {/* Relevance score */}
+          <span className="text-[11px] font-mono text-muted bg-surface-2 px-1.5 py-0.5 rounded border border-border">
+            🎯 {vacancy.relevance}%
+          </span>
+
+          {/* Favorite toggle button */}
+          {onToggleFavorite && (
+            <button
+              onClick={onToggleFavorite}
+              className={`p-1.5 rounded transition-colors ${
+                vacancy.isFavorite
+                  ? 'text-amber-400 hover:text-amber-300'
+                  : 'text-muted hover:text-text'
+              }`}
+              title={vacancy.isFavorite ? 'В избранном' : 'Добавить в избранное'}
+              aria-label="Переключить избранное"
+            >
+              <Star size={14} className={vacancy.isFavorite ? 'fill-amber-400' : ''} />
+            </button>
           )}
         </div>
       </div>
@@ -148,9 +158,24 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         {renderHighlightedText(vacancy.text)}
       </div>
 
+      {/* Skills & Software Tags */}
+      {vacancy.skills && vacancy.skills.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 pt-1">
+          <span className="text-[10px] text-muted uppercase font-semibold">Софт:</span>
+          {vacancy.skills.map((skill, idx) => (
+            <span
+              key={idx}
+              className="text-[10px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20"
+            >
+              {skill}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Matched Keywords Tags */}
       {vacancy.matchedKeywords && vacancy.matchedKeywords.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-1">
+        <div className="flex flex-wrap gap-1.5">
           {vacancy.matchedKeywords.map((kw, idx) => (
             <span
               key={idx}
@@ -164,22 +189,35 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
 
       {/* Action Footer */}
       <div className="flex items-center justify-between pt-2 border-t border-border/60">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <button
             onClick={onHide}
             title="Скрыть вакансию"
-            className="text-muted hover:text-text p-1.5 rounded-control hover:bg-surface-2 transition-colors text-xs flex items-center gap-1"
+            className="text-muted hover:text-text p-1.5 rounded-control hover:bg-surface-2 transition-colors text-xs flex items-center gap-1 min-h-[36px]"
+            aria-label="Скрыть вакансию"
           >
             <EyeOff size={13} />
             <span className="hidden sm:inline">Скрыть</span>
           </button>
+
+          {onHideChannel && (
+            <button
+              onClick={() => onHideChannel(vacancy.channel)}
+              title={`Скрыть все вакансии из @${vacancy.channel}`}
+              className="text-muted hover:text-danger p-1.5 rounded-control hover:bg-surface-2 transition-colors text-xs flex items-center gap-1 min-h-[36px]"
+              aria-label={`Скрыть все вакансии из @${vacancy.channel}`}
+            >
+              <Ban size={13} />
+              <span className="hidden sm:inline">Скрыть канал</span>
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={onConvertToLead}
             title="Создать лида в воронке"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text bg-surface-2 hover:bg-surface-3 rounded-control border border-border transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text bg-surface-2 hover:bg-surface-3 rounded-control border border-border transition-colors min-h-[36px] focus-visible:ring-2 focus-visible:ring-accent"
           >
             <UserPlus size={13} />
             <span>В лиды</span>
@@ -187,7 +225,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
 
           <button
             onClick={onApply}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-accent hover:bg-accent-hover rounded-control shadow-subtle transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-accent hover:bg-accent-hover rounded-control shadow-subtle transition-colors min-h-[36px] focus-visible:ring-2 focus-visible:ring-accent"
           >
             <Send size={13} />
             <span>Откликнуться</span>

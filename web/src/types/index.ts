@@ -83,9 +83,12 @@ export interface Vacancy {
   postedAt: string;
   views: string;
   matchedKeywords: string[];
+  skills?: string[];
   relevance: number;
   formatTag?: 'short' | 'long' | 'both';
   qualityTier?: 'great' | 'fair' | 'shady';
+  statusBadge?: 'new' | 'hot' | 'shady';
+  isFavorite?: boolean;
   seen: boolean;
   hidden: boolean;
   budget?: {

@@ -61,13 +61,16 @@ export function computeVacancyRelevance(
   text: string,
   includeKeywords: string[],
   excludeKeywords: string[],
-  isWorkerLead = false
+  isWorkerLead = false,
+  postedAt?: string
 ): {
   relevance: number;
   matchedKeywords: string[];
+  skills: string[];
   isExcluded: boolean;
   formatTag: 'short' | 'long' | 'both';
   qualityTier: 'great' | 'fair' | 'shady';
+  statusBadge?: 'new' | 'hot' | 'shady';
   budget?: BudgetResult | null;
 } {
   const lower = text.toLowerCase();
@@ -78,21 +81,23 @@ export function computeVacancyRelevance(
     return {
       relevance: 0,
       matchedKeywords: [],
+      skills: [],
       isExcluded: true,
       formatTag: 'both',
       qualityTier: 'shady',
+      statusBadge: 'shady',
       budget: null,
     };
   }
 
   let matchedKeywords = includeKeywords.filter((kw) => lower.includes(kw.toLowerCase()));
-  
-  // Для лидов от воркера не отбрасываем при отсутствии точного совпадения includeKeywords
+
   if (matchedKeywords.length === 0) {
     if (!isWorkerLead) {
       return {
         relevance: 0,
         matchedKeywords: [],
+        skills: [],
         isExcluded: false,
         formatTag: 'both',
         qualityTier: 'fair',
@@ -107,6 +112,17 @@ export function computeVacancyRelevance(
   const hasLong = /(youtube|ютуб|подкаст|горизонтальн|хронометраж|выпуск|фильм|шоу)/i.test(lower);
   const formatTag: 'short' | 'long' | 'both' = hasShort && hasLong ? 'both' : hasShort ? 'short' : 'long';
 
+  // Skills / Software detection
+  const skills: string[] = [];
+  if (/(premiere|премьер|premiere pro)/i.test(lower)) skills.push('Premiere Pro');
+  if (/(davinci|resolve|давинчи)/i.test(lower)) skills.push('DaVinci Resolve');
+  if (/(after effects|афтер|ae\b)/i.test(lower)) skills.push('After Effects');
+  if (/capcut/i.test(lower)) skills.push('CapCut');
+  if (/(photoshop|фотошоп|ps\b)/i.test(lower)) skills.push('Photoshop');
+  if (/(звук|sound design|саунд|аудио)/i.test(lower)) skills.push('Sound Design');
+  if (/(моушн|motion|анимаци)/i.test(lower)) skills.push('Motion');
+  if (/(цветокор|грейдинг|color)/i.test(lower)) skills.push('Color Grading');
+
   // Quality tier detection
   let qualityTier: 'great' | 'fair' | 'shady' = 'fair';
   const isGreat =
@@ -114,7 +130,7 @@ export function computeVacancyRelevance(
       lower
     );
   const isShady =
-    /(бесплатно|за опыт|стажировка|без оплаты|на энтузиазме|до 8\s*000|до 5\s*000|150\s*₽|символическ)/i.test(
+    /(бесплатно|за опыт|стажировка|без оплаты|на энтузиазме|до 8\s*000|до 5\s*000|150\s*₽|символическ|тестовое без оплаты)/i.test(
       lower
     );
 
@@ -126,17 +142,41 @@ export function computeVacancyRelevance(
 
   const budget = parseBudget(text);
 
-  let score = isWorkerLead ? 70 : 50 + matchedKeywords.length * 10;
+  let score = isWorkerLead ? 60 : 40 + matchedKeywords.length * 8;
+  score += Math.min(24, skills.length * 8);
+
+  if (budget) {
+    if (budget.min && (budget.min >= 5000 || budget.currency === 'USD' || budget.currency === 'EUR')) {
+      score += 20;
+    } else {
+      score += 12;
+    }
+  }
+
   if (qualityTier === 'great') score += 20;
   if (qualityTier === 'shady') score -= 35;
-  if (budget) score += 15;
+
+  const finalScore = Math.max(0, Math.min(100, Math.round(score)));
+
+  // Status badge
+  let statusBadge: 'new' | 'hot' | 'shady' | undefined = undefined;
+  if (qualityTier === 'shady') {
+    statusBadge = 'shady';
+  } else if (postedAt) {
+    const isRecent = Date.now() - new Date(postedAt).getTime() < 20 * 60 * 1000;
+    if (isRecent) {
+      statusBadge = finalScore >= 70 ? 'hot' : 'new';
+    }
+  }
 
   return {
-    relevance: Math.max(0, Math.min(100, score)),
+    relevance: finalScore,
     matchedKeywords,
+    skills,
     isExcluded: false,
     formatTag,
     qualityTier,
+    statusBadge,
     budget,
   };
 }

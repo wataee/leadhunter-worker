@@ -122,8 +122,8 @@ export const Vacancies: React.FC = () => {
           (msg as any).fromWorker
         );
 
-        const { relevance, matchedKeywords, isExcluded, formatTag, qualityTier, budget } =
-          computeVacancyRelevance(msg.text, includeKeywords, excludeKeywords, isWorkerLead);
+        const { relevance, matchedKeywords, skills, isExcluded, formatTag, qualityTier, statusBadge, budget } =
+          computeVacancyRelevance(msg.text, includeKeywords, excludeKeywords, isWorkerLead, msg.postedAt);
 
         if (!isExcluded && (isWorkerLead || matchedKeywords.length > 0)) {
           processed.push({
@@ -134,9 +134,11 @@ export const Vacancies: React.FC = () => {
             postedAt: msg.postedAt,
             views: msg.views,
             matchedKeywords,
+            skills,
             relevance,
             formatTag,
             qualityTier,
+            statusBadge,
             budget: budget || (msg as any).budget || null,
             fromWorker: isWorkerLead,
             seen: false,
