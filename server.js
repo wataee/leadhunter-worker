@@ -1,7 +1,5 @@
 import http from 'http';
 import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
 import dotenv from 'dotenv';
 import { TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions/index.js';
@@ -14,6 +12,7 @@ import {
   computeTextHash,
   cleanChatId,
 } from './web/src/shared/filter.js';
+import { createStorage } from './storage.js';
 
 dotenv.config();
 
@@ -26,12 +25,6 @@ const WEBHOOK_URL = process.env.WEBHOOK_URL?.trim() || 'https://fleurleads-work.
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET?.trim() || '';
 const ALLOWED_CHATS_RAW = process.env.ALLOWED_CHATS?.trim() || '';
 const RATE_LIMIT_PER_MINUTE = parseInt(process.env.RATE_LIMIT_PER_MINUTE || '5', 10);
-
-if (!WEBHOOK_SECRET || WEBHOOK_SECRET.length < 16) {
-  console.error('[КРИТИЧЕСКАЯ ОШИБКА] Переменная WEBHOOK_SECRET обязательна и должна содержать минимум 16 символов!');
-  console.error('Сгенерируйте надёжный секрет (например: openssl rand -hex 32) и укажите в .env');
-  process.exit(1);
-}
 
 if (!rawApiId || !API_HASH) {
   console.error('[КРИТИЧЕСКАЯ ОШИБКА] Переменные API_ID и API_HASH обязательны!');
@@ -50,84 +43,22 @@ if (!/^[a-fA-F0-9]{32}$/.test(API_HASH)) {
   process.exit(1);
 }
 
+if (!WEBHOOK_SECRET || WEBHOOK_SECRET.length < 16) {
+  console.error('[КРИТИЧЕСКАЯ ОШИБКА] Переменная WEBHOOK_SECRET обязательна и должна содержать минимум 16 символов!');
+  console.error('Сгенерируйте надёжный секрет (например: openssl rand -hex 32) и укажите в .env');
+  process.exit(1);
+}
+
 const ALLOWED_CHATS = ALLOWED_CHATS_RAW
   ? ALLOWED_CHATS_RAW.split(',')
       .map((s) => s.trim().toLowerCase().replace(/^@/, ''))
       .filter(Boolean)
   : null;
 
-// 2. Хранилище на диске (data/recent.json, data/failed-queue.json)
-const DATA_DIR = path.resolve('data');
-const RECENT_FILE = path.join(DATA_DIR, 'recent.json');
-const FAILED_QUEUE_FILE = path.join(DATA_DIR, 'failed-queue.json');
+// 2. Хранилище (Storage abstraction: File or Upstash Redis)
+const storage = createStorage();
 
-try {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-} catch (err) {
-  console.warn(`[Хранилище] Не удалось создать папку ${DATA_DIR}:`, err.message);
-}
-
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-
-let recentLeads = [];
-let failedQueue = [];
-
-function loadDataFromDisk() {
-  try {
-    if (fs.existsSync(RECENT_FILE)) {
-      const raw = fs.readFileSync(RECENT_FILE, 'utf-8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        const now = Date.now();
-        recentLeads = parsed
-          .filter((item) => {
-            const time = new Date(item.postedAt || item.createdAt || 0).getTime();
-            return now - time <= SEVEN_DAYS_MS;
-          })
-          .slice(0, 500);
-        console.log(`[Хранилище] Загружено ${recentLeads.length} недавних лидов из ${RECENT_FILE}`);
-      }
-    }
-  } catch (err) {
-    console.warn('[Хранилище] Ошибка загрузки recent.json:', err.message);
-    recentLeads = [];
-  }
-
-  try {
-    if (fs.existsSync(FAILED_QUEUE_FILE)) {
-      const raw = fs.readFileSync(FAILED_QUEUE_FILE, 'utf-8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        failedQueue = parsed;
-        console.log(`[Хранилище] Загружено ${failedQueue.length} недоставленных сообщений из очереди`);
-      }
-    }
-  } catch (err) {
-    console.warn('[Хранилище] Ошибка загрузки failed-queue.json:', err.message);
-    failedQueue = [];
-  }
-}
-
-function saveDataToDisk() {
-  try {
-    fs.writeFileSync(RECENT_FILE, JSON.stringify(recentLeads.slice(0, 500), null, 2), 'utf-8');
-  } catch (err) {
-    console.warn('[Хранилище] Ошибка сохранения recent.json:', err.message);
-  }
-
-  try {
-    fs.writeFileSync(FAILED_QUEUE_FILE, JSON.stringify(failedQueue, null, 2), 'utf-8');
-  } catch (err) {
-    console.warn('[Хранилище] Ошибка сохранения failed-queue.json:', err.message);
-  }
-}
-
-loadDataFromDisk();
-
-// 3. Статистика и дедупликация (24 часа)
+// 3. Статистика
 const stats = {
   startedAt: new Date().toISOString(),
   messagesProcessed: 0,
@@ -142,32 +73,7 @@ const privacyStats = {
   skippedNotAllowed: 0,
 };
 
-// Дедупликация: Map<id | hash, timestamp>
-const deduplicationCache = new Map();
-
-function isDuplicate(leadId, textHash) {
-  const now = Date.now();
-  // Очистка старых записей
-  for (const [key, ts] of deduplicationCache.entries()) {
-    if (now - ts > TWENTY_FOUR_HOURS_MS) {
-      deduplicationCache.delete(key);
-    }
-  }
-
-  if (deduplicationCache.has(leadId) || deduplicationCache.has(textHash)) {
-    return true;
-  }
-
-  deduplicationCache.set(leadId, now);
-  deduplicationCache.set(textHash, now);
-  return false;
-}
-
-// Заполняем дедупликацию из загруженных recentLeads
-for (const lead of recentLeads) {
-  if (lead.id) deduplicationCache.set(lead.id, Date.now());
-  if (lead.text) deduplicationCache.set(computeTextHash(lead.text), Date.now());
-}
+let errorsCount = 0;
 
 // 4. Rate Limiter для уведомлений и группировка в дайджест
 const notificationTimestamps = [];
@@ -176,7 +82,6 @@ let digestTimer = null;
 
 function checkRateLimit() {
   const now = Date.now();
-  // Удаляем отметки старше 60 секунд
   while (notificationTimestamps.length > 0 && now - notificationTimestamps[0] > 60000) {
     notificationTimestamps.shift();
   }
@@ -194,10 +99,10 @@ async function sendWebhookWithRetry(payload, maxRetries = 3) {
     const timeout = setTimeout(() => controller.abort(), 8000);
 
     try {
-      const headers = { 'Content-Type': 'application/json' };
-      if (WEBHOOK_SECRET) {
-        headers['X-Webhook-Secret'] = WEBHOOK_SECRET;
-      }
+      const headers = {
+        'Content-Type': 'application/json',
+        'X-Webhook-Secret': WEBHOOK_SECRET,
+      };
 
       const res = await fetch(WEBHOOK_URL, {
         method: 'POST',
@@ -227,21 +132,21 @@ async function sendWebhookWithRetry(payload, maxRetries = 3) {
   return false;
 }
 
-// Обработка очереди недоставленных
+// Обработка очереди повторов
 async function processFailedQueue() {
-  if (failedQueue.length === 0) return;
-  console.log(`[Вебхук] Досылка ${failedQueue.length} лидов из failed-queue...`);
+  const queue = storage.getFailedQueue();
+  if (queue.length === 0) return;
 
-  const remaining = [];
-  for (const item of failedQueue) {
-    const ok = await sendWebhookWithRetry(item, 1);
-    if (!ok) {
-      remaining.push(item);
+  console.log(`[Вебхук] Досылка ${queue.length} лидов из failed-queue...`);
+
+  for (const item of [...queue]) {
+    const ok = await sendWebhookWithRetry(item.payload, 1);
+    if (ok) {
+      storage.dequeueFailed(item.id);
+    } else {
+      storage.recordQueueAttempt(item.id, 'Failed webhook delivery on retry');
     }
   }
-
-  failedQueue = remaining;
-  saveDataToDisk();
 }
 
 async function dispatchLeadNotification(leadItem) {
@@ -259,11 +164,9 @@ async function dispatchLeadNotification(leadItem) {
 
     const sent = await sendWebhookWithRetry(payload);
     if (!sent) {
-      failedQueue.push(payload);
-      saveDataToDisk();
+      storage.enqueueFailed(payload, 'Delivery failed after 3 retries');
     }
   } else {
-    // Превышен лимит: группируем в дайджест
     pendingDigestLeads.push(leadItem);
     console.log(`[Вебхук Rate Limit] Превышен лимит ${RATE_LIMIT_PER_MINUTE}/мин, добавлено в дайджест (${pendingDigestLeads.length})`);
 
@@ -290,15 +193,14 @@ async function dispatchLeadNotification(leadItem) {
 
         const sent = await sendWebhookWithRetry(digestPayload);
         if (!sent) {
-          failedQueue.push(digestPayload);
-          saveDataToDisk();
+          storage.enqueueFailed(digestPayload, 'Digest delivery failed');
         }
       }, 60000);
     }
   }
 }
 
-// 6. Проверка секрета для эндпоинта /recent
+// 6. Проверка секрета для защищённых эндпоинтов
 function verifySecret(provided) {
   if (!WEBHOOK_SECRET || WEBHOOK_SECRET.length < 16) return false;
   if (!provided || typeof provided !== 'string') return false;
@@ -310,14 +212,19 @@ function verifySecret(provided) {
 // 7. Состояние подключения Telegram
 let telegramConnected = false;
 let lastMessageAt = null;
-let disconnectedSince = null;
+let disconnectedSince = Date.now(); // 2.1 Явное состояние отключения на старте
 let client = null;
+let eventHandlerRef = null;
+let reconnectTimer = null;
+let reconnectDelayMs = 5000;
+const MAX_RECONNECT_DELAY_MS = 5 * 60 * 1000; // 5 минут
+let isShuttingDown = false;
 
 // 8. Встроенный Health-check HTTP сервер
 const server = http.createServer((req, res) => {
   const urlObj = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
 
-  // Защищённый эндпоинт /recent (только с секретом)
+  // Защищённый эндпоинт /recent
   if (urlObj.pathname === '/recent') {
     const authHeader = req.headers['x-webhook-secret'] || '';
     const queryKey = urlObj.searchParams.get('key') || '';
@@ -329,11 +236,53 @@ const server = http.createServer((req, res) => {
     }
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ stats, privacyStats, leads: recentLeads }, null, 2));
+    return res.end(
+      JSON.stringify(
+        {
+          stats,
+          privacyStats,
+          leads: storage.getRecentLeads(),
+        },
+        null,
+        2
+      )
+    );
+  }
+
+  // 2.2 Защищённый эндпоинт /metrics
+  if (urlObj.pathname === '/metrics') {
+    const authHeader = req.headers['x-webhook-secret'] || '';
+    const queryKey = urlObj.searchParams.get('key') || '';
+    const provided = typeof authHeader === 'string' && authHeader ? authHeader : queryKey;
+
+    if (!verifySecret(provided)) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ error: 'Unauthorized: invalid or missing secret' }));
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(
+      JSON.stringify(
+        {
+          service: 'LeadHunter Telegram Worker',
+          uptimeSeconds: Math.floor(process.uptime()),
+          telegramConnected,
+          disconnectedSince: disconnectedSince ? new Date(disconnectedSince).toISOString() : null,
+          lastMessageAt,
+          stats,
+          privacyStats,
+          failedQueueCount: storage.getFailedQueue().length,
+          recentLeadsCount: storage.getRecentLeads().length,
+          errorsCount,
+        },
+        null,
+        2
+      )
+    );
   }
 
   // Публичный health-check эндпоинт
-  // Если MTProto отвалился и не может переподключиться > 2 минут — отдаём 503
+  // Если не на связи > 2 минут — отдаём 503
   const isStalled = disconnectedSince && Date.now() - disconnectedSince > 2 * 60 * 1000;
   const statusCode = isStalled ? 503 : 200;
 
@@ -360,12 +309,10 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`[Health-Check] HTTP-сервер запущен на порту ${PORT}`);
 
-  // Запуск очистки очереди повторов каждые 2 минуты
   setInterval(() => {
     processFailedQueue().catch((err) => console.warn('[Очередь] Ошибка фоновой очистки:', err.message));
   }, 2 * 60 * 1000);
 
-  // Самопинг каждые 10 минут, если задан RENDER_EXTERNAL_URL
   const selfUrl = process.env.RENDER_EXTERNAL_URL;
   if (selfUrl) {
     setInterval(async () => {
@@ -379,202 +326,230 @@ server.listen(PORT, () => {
   }
 });
 
-// 9. Запуск Telegram MTProto клиента с обработкой разрывов и переподключений
+// 9. Запуск Telegram MTProto клиента с обработкой разрывов и экспоненциальным backoff
 if (!SESSION_STRING) {
   console.error('\n[ВНИМАНИЕ] SESSION_STRING не задан в .env файле!');
   console.error('Сначала выполните команду: npm run auth\n');
   process.exit(1);
 }
 
-async function startListener() {
-  console.log('[Telegram] Подключение к Telegram через MTProto...');
-  const stringSession = new StringSession(SESSION_STRING);
-  client = new TelegramClient(stringSession, API_ID, API_HASH, {
-    connectionRetries: 10,
-    useWSS: false,
-  });
+async function connectTelegram() {
+  if (isShuttingDown) return;
 
-  // Отслеживание состояния подключения
-  const updateConnectionState = () => {
+  // Очистка предыдущего клиента и слушателей во избежание дубликатов
+  if (client) {
     try {
-      const isConn = Boolean(client && client.connected);
-      if (isConn !== telegramConnected) {
-        telegramConnected = isConn;
-        if (isConn) {
-          console.log('[Telegram] Соединение MTProto активно.');
-          disconnectedSince = null;
-        } else {
-          console.warn('[Telegram] Соединение MTProto разорвано!');
-          if (!disconnectedSince) disconnectedSince = Date.now();
-        }
+      if (eventHandlerRef) {
+        client.removeEventHandler(eventHandlerRef);
+        eventHandlerRef = null;
       }
+      await client.disconnect();
     } catch {}
-  };
-
-  setInterval(updateConnectionState, 5000);
-
-  await client.connect();
-  telegramConnected = true;
-  disconnectedSince = null;
-
-  const me = await client.getMe();
-  console.log(`[Telegram] Успешно подключено под аккаунтом: ${me.firstName} (@${me.username || me.phone})`);
-  if (ALLOWED_CHATS) {
-    console.log(`[Telegram] Белый список чатов активен (${ALLOWED_CHATS.length} чатов)`);
+    client = null;
   }
-  console.log('[Telegram] Режим слушателя активен: отслеживаю каналы и группы 24/7...\n');
 
-  // Досылаем недоставленные при старте
-  processFailedQueue().catch(() => {});
+  console.log('[Telegram] Подключение к Telegram через MTProto...');
+  disconnectedSince = disconnectedSince || Date.now();
+  telegramConnected = false;
 
-  client.addEventHandler(async (event) => {
-    try {
-      const message = event.message;
-      if (!message || !message.text) return;
+  try {
+    const stringSession = new StringSession(SESSION_STRING);
+    client = new TelegramClient(stringSession, API_ID, API_HASH, {
+      connectionRetries: 3,
+      useWSS: false,
+    });
 
-      lastMessageAt = new Date().toISOString();
+    await client.connect();
 
-      // 1.2 Приватность: фильтруем исходящие, личные переписки и ботов
-      if (message.out) {
-        privacyStats.skippedOutgoing++;
-        return;
-      }
+    const me = await client.getMe();
+    console.log(`[Telegram] Успешно подключено под аккаунтом: ${me.firstName} (@${me.username || me.phone})`);
 
-      const isChannel = Boolean(event.isChannel || message.isChannel);
-      const isGroup = Boolean(event.isGroup || message.isGroup);
-      const isPrivate = Boolean(event.isPrivate || message.isPrivate);
+    telegramConnected = true;
+    disconnectedSince = null;
+    reconnectDelayMs = 5000; // Сброс задержки при успехе
 
-      if (isPrivate || (!isChannel && !isGroup)) {
-        privacyStats.skippedPrivate++;
-        return;
-      }
+    if (ALLOWED_CHATS) {
+      console.log(`[Telegram] Белый список чатов активен (${ALLOWED_CHATS.length} чатов)`);
+    }
+    console.log('[Telegram] Режим слушателя активен: отслеживаю каналы и группы 24/7...\n');
 
-      // Получаем информацию о чате для белого списка и ссылок
-      let chatTitle = 'Telegram';
-      let chatUsername = '';
-      let rawChatId = message.chatId || '';
+    processFailedQueue().catch(() => {});
 
+    eventHandlerRef = async (event) => {
       try {
-        const chat = await message.getChat();
-        if (chat) {
-          if ('bot' in chat && chat.bot) {
-            privacyStats.skippedBots++;
-            return;
-          }
-          chatTitle = chat.title || chat.username || 'Чат';
-          chatUsername = chat.username ? chat.username.toLowerCase().replace(/^@/, '') : '';
-          if (chat.id) rawChatId = chat.id;
-        }
-      } catch {}
+        const message = event.message;
+        if (!message || !message.text) return;
 
-      const cleanCId = cleanChatId(rawChatId);
+        lastMessageAt = new Date().toISOString();
 
-      // Фильтрация по белому списку (если задан)
-      if (ALLOWED_CHATS && ALLOWED_CHATS.length > 0) {
-        const isAllowed =
-          (chatUsername && ALLOWED_CHATS.includes(chatUsername)) ||
-          (cleanCId && ALLOWED_CHATS.includes(cleanCId));
-
-        if (!isAllowed) {
-          privacyStats.skippedNotAllowed++;
+        if (message.out) {
+          privacyStats.skippedOutgoing++;
           return;
         }
+
+        const isChannel = Boolean(event.isChannel || message.isChannel);
+        const isGroup = Boolean(event.isGroup || message.isGroup);
+        const isPrivate = Boolean(event.isPrivate || message.isPrivate);
+
+        if (isPrivate || (!isChannel && !isGroup)) {
+          privacyStats.skippedPrivate++;
+          return;
+        }
+
+        let chatTitle = 'Telegram';
+        let chatUsername = '';
+        let rawChatId = message.chatId || '';
+
+        try {
+          const chat = await message.getChat();
+          if (chat) {
+            if ('bot' in chat && chat.bot) {
+              privacyStats.skippedBots++;
+              return;
+            }
+            chatTitle = chat.title || chat.username || 'Чат';
+            chatUsername = chat.username ? chat.username.toLowerCase().replace(/^@/, '') : '';
+            if (chat.id) rawChatId = chat.id;
+          }
+        } catch {}
+
+        const cleanCId = cleanChatId(rawChatId);
+
+        if (ALLOWED_CHATS && ALLOWED_CHATS.length > 0) {
+          const isAllowed =
+            (chatUsername && ALLOWED_CHATS.includes(chatUsername)) ||
+            (cleanCId && ALLOWED_CHATS.includes(cleanCId));
+
+          if (!isAllowed) {
+            privacyStats.skippedNotAllowed++;
+            return;
+          }
+        }
+
+        stats.messagesProcessed++;
+
+        // 2.4 Фильтрация вакансий с регулярными выражениями и стоп-листом соискателей
+        const matchResult = matchesVacancy(message.text);
+        if (!matchResult.isMatch) {
+          return;
+        }
+
+        const leadId = buildLeadId(rawChatId, message.id);
+        const textHash = computeTextHash(message.text);
+
+        if (await storage.isDuplicate(leadId, textHash)) {
+          return;
+        }
+
+        stats.leadsFound++;
+        stats.lastLeadAt = new Date().toISOString();
+
+        const postUrl = buildPostUrl(
+          chatUsername ? { username: chatUsername } : { id: rawChatId },
+          message.id
+        );
+
+        const budget = parseBudget(message.text);
+
+        const postedAt = message.date
+          ? new Date(message.date * 1000).toISOString()
+          : new Date().toISOString();
+
+        const leadItem = {
+          id: leadId,
+          channel: chatUsername ? `@${chatUsername}` : chatTitle,
+          text: message.text,
+          url: postUrl,
+          matchedKeywords: matchResult.matched,
+          budget,
+          postedAt,
+        };
+
+        console.log(`\n🔥 [НАЙДЕНА ВАКАНСИЯ] в "${chatTitle}" (${matchResult.matched.join(', ')})`);
+        if (budget) {
+          console.log(`💰 Бюджет: ${budget.currency === 'NEGOTIABLE' ? 'Договорной' : `${budget.min || ''}-${budget.max || ''} ${budget.currency}`}`);
+        }
+        console.log(`Текст: ${message.text.slice(0, 140)}...`);
+        console.log(`Ссылка: ${postUrl}\n`);
+
+        storage.addRecentLead(leadItem);
+        await dispatchLeadNotification(leadItem);
+      } catch (err) {
+        errorsCount++;
+        console.error('[Ошибка обработки сообщения]:', err.message);
       }
+    };
 
-      stats.messagesProcessed++;
+    client.addEventHandler(eventHandlerRef, new NewMessage({}));
+  } catch (err) {
+    errorsCount++;
+    telegramConnected = false;
+    if (!disconnectedSince) disconnectedSince = Date.now();
 
-      // 2.3 Фильтрация вакансий с регулярными выражениями и стоп-листом соискателей
-      const matchResult = matchesVacancy(message.text);
-      if (!matchResult.isMatch) {
-        return;
-      }
+    const errStr = String(err.message || err);
+    console.error(`[Telegram] Ошибка подключения: ${errStr}`);
 
-      // 2.1 Идентификаторы, время и дедупликация
-      const leadId = buildLeadId(rawChatId, message.id);
-      const textHash = computeTextHash(message.text);
-
-      if (isDuplicate(leadId, textHash)) {
-        return;
-      }
-
-      stats.leadsFound++;
-      stats.lastLeadAt = new Date().toISOString();
-
-      // 2.2 Формирование ссылки на пост
-      const postUrl = buildPostUrl(
-        chatUsername ? { username: chatUsername } : { id: rawChatId },
-        message.id
-      );
-
-      // 2.3б Парсер бюджета
-      const budget = parseBudget(message.text);
-
-      const postedAt = message.date
-        ? new Date(message.date * 1000).toISOString()
-        : new Date().toISOString();
-
-      const leadItem = {
-        id: leadId,
-        channel: chatUsername ? `@${chatUsername}` : chatTitle,
-        text: message.text,
-        url: postUrl,
-        matchedKeywords: matchResult.matched,
-        budget,
-        postedAt,
-      };
-
-      console.log(`\n🔥 [НАЙДЕНА ВАКАНСИЯ] в "${chatTitle}" (${matchResult.matched.join(', ')})`);
-      if (budget) {
-        console.log(`💰 Бюджет: ${budget.currency === 'NEGOTIABLE' ? 'Договорной' : `${budget.min || ''}-${budget.max || ''} ${budget.currency}`}`);
-      }
-      console.log(`Текст: ${message.text.slice(0, 140)}...`);
-      console.log(`Ссылка: ${postUrl}\n`);
-
-      // 2.5 Сохранение в recentLeads и сброс на диск
-      recentLeads.unshift(leadItem);
-      if (recentLeads.length > 500) {
-        recentLeads.pop();
-      }
-      saveDataToDisk();
-
-      // 2.4 Отправка на вебхук с rate limit и очередью
-      await dispatchLeadNotification(leadItem);
-    } catch (err) {
-      console.error('[Ошибка обработки сообщения]:', err.message);
+    if (errStr.includes('AUTH_KEY_UNREGISTERED') || errStr.includes('SESSION_REVOKED')) {
+      console.error('[Telegram КРИТИЧЕСКАЯ ОШИБКА] Сессия Telegram аннулирована (AUTH_KEY_UNREGISTERED)!');
+      console.error('Необходимо заново пройти авторизацию: npm run auth');
+      await handleShutdown('AUTH_KEY_UNREGISTERED', 1);
+      return;
     }
-  }, new NewMessage({}));
+
+    const floodMatch = errStr.match(/FLOOD_WAIT_(\d+)/i);
+    let waitMs = reconnectDelayMs;
+    if (floodMatch) {
+      const waitSeconds = parseInt(floodMatch[1], 10);
+      console.warn(`[Telegram FLOOD_WAIT] Telegram запросил ожидание ${waitSeconds} секунд`);
+      waitMs = (waitSeconds + 2) * 1000;
+    } else {
+      reconnectDelayMs = Math.min(reconnectDelayMs * 2, MAX_RECONNECT_DELAY_MS);
+    }
+
+    console.log(`[Telegram Reconnect] Повторная попытка подключения через ${Math.round(waitMs / 1000)} сек...`);
+    reconnectTimer = setTimeout(connectTelegram, waitMs);
+  }
 }
 
-// 10. Глобальный перехват ошибок и Graceful Shutdown (2.6)
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('[unhandledRejection] Необработанное отклонение промиса:', reason);
-});
+connectTelegram();
 
-process.on('uncaughtException', (err) => {
-  console.error('[uncaughtException] Необработанное исключение:', err);
-});
+// 10. Глобальный перехват ошибок и Graceful Shutdown (2.1)
+async function handleShutdown(signal, exitCode = 0) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
 
-async function handleShutdown(signal) {
+  if (reconnectTimer) clearTimeout(reconnectTimer);
+
   console.log(`\n[Shutdown] Получен сигнал ${signal}. Завершение работы...`);
   try {
-    saveDataToDisk();
+    storage.flush();
     if (server) {
       server.close(() => console.log('[Shutdown] HTTP-сервер остановлен'));
     }
     if (client) {
-      await client.disconnect();
+      const disconnectPromise = client.disconnect();
+      const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 3000));
+      await Promise.race([disconnectPromise, timeoutPromise]);
       console.log('[Shutdown] Telegram MTProto отключен');
     }
   } catch (err) {
     console.error('[Shutdown] Ошибка при завершении:', err.message);
   } finally {
-    process.exit(0);
+    process.exit(exitCode);
   }
 }
 
-process.on('SIGTERM', () => handleShutdown('SIGTERM'));
-process.on('SIGINT', () => handleShutdown('SIGINT'));
-
-startListener().catch((err) => {
-  console.error('[Критическая ошибка Telegram Listener]:', err);
+process.on('unhandledRejection', (reason) => {
+  console.error('[unhandledRejection] Необработанное отклонение промиса:', reason);
+  errorsCount++;
+  handleShutdown('unhandledRejection', 1);
 });
+
+process.on('uncaughtException', (err) => {
+  console.error('[uncaughtException] Необработанное исключение:', err);
+  errorsCount++;
+  handleShutdown('uncaughtException', 1);
+});
+
+process.on('SIGTERM', () => handleShutdown('SIGTERM', 0));
+process.on('SIGINT', () => handleShutdown('SIGINT', 0));

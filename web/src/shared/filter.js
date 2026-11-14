@@ -2,7 +2,7 @@ import { KEYWORDS } from './keywords.js';
 
 /**
  * Escapes regex special characters
- * @param {string} str 
+ * @param {string} str
  * @returns {string}
  */
 export function escapeRegex(str) {
@@ -11,7 +11,7 @@ export function escapeRegex(str) {
 
 /**
  * Builds a regex with Unicode word boundaries for Cyrillic (with inflection endings) and Latin
- * @param {string} phrase 
+ * @param {string} phrase
  * @returns {RegExp}
  */
 export function buildWordBoundaryRegex(phrase) {
@@ -39,7 +39,7 @@ export function buildWordBoundaryRegex(phrase) {
 
 /**
  * Normalizes text: lowercase, collapses whitespace, strips URLs and handles
- * @param {string} text 
+ * @param {string} text
  * @returns {string}
  */
 export function normalizeText(text) {
@@ -55,7 +55,7 @@ export function normalizeText(text) {
 
 /**
  * Simple fast 32-bit FNV-1a hash for deterministic 24-hour deduplication
- * @param {string} str 
+ * @param {string} str
  * @returns {string}
  */
 export function computeTextHash(str) {
@@ -70,7 +70,7 @@ export function computeTextHash(str) {
 
 /**
  * Cleans Telegram chat ID by removing the '-100' supergroup prefix
- * @param {string | number} chatId 
+ * @param {string | number} chatId
  * @returns {string}
  */
 export function cleanChatId(chatId) {
@@ -81,8 +81,8 @@ export function cleanChatId(chatId) {
 
 /**
  * Builds a stable lead ID
- * @param {string | number} chatId 
- * @param {string | number} messageId 
+ * @param {string | number} chatId
+ * @param {string | number} messageId
  * @returns {string}
  */
 export function buildLeadId(chatId, messageId) {
@@ -93,14 +93,13 @@ export function buildLeadId(chatId, messageId) {
  * Builds standard Telegram post URL
  * Public: https://t.me/<username>/<id>
  * Private supergroup: https://t.me/c/<cleanChatId>/<id>
- * @param {{ username?: string | null; id?: string | number; chatId?: string | number } | string} chat 
- * @param {string | number} messageId 
+ * @param {{ username?: string | null; id?: string | number; chatId?: string | number } | string} chat
+ * @param {string | number} messageId
  * @returns {string}
  */
 export function buildPostUrl(chat, messageId) {
   const msgId = String(messageId || '').trim();
 
-  // If chat is a string (username or chatId)
   if (typeof chat === 'string') {
     const clean = chat.replace(/^@/, '').trim();
     if (/^\d+$/.test(clean) || clean.startsWith('-')) {
@@ -109,7 +108,6 @@ export function buildPostUrl(chat, messageId) {
     return `https://t.me/${clean}/${msgId}`;
   }
 
-  // If chat is an object
   if (chat && typeof chat === 'object') {
     const username = (chat.username || '').replace(/^@/, '').trim();
     if (username) {
@@ -140,19 +138,17 @@ const HIRING_PHRASE_REGEXES = KEYWORDS.hiringPhrases.map((phrase) => ({
   regex: buildWordBoundaryRegex(phrase),
 }));
 
-const SECONDARY_TERM_REGEXES = KEYWORDS.secondaryTerms.map((term) => ({
-  term,
-  regex: buildWordBoundaryRegex(term),
-}));
-
 const HIRING_SIGNAL_REGEXES = KEYWORDS.hiringSignals.map((signal) => ({
   signal,
   regex: buildWordBoundaryRegex(signal),
 }));
 
+const EXPLICIT_VACANCY_HEADER =
+  /(?:^|[\r\n])\s*(?:#вакансия|#работа|#job|#hiring|вакансия\s*[:!-]|ищем\s+в\s+команду|работа\s*[:!-])/i;
+
 /**
  * Filters and validates if text is a genuine video editor job lead
- * @param {string} text 
+ * @param {string} text
  * @returns {{ isMatch: boolean; matched: string[]; reason?: string }}
  */
 export function matchesVacancy(text) {
@@ -160,59 +156,72 @@ export function matchesVacancy(text) {
     return { isMatch: false, matched: [], reason: 'empty_text' };
   }
 
-  // 1. Check stop-phrases (resumes, freelancers, courses, spam)
+  // 1. Проверка стоп-фраз (соискатели, резюме, строительный монтаж, курсы, спам)
   for (const { phrase, regex } of STOP_REGEXES) {
     if (regex.test(text)) {
       return { isMatch: false, matched: [], reason: `stop_phrase: ${phrase}` };
     }
   }
 
-  const matched = [];
-
-  // 2. Check hiring phrases
+  // 2. Прямые составные фразы найма (например "ищем видеомонтажера", "looking for video editor")
   for (const { phrase, regex } of HIRING_PHRASE_REGEXES) {
     if (regex.test(text)) {
-      matched.push(phrase);
+      return { isMatch: true, matched: [phrase] };
     }
   }
 
-  // 3. Check core roles
+  // 3. Поиск первичных маркеров (роли видеомонтажа)
+  const foundRoles = [];
   for (const { role, regex } of CORE_ROLE_REGEXES) {
-    if (regex.test(text)) {
-      matched.push(role);
+    const match = regex.exec(text);
+    if (match) {
+      foundRoles.push({ role, index: match.index, length: match[0].length });
     }
   }
 
-  // If we matched any explicit hiring phrase OR core role
-  if (matched.length > 0) {
-    return { isMatch: true, matched: Array.from(new Set(matched)) };
+  // Первичный маркер обязателен! Без него это не вакансия монтажера.
+  if (foundRoles.length === 0) {
+    return { isMatch: false, matched: [], reason: 'no_core_role' };
   }
 
-  // 4. Check combination: secondary term (reels, premiere, etc.) + hiring signal
-  let matchedSecondary = null;
-  for (const { term, regex } of SECONDARY_TERM_REGEXES) {
-    if (regex.test(text)) {
-      matchedSecondary = term;
-      break;
+  // 4. Проверка явного заголовка вакансии в начале поста или строки
+  if (EXPLICIT_VACANCY_HEADER.test(text)) {
+    return {
+      isMatch: true,
+      matched: foundRoles.map((r) => r.role),
+    };
+  }
+
+  // 5. Проверка близости вторичного маркера найма (в пределах 40 символов от первичного)
+  const foundSignals = [];
+  for (const { signal, regex } of HIRING_SIGNAL_REGEXES) {
+    let match;
+    const globalRegex = new RegExp(regex.source, 'giu');
+    while ((match = globalRegex.exec(text)) !== null) {
+      foundSignals.push({ signal, index: match.index, length: match[0].length });
     }
   }
 
-  if (matchedSecondary) {
-    let matchedSignal = null;
-    for (const { signal, regex } of HIRING_SIGNAL_REGEXES) {
-      if (regex.test(text)) {
-        matchedSignal = signal;
-        break;
+  for (const r of foundRoles) {
+    for (const s of foundSignals) {
+      // Расстояние между границами слов
+      const distance =
+        s.index > r.index
+          ? s.index - (r.index + r.length)
+          : r.index - (s.index + s.length);
+
+      if (distance <= 40) {
+        return {
+          isMatch: true,
+          matched: [`${s.signal} + ${r.role}`],
+        };
       }
     }
-
-    if (matchedSignal) {
-      return {
-        isMatch: true,
-        matched: [`${matchedSecondary} + ${matchedSignal}`],
-      };
-    }
   }
 
-  return { isMatch: false, matched: [], reason: 'no_keywords' };
+  return {
+    isMatch: false,
+    matched: [],
+    reason: 'no_hiring_intent_within_proximity',
+  };
 }

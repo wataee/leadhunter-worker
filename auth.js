@@ -69,24 +69,30 @@ async function main() {
   console.log('\nУспешный вход в аккаунт Telegram!');
   const savedSession = client.session.save();
 
-  // Сохраняем в .env
+  // Сохраняем в .env с сохранением комментариев и существующих переменных
   const envPath = path.join(__dirname, '.env');
-  let existingEnv = '';
+  let existingContent = '';
   if (fs.existsSync(envPath)) {
-    existingEnv = fs.readFileSync(envPath, 'utf-8');
+    existingContent = fs.readFileSync(envPath, 'utf-8');
   }
 
-  const envConfig = {
+  const keysToUpdate = {
     API_ID: String(apiId),
     API_HASH: apiHash,
     SESSION_STRING: savedSession,
-    WEBHOOK_URL: process.env.WEBHOOK_URL || 'https://fleurleads-work.netlify.app/api/tg-notify',
-    WEBHOOK_SECRET: process.env.WEBHOOK_SECRET || '',
-    PORT: process.env.PORT || '8080',
   };
 
-  const newLines = Object.entries(envConfig).map(([k, v]) => `${k}=${v}`);
-  fs.writeFileSync(envPath, newLines.join('\n') + '\n', 'utf-8');
+  let updatedContent = existingContent;
+  for (const [key, value] of Object.entries(keysToUpdate)) {
+    const keyRegex = new RegExp(`^(\\s*${key}\\s*=).*$`, 'm');
+    if (keyRegex.test(updatedContent)) {
+      updatedContent = updatedContent.replace(keyRegex, `$1${value}`);
+    } else {
+      updatedContent = updatedContent.trimEnd() + `\n${key}=${value}\n`;
+    }
+  }
+
+  fs.writeFileSync(envPath, updatedContent.trim() + '\n', 'utf-8');
 
   console.log('Сессия успешно сохранена в файл .env!');
   console.log('\nВаша строка сессии (SESSION_STRING):\n');

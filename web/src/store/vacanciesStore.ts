@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { Vacancy, SavedSearchPreset } from '../types';
 import KEYWORDS from '../shared/keywords.js';
 import { parseBudget, BudgetResult } from '../shared/budget.js';
+import { matchesVacancy } from '../shared/filter.js';
 
 export interface TelegramSource {
   username: string;
@@ -100,7 +101,10 @@ export function computeVacancyRelevance(
     };
   }
 
-  let matchedKeywords = includeKeywords.filter((kw) => lower.includes(kw.toLowerCase()));
+  const matchCheck = matchesVacancy(text);
+  let matchedKeywords = matchCheck.isMatch
+    ? matchCheck.matched
+    : includeKeywords.filter((kw) => lower.includes(kw.toLowerCase()));
 
   if (matchedKeywords.length === 0) {
     if (!isWorkerLead) {
@@ -114,7 +118,7 @@ export function computeVacancyRelevance(
         budget: null,
       };
     }
-    matchedKeywords = ['монтаж'];
+    matchedKeywords = ['видеомонтаж'];
   }
 
   // Format detection

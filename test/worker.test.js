@@ -65,11 +65,13 @@ test('2.3b parseBudget parses various currency and range formats', () => {
     min: 5000,
     max: 10000,
     currency: 'RUB',
+    unit: 'project',
   });
   assert.deepEqual(parseBudget('Ставка 50-80к в месяц'), {
     min: 50000,
     max: 80000,
     currency: 'RUB',
+    unit: 'per_month',
   });
 
   // Range with "от ... до ..."
@@ -84,6 +86,7 @@ test('2.3b parseBudget parses various currency and range formats', () => {
     min: 5000,
     max: null,
     currency: 'RUB',
+    unit: 'per_video',
   });
 
   // "до 100 000"
@@ -98,11 +101,13 @@ test('2.3b parseBudget parses various currency and range formats', () => {
     min: 1500,
     max: 2000,
     currency: 'USD',
+    unit: 'per_month',
   });
   assert.deepEqual(parseBudget('Rate: 500 usd per video'), {
     min: 500,
     max: 500,
     currency: 'USD',
+    unit: 'per_video',
   });
 
   // EUR
@@ -110,6 +115,7 @@ test('2.3b parseBudget parses various currency and range formats', () => {
     min: 800,
     max: 800,
     currency: 'EUR',
+    unit: 'per_video',
   });
 
   // KZT
@@ -124,6 +130,7 @@ test('2.3b parseBudget parses various currency and range formats', () => {
     min: 5000,
     max: 5000,
     currency: 'RUB',
+    unit: 'per_video',
   });
 
   // No budget mentioned
