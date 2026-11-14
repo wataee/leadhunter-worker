@@ -2,12 +2,15 @@ import {
   jsonResponse,
   errorResponse,
   handleOptions,
+  checkRateLimit,
+  validatePayloadSize,
   fetchWithTimeout,
   type NetlifyResponse,
 } from './_shared/response';
 
 interface HandlerEvent {
   httpMethod: string;
+  headers: Record<string, string | undefined>;
   body: string | null;
 }
 
@@ -214,13 +217,16 @@ async function callGemini(
   let lastStatus = 0;
 
   for (const mod of modelsToTry) {
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${mod}:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${mod}:generateContent`;
     try {
       const res = await fetchWithTimeout(
         geminiUrl,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
           body: JSON.stringify({
             system_instruction: {
               parts: [{ text: SYSTEM_PROMPT }],
@@ -334,12 +340,32 @@ async function callOpenRouter(
 }
 
 export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
+  const origin = event.headers?.origin || event.headers?.Origin;
+
   if (event.httpMethod === 'OPTIONS') {
-    return handleOptions();
+    return handleOptions(origin);
   }
 
   if (event.httpMethod !== 'POST') {
-    return errorResponse(405, 'Метод не поддерживается. Используйте POST.');
+    return errorResponse(405, 'Метод не поддерживается. Используйте POST.', null, origin);
+  }
+
+  // Rate Limiting по IP
+  const clientIp =
+    event.headers?.['x-nf-client-connection-ip'] ||
+    event.headers?.['client-ip'] ||
+    event.headers?.['x-forwarded-for'] ||
+    'anonymous';
+
+  const rateCheck = checkRateLimit(clientIp, 30, 60_000);
+  if (!rateCheck.allowed) {
+    return errorResponse(429, 'Слишком много запросов к AI. Пожалуйста, подождите минуту.', null, origin);
+  }
+
+  // Проверка размера тела запроса (макс 32 КБ)
+  const sizeValidation = validatePayloadSize(event.body, 32 * 1024);
+  if (!sizeValidation.valid) {
+    return errorResponse(400, sizeValidation.error || 'Слишком большой запрос', null, origin);
   }
 
   const geminiKey = process.env.GEMINI_API_KEY?.trim();
@@ -348,19 +374,19 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   // If no keys configured, return { enabled: false } without error!
   if (!geminiKey && !groqKey && !openRouterKey) {
-    return jsonResponse(200, { enabled: false });
+    return jsonResponse(200, { enabled: false }, origin);
   }
 
   let body: ScoreRequestBody;
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
-    return errorResponse(400, 'Некорректный JSON в теле запроса.');
+    return errorResponse(400, 'Некорректный JSON в теле запроса.', null, origin);
   }
 
   const leads = Array.isArray(body.leads) ? body.leads.slice(0, 5) : [];
   if (leads.length === 0) {
-    return errorResponse(400, 'Список leads пуст или не передан.');
+    return errorResponse(400, 'Список leads пуст или не передан.', null, origin);
   }
 
   const userPrompt = buildUserPrompt(leads, body.examples);
@@ -413,9 +439,9 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   if (!rawResponseText) {
     return errorResponse(
       502,
-      `Все настроенные AI-провайдеры вернули ошибку или исчерпали лимит. Последняя ошибка: ${
-        lastError instanceof Error ? lastError.message : String(lastError)
-      }`
+      'Все настроенные AI-провайдеры вернули ошибку или исчерпали лимит.',
+      null,
+      origin
     );
   }
 
@@ -445,9 +471,13 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     }
   }
 
-  return jsonResponse(200, {
-    enabled: true,
-    provider: successfulProvider,
-    scores: results,
-  });
+  return jsonResponse(
+    200,
+    {
+      enabled: true,
+      provider: successfulProvider,
+      scores: results,
+    },
+    origin
+  );
 }

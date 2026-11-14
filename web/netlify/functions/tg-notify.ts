@@ -1,13 +1,17 @@
+import crypto from 'crypto';
 import {
   jsonResponse,
   errorResponse,
   handleOptions,
+  checkRateLimit,
+  validatePayloadSize,
   fetchWithTimeout,
   type NetlifyResponse,
 } from './_shared/response';
 
 interface HandlerEvent {
   httpMethod: string;
+  headers: Record<string, string | undefined>;
   body: string | null;
 }
 
@@ -18,13 +22,62 @@ interface NotifyBody {
   channel?: string;
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
+  const origin = event.headers.origin || event.headers.Origin;
+
   if (event.httpMethod === 'OPTIONS') {
-    return handleOptions();
+    return handleOptions(origin);
   }
 
   if (event.httpMethod !== 'POST') {
-    return errorResponse(405, 'Метод не поддерживается. Используйте POST.');
+    return errorResponse(405, 'Метод не поддерживается. Используйте POST.', null, origin);
+  }
+
+  // Rate Limiting по IP
+  const clientIp =
+    event.headers['x-nf-client-connection-ip'] ||
+    event.headers['client-ip'] ||
+    event.headers['x-forwarded-for'] ||
+    'anonymous';
+
+  const rateCheck = checkRateLimit(clientIp, 60, 60_000);
+  if (!rateCheck.allowed) {
+    return errorResponse(429, 'Слишком много запросов. Пожалуйста, подождите минуту.', null, origin);
+  }
+
+  // Проверка размера тела запроса (макс 32 КБ)
+  const sizeValidation = validatePayloadSize(event.body, 32 * 1024);
+  if (!sizeValidation.valid) {
+    return errorResponse(400, sizeValidation.error || 'Слишком большой запрос', null, origin);
+  }
+
+  // 1.3 Авторизация воркер → сайт (WEBHOOK_SECRET)
+  const expectedSecret = process.env.WEBHOOK_SECRET?.trim();
+  if (expectedSecret) {
+    const incomingSecret = (
+      event.headers['x-webhook-secret'] ||
+      event.headers['X-Webhook-Secret'] ||
+      ''
+    ).trim();
+
+    if (!incomingSecret) {
+      return errorResponse(401, 'Доступ запрещён: отсутствует заголовок X-Webhook-Secret', null, origin);
+    }
+
+    const inBuf = Buffer.from(incomingSecret);
+    const expBuf = Buffer.from(expectedSecret);
+
+    if (inBuf.length !== expBuf.length || !crypto.timingSafeEqual(inBuf, expBuf)) {
+      return errorResponse(401, 'Доступ запрещён: неверный X-Webhook-Secret', null, origin);
+    }
   }
 
   const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
@@ -33,7 +86,9 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   if (!token || !chatId) {
     return errorResponse(
       400,
-      'Переменные TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID не настроены в Netlify.'
+      'Переменные TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID не настроены в Netlify.',
+      null,
+      origin
     );
   }
 
@@ -41,21 +96,37 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
-    return errorResponse(400, 'Некорректный JSON');
+    return errorResponse(400, 'Некорректный JSON', null, origin);
   }
 
-  if (!body.text || !body.url) {
-    return errorResponse(400, 'Отсутствуют обязательные поля: text или url');
+  if (!body.text || typeof body.text !== 'string' || !body.url || typeof body.url !== 'string') {
+    return errorResponse(400, 'Отсутствуют обязательные текстовые поля: text или url', null, origin);
   }
 
-  const cleanSnippet = body.text.slice(0, 400).trim();
+  // 1.5 Валидация URL: строго ссылки на посты в Telegram
+  const cleanUrl = body.url.trim();
+  const isTgUrl = /^https:\/\/t\.me\/(?:[a-zA-Z0-9_+/=-]+)$/.test(cleanUrl);
+  if (!isTgUrl) {
+    return errorResponse(
+      400,
+      'Недопустимый URL. Разрешены только ссылки вида https://t.me/...',
+      null,
+      origin
+    );
+  }
+
+  // 1.5 Экранирование для HTML parse_mode
+  const cleanSnippet = escapeHtml(body.text.slice(0, 500).trim());
+  const safeChannel = body.channel && typeof body.channel === 'string' ? escapeHtml(body.channel.trim()) : '';
+  const safeTitle = body.title && typeof body.title === 'string' ? escapeHtml(body.title.trim()) : 'Новая вакансия';
+
   const message = [
-    `🎯 <b>Новая горячая вакансия!</b> ${body.channel ? `(@${body.channel})` : ''}`,
+    `🎯 <b>${safeTitle}</b> ${safeChannel ? `(${safeChannel})` : ''}`,
     '',
     cleanSnippet,
-    cleanSnippet.length >= 400 ? '...' : '',
+    body.text.length > 500 ? '...' : '',
     '',
-    `🔗 <a href="${body.url}">Открыть пост в Telegram</a>`,
+    `🔗 <a href="${cleanUrl}">Открыть пост в Telegram</a>`,
   ].join('\n');
 
   try {
@@ -78,12 +149,12 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
     const data = await res.json();
     if (!res.ok) {
-      return errorResponse(res.status, data?.description || 'Ошибка отправки в Telegram');
+      return errorResponse(res.status, 'Ошибка отправки сообщения в Telegram Bot API', null, origin);
     }
 
-    return jsonResponse(200, { success: true });
+    return jsonResponse(200, { success: true }, origin);
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Неизвестная ошибка';
-    return errorResponse(500, `Ошибка соединения с Telegram Bot API: ${msg}`);
+    const msg = err instanceof Error ? err.message : 'Ошибка сети';
+    return errorResponse(500, `Ошибка отправки в Telegram: ${msg}`, null, origin);
   }
 }

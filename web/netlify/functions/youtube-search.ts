@@ -2,6 +2,8 @@ import {
   jsonResponse,
   errorResponse,
   handleOptions,
+  checkRateLimit,
+  validatePayloadSize,
   fetchWithTimeout,
   type NetlifyResponse,
 } from './_shared/response';
@@ -25,6 +27,7 @@ interface SearchRequestBody {
 
 interface HandlerEvent {
   httpMethod: string;
+  headers: Record<string, string | undefined>;
   body: string | null;
 }
 
@@ -73,19 +76,41 @@ interface YouTubePlaylistItem {
 }
 
 export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
+  const origin = event.headers?.origin || event.headers?.Origin;
+
   if (event.httpMethod === 'OPTIONS') {
-    return handleOptions();
+    return handleOptions(origin);
   }
 
   if (event.httpMethod !== 'POST') {
-    return errorResponse(405, 'Метод не поддерживается. Используйте POST.');
+    return errorResponse(405, 'Метод не поддерживается. Используйте POST.', null, origin);
+  }
+
+  // Rate Limiting по IP
+  const clientIp =
+    event.headers?.['x-nf-client-connection-ip'] ||
+    event.headers?.['client-ip'] ||
+    event.headers?.['x-forwarded-for'] ||
+    'anonymous';
+
+  const rateCheck = checkRateLimit(clientIp, 30, 60_000);
+  if (!rateCheck.allowed) {
+    return errorResponse(429, 'Слишком много поисковых запросов. Пожалуйста, подождите минуту.', null, origin);
+  }
+
+  // Проверка размера тела запроса (макс 32 КБ)
+  const sizeValidation = validatePayloadSize(event.body, 32 * 1024);
+  if (!sizeValidation.valid) {
+    return errorResponse(400, sizeValidation.error || 'Слишком большой запрос', null, origin);
   }
 
   const apiKey = process.env.YOUTUBE_API_KEY?.trim();
   if (!apiKey) {
     return errorResponse(
       400,
-      'Ключ YOUTUBE_API_KEY не настроен в переменных окружения Netlify. Добавьте его в Site configuration -> Environment variables или воспользуйтесь демо-данными.'
+      'Ключ YOUTUBE_API_KEY не настроен в переменных окружения Netlify.',
+      null,
+      origin
     );
   }
 
@@ -93,12 +118,16 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
-    return errorResponse(400, 'Некорректный JSON в теле запроса.');
+    return errorResponse(400, 'Некорректный JSON в теле запроса.', null, origin);
   }
 
   const query = (body.query || '').trim();
   if (!query) {
-    return errorResponse(400, 'Укажите поисковый запрос (нишу).');
+    return errorResponse(400, 'Укажите поисковый запрос (нишу).', null, origin);
+  }
+
+  if (query.length > 200) {
+    return errorResponse(400, 'Поисковый запрос слишком длинный (максимум 200 символов).', null, origin);
   }
 
   const minSubs = typeof body.minSubs === 'number' ? body.minSubs : 5000;
@@ -322,13 +351,17 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     // Sort by score descending by default
     results.sort((a, b) => b.score - a.score);
 
-    return jsonResponse(200, {
-      channels: results,
-      quotaUsed: estimatedQuotaUsed,
-      totalFound: results.length,
-    });
+    return jsonResponse(
+      200,
+      {
+        channels: results,
+        quotaUsed: estimatedQuotaUsed,
+        totalFound: results.length,
+      },
+      origin
+    );
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Неизвестная ошибка при поиске на YouTube';
-    return errorResponse(500, `Внутренняя ошибка сервиса: ${msg}`, { quotaUsed: estimatedQuotaUsed });
+    return errorResponse(500, `Внутренняя ошибка сервиса: ${msg}`, { quotaUsed: estimatedQuotaUsed }, origin);
   }
 }

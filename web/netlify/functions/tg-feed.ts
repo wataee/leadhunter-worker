@@ -3,12 +3,15 @@ import {
   jsonResponse,
   errorResponse,
   handleOptions,
+  checkRateLimit,
+  validatePayloadSize,
   fetchWithTimeout,
   type NetlifyResponse,
 } from './_shared/response';
 
 interface HandlerEvent {
   httpMethod: string;
+  headers: Record<string, string | undefined>;
   body: string | null;
   queryStringParameters?: Record<string, string>;
 }
@@ -148,8 +151,28 @@ async function runInPool<T, R>(items: T[], limit: number, fn: (item: T) => Promi
 }
 
 export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
+  const origin = event.headers?.origin || event.headers?.Origin;
+
   if (event.httpMethod === 'OPTIONS') {
-    return handleOptions();
+    return handleOptions(origin);
+  }
+
+  // Rate Limiting по IP
+  const clientIp =
+    event.headers?.['x-nf-client-connection-ip'] ||
+    event.headers?.['client-ip'] ||
+    event.headers?.['x-forwarded-for'] ||
+    'anonymous';
+
+  const rateCheck = checkRateLimit(clientIp, 60, 60_000);
+  if (!rateCheck.allowed) {
+    return errorResponse(429, 'Слишком много запросов. Пожалуйста, подождите минуту.', null, origin);
+  }
+
+  // Проверка размера тела запроса (макс 32 КБ)
+  const sizeValidation = validatePayloadSize(event.body, 32 * 1024);
+  if (!sizeValidation.valid) {
+    return errorResponse(400, sizeValidation.error || 'Слишком большой запрос', null, origin);
   }
 
   let channels: string[] = [];
@@ -163,7 +186,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
       }
       before = body.before;
     } catch {
-      return errorResponse(400, 'Некорректный JSON');
+      return errorResponse(400, 'Некорректный JSON', null, origin);
     }
   } else if (event.httpMethod === 'GET') {
     const chParam = event.queryStringParameters?.channels;
@@ -172,7 +195,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     }
     before = event.queryStringParameters?.before;
   } else {
-    return errorResponse(405, 'Метод не поддерживается');
+    return errorResponse(405, 'Метод не поддерживается', null, origin);
   }
 
   const allMessages: ParsedMessage[] = [];
@@ -180,26 +203,37 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   const results: ChannelFeedResult[] = [];
 
   // 1. Fetch live leads captured by 24/7 Telegram Worker (MTProto on Render)
-  const workerUrl = process.env.TG_WORKER_URL || 'https://leadhunter-worker-uokh.onrender.com';
-  try {
-    const workerRes = await fetchWithTimeout(`${workerUrl}/recent`, {}, 5000);
-    if (workerRes.ok) {
-      const data = await workerRes.json();
-      if (Array.isArray(data.leads) && data.leads.length > 0) {
-        for (const l of data.leads) {
-          allMessages.push({
-            id: l.id || `worker_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-            channel: l.channel || 'Telegram Chat',
-            text: l.text || '',
-            url: l.url || '',
-            postedAt: l.postedAt || new Date().toISOString(),
-            views: 'MTProto 24/7',
-          });
+  const workerUrl = process.env.TG_WORKER_URL;
+  let workerActive = false;
+
+  if (workerUrl) {
+    try {
+      const secret = process.env.WEBHOOK_SECRET?.trim();
+      const headers: Record<string, string> = {};
+      if (secret) {
+        headers['X-Webhook-Secret'] = secret;
+      }
+
+      const workerRes = await fetchWithTimeout(`${workerUrl.replace(/\/$/, '')}/recent`, { headers }, 5000);
+      if (workerRes.ok) {
+        workerActive = true;
+        const data = await workerRes.json();
+        if (Array.isArray(data.leads) && data.leads.length > 0) {
+          for (const l of data.leads) {
+            allMessages.push({
+              id: l.id || `worker_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+              channel: l.channel || 'Telegram Chat',
+              text: l.text || '',
+              url: l.url || '',
+              postedAt: l.postedAt || new Date().toISOString(),
+              views: 'MTProto 24/7',
+            });
+          }
         }
       }
+    } catch {
+      // Worker offline or unreachable
     }
-  } catch {
-    // Worker offline or unreachable, continue with direct web fetch
   }
 
   // 2. Optional: Direct web fetch for requested public channels
@@ -232,11 +266,15 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   // Sort combined messages by date descending
   uniqueMessages.sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime());
 
-  return jsonResponse(200, {
-    results,
-    allMessages: uniqueMessages,
-    errors,
-    totalMessages: uniqueMessages.length,
-    workerActive: true,
-  });
+  return jsonResponse(
+    200,
+    {
+      results,
+      allMessages: uniqueMessages,
+      errors,
+      totalMessages: uniqueMessages.length,
+      workerActive,
+    },
+    origin
+  );
 }
