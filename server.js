@@ -27,6 +27,12 @@ const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET?.trim() || '';
 const ALLOWED_CHATS_RAW = process.env.ALLOWED_CHATS?.trim() || '';
 const RATE_LIMIT_PER_MINUTE = parseInt(process.env.RATE_LIMIT_PER_MINUTE || '5', 10);
 
+if (!WEBHOOK_SECRET || WEBHOOK_SECRET.length < 16) {
+  console.error('[КРИТИЧЕСКАЯ ОШИБКА] Переменная WEBHOOK_SECRET обязательна и должна содержать минимум 16 символов!');
+  console.error('Сгенерируйте надёжный секрет (например: openssl rand -hex 32) и укажите в .env');
+  process.exit(1);
+}
+
 if (!rawApiId || !API_HASH) {
   console.error('[КРИТИЧЕСКАЯ ОШИБКА] Переменные API_ID и API_HASH обязательны!');
   console.error('Задайте их в .env файле или в панели управления Render.');
@@ -294,11 +300,10 @@ async function dispatchLeadNotification(leadItem) {
 
 // 6. Проверка секрета для эндпоинта /recent
 function verifySecret(provided) {
-  if (!WEBHOOK_SECRET) return true;
+  if (!WEBHOOK_SECRET || WEBHOOK_SECRET.length < 16) return false;
   if (!provided || typeof provided !== 'string') return false;
-  const pBuf = Buffer.from(provided);
-  const sBuf = Buffer.from(WEBHOOK_SECRET);
-  if (pBuf.length !== sBuf.length) return false;
+  const pBuf = crypto.createHash('sha256').update(provided).digest();
+  const sBuf = crypto.createHash('sha256').update(WEBHOOK_SECRET).digest();
   return crypto.timingSafeEqual(pBuf, sBuf);
 }
 

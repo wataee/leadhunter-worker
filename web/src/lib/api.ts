@@ -148,11 +148,51 @@ async function handleApiResponse<T>(res: Response): Promise<T> {
   }
 
   if (!res.ok) {
+    if (res.status === 401 && typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
     const errorMsg = (data && typeof data.error === 'string') ? data.error : `Ошибка запроса (HTTP ${res.status})`;
     throw new Error(errorMsg);
   }
 
   return data as unknown as T;
+}
+
+export async function loginWithPassword(password: string): Promise<{ ok: boolean; devMode?: boolean }> {
+  const res = await fetch('/api/auth-login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  });
+  return handleApiResponse<{ ok: boolean; devMode?: boolean }>(res);
+}
+
+export async function logout(): Promise<void> {
+  try {
+    await fetch('/api/auth-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'logout' }),
+    });
+  } catch {
+    // Ignore network error on logout
+  }
+  if (typeof window !== 'undefined') {
+    window.location.href = '/login';
+  }
+}
+
+export async function checkAuthStatus(): Promise<{ authenticated: boolean }> {
+  try {
+    const res = await fetch('/api/auth-login');
+    if (res.ok) {
+      const data = await res.json();
+      return { authenticated: Boolean(data?.authenticated ?? true) };
+    }
+    return { authenticated: false };
+  } catch {
+    return { authenticated: false };
+  }
 }
 
 export async function checkApiHealth(): Promise<HealthStatus> {
@@ -185,20 +225,6 @@ export async function fetchTelegramFeed(channels: string[], before?: string): Pr
   });
 
   return handleApiResponse<TgFeedResponse>(res);
-}
-
-export async function sendTelegramNotification(payload: {
-  text: string;
-  url: string;
-  channel?: string;
-}): Promise<{ success: boolean }> {
-  const res = await fetch('/api/tg-notify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-
-  return handleApiResponse<{ success: boolean }>(res);
 }
 
 export async function rewritePitchWithAi(payload: {

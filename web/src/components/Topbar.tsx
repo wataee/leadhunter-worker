@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Menu, Plus, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Menu, Plus, CheckCircle2, AlertCircle, LogOut } from 'lucide-react';
 import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
-import { checkApiHealth, HealthStatus } from '../lib/api';
+import { checkApiHealth, HealthStatus, logout } from '../lib/api';
 
 interface TopbarProps {
   onToggleMobile: () => void;
@@ -104,6 +104,16 @@ export const Topbar: React.FC<TopbarProps> = ({ onToggleMobile }) => {
           >
             <Plus size={14} strokeWidth={2.5} />
             <span>+1 отправлено</span>
+          </button>
+
+          <button
+            onClick={() => logout()}
+            title="Выйти из системы"
+            aria-label="Выйти из системы"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-text-muted hover:text-text hover:bg-surface-2 rounded-control border border-border text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <LogOut size={14} />
+            <span className="hidden sm:inline">Выйти</span>
           </button>
         </div>
       </div>

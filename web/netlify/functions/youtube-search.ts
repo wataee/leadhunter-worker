@@ -7,6 +7,7 @@ import {
   fetchWithTimeout,
   type NetlifyResponse,
 } from './_shared/response';
+import { requireAuth } from './_shared/auth';
 import {
   detectProduct,
   extractContacts,
@@ -80,6 +81,12 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   if (event.httpMethod === 'OPTIONS') {
     return handleOptions(origin);
+  }
+
+  // 1.3 Проверка авторизации
+  const auth = requireAuth(event);
+  if (!auth.authenticated) {
+    return errorResponse(auth.statusCode || 401, auth.error || 'Требуется авторизация', null, origin);
   }
 
   if (event.httpMethod !== 'POST') {

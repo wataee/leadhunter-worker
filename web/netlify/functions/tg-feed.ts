@@ -8,6 +8,7 @@ import {
   fetchWithTimeout,
   type NetlifyResponse,
 } from './_shared/response';
+import { requireAuth } from './_shared/auth';
 
 interface HandlerEvent {
   httpMethod: string;
@@ -206,6 +207,12 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return handleOptions(origin);
   }
 
+  // 1.3 Проверка авторизации
+  const auth = requireAuth(event);
+  if (!auth.authenticated) {
+    return errorResponse(auth.statusCode || 401, auth.error || 'Требуется авторизация', null, origin);
+  }
+
   // Rate Limiting по IP
   const clientIp =
     event.headers?.['x-nf-client-connection-ip'] ||
@@ -249,6 +256,10 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   const workerUrl = process.env.TG_WORKER_URL?.trim();
   const workerSecret = process.env.WEBHOOK_SECRET?.trim();
+
+  if (workerUrl && (!workerSecret || workerSecret.length < 16)) {
+    return errorResponse(503, 'WEBHOOK_SECRET не настроен на сервере для связи с воркером', null, origin);
+  }
 
   // Параллельный опрос воркера и скрейпинга через Promise.allSettled с общим бюджетом ≤ 8с
   const workerPromise = workerUrl

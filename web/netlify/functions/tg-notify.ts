@@ -61,23 +61,25 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   // 1.3 Авторизация воркер → сайт (WEBHOOK_SECRET)
   const expectedSecret = process.env.WEBHOOK_SECRET?.trim();
-  if (expectedSecret) {
-    const incomingSecret = (
-      event.headers['x-webhook-secret'] ||
-      event.headers['X-Webhook-Secret'] ||
-      ''
-    ).trim();
+  if (!expectedSecret || expectedSecret.length < 16) {
+    return errorResponse(503, 'WEBHOOK_SECRET не настроен на сервере', null, origin);
+  }
 
-    if (!incomingSecret) {
-      return errorResponse(401, 'Доступ запрещён: отсутствует заголовок X-Webhook-Secret', null, origin);
-    }
+  const incomingSecret = (
+    event.headers['x-webhook-secret'] ||
+    event.headers['X-Webhook-Secret'] ||
+    ''
+  ).trim();
 
-    const inBuf = Buffer.from(incomingSecret);
-    const expBuf = Buffer.from(expectedSecret);
+  if (!incomingSecret) {
+    return errorResponse(401, 'Доступ запрещён: отсутствует заголовок X-Webhook-Secret', null, origin);
+  }
 
-    if (inBuf.length !== expBuf.length || !crypto.timingSafeEqual(inBuf, expBuf)) {
-      return errorResponse(401, 'Доступ запрещён: неверный X-Webhook-Secret', null, origin);
-    }
+  const inBuf = crypto.createHash('sha256').update(incomingSecret).digest();
+  const expBuf = crypto.createHash('sha256').update(expectedSecret).digest();
+
+  if (!crypto.timingSafeEqual(inBuf, expBuf)) {
+    return errorResponse(401, 'Доступ запрещён: неверный X-Webhook-Secret', null, origin);
   }
 
   const token = process.env.TELEGRAM_BOT_TOKEN?.trim();

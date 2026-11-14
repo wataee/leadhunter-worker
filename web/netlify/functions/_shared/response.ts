@@ -5,28 +5,42 @@ export interface NetlifyResponse {
 }
 
 export function getCorsHeaders(incomingOrigin?: string): Record<string, string> {
-  const allowed = process.env.ALLOWED_ORIGIN?.trim() || 'https://fleurleads-work.netlify.app';
-  let origin = allowed;
+  const allowedRaw = process.env.ALLOWED_ORIGIN?.trim() || 'https://fleurleads-work.netlify.app';
+  const allowedList = allowedRaw
+    .split(',')
+    .map((o) => o.trim().replace(/\/$/, ''))
+    .filter(Boolean);
 
+  const isDev = Boolean(
+    process.env.NETLIFY_DEV || process.env.NODE_ENV !== 'production'
+  );
+
+  let matchedOrigin: string | null = null;
   if (incomingOrigin) {
-    const trimmed = incomingOrigin.trim();
-    if (
-      trimmed === allowed ||
-      trimmed.endsWith('.netlify.app') ||
-      trimmed.startsWith('http://localhost:') ||
-      trimmed.startsWith('http://127.0.0.1:')
+    const trimmed = incomingOrigin.trim().replace(/\/$/, '');
+    if (allowedList.includes(trimmed)) {
+      matchedOrigin = trimmed;
+    } else if (
+      isDev &&
+      (trimmed.startsWith('http://localhost:') || trimmed.startsWith('http://127.0.0.1:'))
     ) {
-      origin = trimmed;
+      matchedOrigin = trimmed;
     }
   }
 
-  return {
-    'Access-Control-Allow-Origin': origin,
+  const headers: Record<string, string> = {
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Webhook-Secret',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Credentials': 'true',
     'Content-Type': 'application/json; charset=utf-8',
     Vary: 'Origin',
   };
+
+  if (matchedOrigin) {
+    headers['Access-Control-Allow-Origin'] = matchedOrigin;
+  }
+
+  return headers;
 }
 
 // Backward compatible default headers

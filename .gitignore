@@ -2,8 +2,6 @@ node_modules
 .env
 .env.local
 *.session
-solve-pow.js
-test-payload.json
-test-system.js
 dist
 data/
+.netlify

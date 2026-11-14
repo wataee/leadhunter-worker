@@ -13,6 +13,7 @@ const Vacancies = lazy(() => import('./pages/Vacancies').then(m => ({ default: m
 const Leads = lazy(() => import('./pages/Leads').then(m => ({ default: m.Leads })));
 const Templates = lazy(() => import('./pages/Templates').then(m => ({ default: m.Templates })));
 const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
+const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
 const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
 
 const PageLoadingFallback: React.FC = () => (
@@ -100,6 +101,21 @@ const AppContent: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [navigate, location.pathname, lastKeyPressed]);
 
+  const isLoginPage = location.pathname === '/login';
+
+  if (isLoginPage) {
+    return (
+      <div className="min-h-screen bg-bg text-text antialiased">
+        <Suspense fallback={<PageLoadingFallback />}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+          </Routes>
+        </Suspense>
+        <ToastContainer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex bg-bg text-text antialiased">
       {/* Left Sidebar */}
@@ -125,6 +141,7 @@ const AppContent: React.FC = () => {
               <Route path="/leads" element={<Leads />} />
               <Route path="/templates" element={<Templates />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/login" element={<Login />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
