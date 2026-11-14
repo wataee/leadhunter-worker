@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Vacancy } from '../types';
 import { formatRelativeTime } from '../lib/time';
 import { BudgetBadge } from './BudgetBadge';
 import { computeProfileFit } from '../lib/profileFit';
 import { useSettingsStore } from '../store/settingsStore';
+import { useToastStore } from '../store/toastStore';
+import { rewritePitchWithAi } from '../lib/api';
 import {
   ExternalLink,
   Send,
@@ -15,6 +17,10 @@ import {
   AlertTriangle,
   Star,
   Ban,
+  Copy,
+  Check,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 interface VacancyCardProps {
@@ -37,8 +43,64 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   highlightWords = [],
 }) => {
   const profile = useSettingsStore((s) => s.profile);
+  const addToast = useToastStore((s) => s.addToast);
   const fitScore = vacancy.profileFit ?? computeProfileFit(vacancy, profile);
-  const isHot = vacancy.statusBadge === 'hot' || Date.now() - new Date(vacancy.postedAt).getTime() < 20 * 60 * 1000;
+  const isHot = vacancy.statusBadge === 'hot' || Date.now() - new Date(vacancy.postedAt).getTime() < 15 * 60 * 1000;
+
+  const [copied, setCopied] = useState(false);
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [customDraft, setCustomDraft] = useState<string | null>(null);
+  const [isDraftCollapsed, setIsDraftCollapsed] = useState(false);
+
+  const initialDraft = useMemo(() => {
+    const ch = vacancy.channel.startsWith('@') ? vacancy.channel : `@${vacancy.channel}`;
+    const skillsPart = profile.skills?.length ? `Работаю в ${profile.skills.slice(0, 2).join(', ')}.` : '';
+    const portfolio = profile.portfolioUrl || 'https://fleur-editor.netlify.app';
+    return `Здравствуйте! Увидел вакансию в ${ch}. Занимаюсь ${profile.specialization || 'видеомонтажом'}. ${skillsPart} Моё портфолио: ${portfolio}. Готов оперативно обсудить задачу!`;
+  }, [vacancy.channel, profile]);
+
+  const activeDraft = customDraft ?? initialDraft;
+
+  const handleCopyDraft = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(activeDraft);
+      setCopied(true);
+      addToast({ type: 'success', message: 'Черновик скопирован в буфер обмена' });
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      addToast({ type: 'error', message: 'Не удалось скопировать' });
+    }
+  };
+
+  const handleCopyAndOpen = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    await handleCopyDraft();
+    window.open(vacancy.url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleGenerateAiDraft = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setIsGeneratingAi(true);
+    try {
+      const res = await rewritePitchWithAi({
+        text: activeDraft,
+        leadContext: {
+          name: vacancy.channel,
+          channel: vacancy.channel,
+          niche: `Telegram-вакансия (${vacancy.matchedKeywords?.join(', ') || 'монтаж'})`,
+        },
+      });
+      if (res.rewritten) {
+        setCustomDraft(res.rewritten);
+        addToast({ type: 'success', message: 'AI подготовил персонализированный отклик!' });
+      }
+    } catch {
+      addToast({ type: 'error', message: 'Ошибка генерации AI. Проверьте настройки ключей.' });
+    } finally {
+      setIsGeneratingAi(false);
+    }
+  };
 
   // Render text with highlighted keywords
   const renderHighlightedText = (text: string) => {
@@ -162,6 +224,69 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
       <div className="text-xs text-text leading-relaxed whitespace-pre-wrap line-clamp-5 select-text font-sans">
         {renderHighlightedText(vacancy.text)}
       </div>
+
+      {/* 5.3 Quick Pitch Draft for Hot Vacancies (<15 min) */}
+      {isHot && (
+        <div className="bg-surface-2/70 border border-danger/30 rounded-control p-3 space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5 text-xs font-bold text-danger">
+              <Flame size={14} className="animate-pulse" />
+              <span>Черновик быстрого отклика (&lt;15 мин)</span>
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handleGenerateAiDraft}
+                disabled={isGeneratingAi}
+                className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover px-2 py-0.5 rounded hover:bg-accent/10 transition-colors disabled:opacity-50"
+                title="Улучшить черновик через AI под контекст вакансии"
+              >
+                <Sparkles size={12} className={isGeneratingAi ? 'animate-spin' : ''} />
+                <span>{isGeneratingAi ? 'Генерирую...' : 'AI-версия'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsDraftCollapsed(!isDraftCollapsed)}
+                className="text-muted hover:text-text p-1"
+                aria-label={isDraftCollapsed ? 'Развернуть черновик' : 'Свернуть черновик'}
+              >
+                {isDraftCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+              </button>
+            </div>
+          </div>
+
+          {!isDraftCollapsed && (
+            <>
+              <p className="text-xs text-text bg-surface/80 p-2.5 rounded border border-border/60 leading-relaxed font-sans select-text">
+                {activeDraft}
+              </p>
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px]">
+                <span className="text-[10px] text-text-muted italic">
+                  *Сообщения не отправляются автоматически. Скопируйте и отправьте вручную.
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCopyDraft}
+                    className="flex items-center gap-1 px-2.5 py-1 bg-surface hover:bg-surface-3 text-text rounded border border-border transition-colors font-medium min-h-[30px]"
+                  >
+                    {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                    <span>{copied ? 'Скопировано!' : 'Копировать'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyAndOpen}
+                    className="flex items-center gap-1 px-3 py-1 bg-accent hover:bg-accent-hover text-white rounded font-semibold transition-colors min-h-[30px]"
+                  >
+                    <span>Скопировать и в чат</span>
+                    <ExternalLink size={12} />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Skills & Software Tags */}
       {vacancy.skills && vacancy.skills.length > 0 && (
