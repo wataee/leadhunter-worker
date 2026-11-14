@@ -268,7 +268,7 @@ export const Vacancies: React.FC = () => {
         total: activeChannels.length,
         nextInSec: 30,
       });
-      setWorkerActive(Boolean(res.workerActive));
+      setWorkerActive(typeof res.workerActive === 'boolean' ? res.workerActive : null);
 
       const processed: Vacancy[] = [];
 
@@ -869,7 +869,7 @@ export const Vacancies: React.FC = () => {
       </div>
 
       {/* Cloud Worker Status Badge */}
-      {workerActive === false ? (
+      {workerActive === false && (
         <div className="p-3 bg-warning-soft/40 border border-warning/40 rounded-card flex items-center justify-between gap-3 text-xs text-text">
           <div className="flex items-center gap-2.5">
             <AlertTriangle size={18} className="text-warning shrink-0" />
@@ -882,11 +882,12 @@ export const Vacancies: React.FC = () => {
             className="px-3 py-1 bg-warning/20 hover:bg-warning/30 text-warning font-semibold rounded text-xs shrink-0 border border-warning/30 min-h-[36px] flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-warning"
             aria-label="Проверить статус воркера"
           >
-            <RefreshCcw size={12} />
+            <RefreshCcw size={12} className={isLoading ? 'animate-spin' : ''} />
             <span>Проверить</span>
           </button>
         </div>
-      ) : (
+      )}
+      {workerActive === true && (
         <div className="p-3 bg-success-soft/30 border border-success/30 rounded-card flex items-center justify-between gap-2.5 text-xs text-text">
           <div className="flex items-center gap-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-success animate-pulse shrink-0" />

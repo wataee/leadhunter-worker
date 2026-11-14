@@ -169,19 +169,21 @@ async function runInPoolWithDeadline<T, R>(
   return results;
 }
 
-// 1. Параллельный опрос воркера (Таймаут 6s)
+// 1. Параллельный опрос воркера (Таймаут 7s)
 async function fetchWorkerLeads(
   workerUrl: string,
   secret?: string
-): Promise<{ active: boolean; leads: ParsedMessage[] }> {
+): Promise<{ active: boolean | null; leads: ParsedMessage[] }> {
   try {
     const headers: Record<string, string> = {};
     if (secret) {
       headers['X-Webhook-Secret'] = secret;
     }
 
-    const workerRes = await fetchWithTimeout(`${workerUrl.replace(/\/$/, '')}/recent`, { headers }, 6000);
+    const targetUrl = `${workerUrl.replace(/\/+$/, '')}/recent`;
+    const workerRes = await fetchWithTimeout(targetUrl, { headers }, 7000);
     if (!workerRes.ok) {
+      console.warn(`[tg-feed] Ошибка ответа воркера HTTP ${workerRes.status} (${targetUrl})`);
       return { active: false, leads: [] };
     }
 
@@ -204,7 +206,9 @@ async function fetchWorkerLeads(
     }
 
     return { active: true, leads };
-  } catch {
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[tg-feed] Не удалось подключиться к воркеру (${workerUrl}): ${msg}`);
     return { active: false, leads: [] };
   }
 }
@@ -263,11 +267,18 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return errorResponse(405, 'Метод не поддерживается', null, origin);
   }
 
-  const workerUrl = process.env.TG_WORKER_URL?.trim();
+  // Поддержка различных вариантов имени переменной для гибкости конфигурации
+  const rawWorkerUrl = (
+    process.env.TG_WORKER_URL ||
+    process.env.WORKER_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    (process.env.WEBHOOK_URL && process.env.WEBHOOK_URL.includes('onrender.com') ? process.env.WEBHOOK_URL : '')
+  )?.trim();
+  const workerUrl = rawWorkerUrl ? rawWorkerUrl.replace(/\/recent\/?$/, '') : undefined;
   const workerSecret = process.env.WEBHOOK_SECRET?.trim();
 
   if (workerUrl && (!workerSecret || workerSecret.length < 16)) {
-    return errorResponse(503, 'WEBHOOK_SECRET не настроен на сервере для связи с воркером', null, origin);
+    console.warn('[tg-feed] Предупреждение: WEBHOOK_SECRET не настроен или короче 16 символов в Netlify.');
   }
 
   const startTime = Date.now();
@@ -282,7 +293,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     // Параллельный опрос воркера и скрейпинга через Promise.allSettled
     const workerPromise = workerUrl
       ? fetchWorkerLeads(workerUrl, workerSecret)
-      : Promise.resolve({ active: false, leads: [] });
+      : Promise.resolve({ active: null, leads: [] });
 
     const uniqueChannels = Array.from(new Set(channels.map((c) => c.trim().toLowerCase()))).slice(0, 15);
     const scrapingPromise =
@@ -292,7 +303,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
     const [workerSettled, scrapingSettled] = await Promise.allSettled([workerPromise, scrapingPromise]);
 
-    let workerActive = false;
+    let workerActive: boolean | null = null;
     const allMessages: ParsedMessage[] = [];
     const errors: { channel: string; error: string }[] = [];
     const results: ChannelFeedResult[] = [];
@@ -337,6 +348,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
       errors,
       totalMessages: uniqueMessages.length,
       workerActive,
+      workerConfigured: Boolean(workerUrl),
     };
   };
 

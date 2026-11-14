@@ -1,5 +1,6 @@
 import http from 'http';
 import crypto from 'crypto';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import { TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions/index.js';
@@ -322,12 +323,11 @@ const server = http.createServer((req, res) => {
   }
 
   // Публичный health-check эндпоинт
-  // Если не на связи > 2 минут — отдаём 503
+  // Возвращаем HTTP 200 (даже если статус degraded), чтобы оркестратор Render не убивал процесс во время реконнекта
   const isStalled = disconnectedSince && Date.now() - disconnectedSince > 2 * 60 * 1000;
-  const statusCode = isStalled ? 503 : 200;
 
   res.setHeader('Content-Type', 'application/json');
-  res.writeHead(statusCode);
+  res.writeHead(200);
   res.end(
     JSON.stringify(
       {
@@ -346,15 +346,20 @@ const server = http.createServer((req, res) => {
   );
 });
 
-server.listen(PORT, () => {
-  console.log(`[Health-Check] HTTP-сервер запущен на порту ${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`[Health-Check] HTTP-сервер запущен на 0.0.0.0:${PORT}`);
 
   setInterval(() => {
     processFailedQueue().catch((err) => console.warn('[Очередь] Ошибка фоновой очистки:', err.message));
   }, 2 * 60 * 1000);
 
-  const selfUrl = process.env.RENDER_EXTERNAL_URL;
+  // Автоматический keep-alive самопинг: используем RENDER_EXTERNAL_URL или автоматический хостнейм Render
+  const selfUrl =
+    process.env.RENDER_EXTERNAL_URL?.trim() ||
+    (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null);
+
   if (selfUrl) {
+    console.log(`[Keep-Alive] Автоматический самопинг активен для ${selfUrl}`);
     setInterval(async () => {
       try {
         await fetch(`${selfUrl}/`);

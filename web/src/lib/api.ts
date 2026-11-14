@@ -136,7 +136,8 @@ export interface TgFeedResponse {
   }>;
   errors: Array<{ channel: string; error: string }>;
   totalMessages: number;
-  workerActive?: boolean;
+  workerActive?: boolean | null;
+  workerConfigured?: boolean;
 }
 
 async function handleApiResponse<T>(res: Response): Promise<T> {
