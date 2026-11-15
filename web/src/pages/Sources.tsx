@@ -10,6 +10,8 @@ export const Sources: React.FC = () => {
     customSources,
     activeSources,
     toggleActive,
+    enableAllSources,
+    disableAllSources,
     addCustomSource,
   } = useCatalogStore();
 
@@ -143,19 +145,35 @@ export const Sources: React.FC = () => {
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-text">Источники</h1>
           <p className="text-xs text-text-muted mt-0.5">
-            Активно: {activeSources.size} из {allSources.length}
+            Активно для мониторинга: <span className="text-accent font-semibold">{activeSources.size}</span> из {allSources.length} проверенных каналов
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleKeepOnlyActive}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 hover:bg-surface-3 text-text-muted hover:text-text rounded-control border border-border text-xs font-medium transition-colors self-start sm:self-auto min-h-[36px]"
-          title="Отключить каналы без вакансий за 14 дней"
-        >
-          <AlertTriangle size={13} className="text-warning" />
-          <span>Оставить только с лидами за 14 дней</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={enableAllSources}
+            className="px-3 py-1.5 bg-accent/15 hover:bg-accent/25 text-accent rounded-control border border-accent/30 text-xs font-semibold transition-colors min-h-[36px]"
+          >
+            Включить все ({allSources.length})
+          </button>
+          <button
+            type="button"
+            onClick={disableAllSources}
+            className="px-3 py-1.5 bg-surface-2 hover:bg-surface-3 text-text-muted hover:text-text rounded-control border border-border text-xs font-medium transition-colors min-h-[36px]"
+          >
+            Отключить все
+          </button>
+          <button
+            type="button"
+            onClick={handleKeepOnlyActive}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 hover:bg-surface-3 text-text-muted hover:text-text rounded-control border border-border text-xs font-medium transition-colors min-h-[36px]"
+            title="Отключить каналы без вакансий за 14 дней"
+          >
+            <AlertTriangle size={13} className="text-warning" />
+            <span>Только с лидами (14 дн.)</span>
+          </button>
+        </div>
       </div>
 
       {/* Search & Add Bar */}

@@ -67,10 +67,11 @@ export const VacancyFiltersBar: React.FC<VacancyFiltersBarProps> = ({
       {/* Right Link to Sources */}
       <Link
         to="/sources"
-        className="text-xs text-text-muted hover:text-accent font-medium transition-colors"
-        title="Перейти к списку источников"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 hover:bg-surface-3 text-text rounded-control border border-border text-xs font-semibold hover:border-accent transition-colors min-h-[36px]"
+        title="Перейти к списку источников и настроить каналы"
       >
-        Источники: {activeSourcesCount} активных →
+        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <span>Мониторинг: {activeSourcesCount} из 152 каналов →</span>
       </Link>
     </div>
   );

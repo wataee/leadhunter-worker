@@ -2,43 +2,62 @@ import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../store/settingsStore';
 import { useLeadsStore } from '../store/leadsStore';
 import { useVacanciesStore } from '../store/vacanciesStore';
+import { useTemplatesStore } from '../store/templatesStore';
 import { useToastStore } from '../store/toastStore';
 import { checkApiHealth, HealthStatus, rewritePitchWithAi } from '../lib/api';
 import { exportLeadsToCsv } from '../lib/csv';
 import { Modal } from '../components/Modal';
 import {
+  Settings as SettingsIcon,
   User,
-  Bell,
-  Link as LinkIcon,
+  Target,
+  Key,
   Database,
   Download,
+  Upload,
   Trash2,
   CheckCircle2,
   AlertCircle,
-  RotateCw,
+  Sparkles,
 } from 'lucide-react';
 
 export const Settings: React.FC = () => {
   const {
     profile,
-    updateProfile,
+    dailyGoal,
+    followUpIntervals,
     duplicateToTelegram,
-    setDuplicateToTelegram,
+    autoRefreshInterval,
     soundEnabled,
-    setSoundEnabled,
     notificationsEnabled,
-    setNotificationsEnabled,
     quietHoursEnabled,
     quietHoursStart,
     quietHoursEnd,
-    setQuietHours,
+    useAiQualification,
+    aiTopNCount,
     customAiApiKey,
+    customAiProvider,
     setCustomAiApiKey,
+    setCustomAiProvider,
+    setUseAiQualification,
+    setAiTopNCount,
+    setQuietHours,
+    updateProfile,
+    setDailyGoal,
+    setFollowUpIntervals,
+    setDuplicateToTelegram,
+    setAutoRefreshInterval,
+    setSoundEnabled,
+    setNotificationsEnabled,
+    resetQuota,
   } = useSettingsStore();
 
-  const { leads, clearAllLeads } = useLeadsStore();
+  const { leads, clearAllLeads, importLeads } = useLeadsStore();
+  const { templates, setTemplates } = useTemplatesStore();
   const { clearAllVacancies } = useVacanciesStore();
   const addToast = useToastStore((s) => s.addToast);
+
+  const evaluatedLeadsCount = leads.filter((l) => l.aiScore !== undefined).length;
 
   const [health, setHealth] = useState<HealthStatus>({
     youtube: false,
@@ -49,13 +68,26 @@ export const Settings: React.FC = () => {
   const [clearModalOpen, setClearModalOpen] = useState(false);
   const [isTestingKey, setIsTestingKey] = useState(false);
 
-  // Form profile state
-  const [name, setName] = useState(profile.name || '');
-  const [specialization, setSpecialization] = useState(profile.specialization || '');
-  const [portfolioUrl, setPortfolioUrl] = useState(profile.portfolioUrl || '');
-  const [telegram, setTelegram] = useState(profile.telegram || '');
-  const [minRate, setMinRate] = useState(profile.minRate ? String(profile.minRate) : '');
-  const [skillsStr, setSkillsStr] = useState((profile.skills || []).join(', '));
+  const handleTestCustomAiKey = async () => {
+    setIsTestingKey(true);
+    try {
+      const res = await rewritePitchWithAi({
+        text: 'Привет, я монтажер. Готов сделать тестовый ролик.',
+      });
+      if (res.rewritten) {
+        addToast({ type: 'success', message: 'Ключ проверен успешно! ИИ работает.' });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Ошибка проверки ключа';
+      addToast({ type: 'error', message: `Ошибка AI: ${msg}` });
+    } finally {
+      setIsTestingKey(false);
+    }
+  };
+
+  useEffect(() => {
+    checkHealth();
+  }, []);
 
   const checkHealth = async () => {
     setIsCheckingHealth(true);
@@ -69,353 +101,775 @@ export const Settings: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    checkHealth();
-  }, []);
+  const handleExportJson = () => {
+    const backupData = {
+      schemaVersion: 2,
+      exportedAt: new Date().toISOString(),
+      leads,
+      templates,
+      settings: {
+        profile,
+        dailyGoal,
+        followUpIntervals,
+        duplicateToTelegram,
+        autoRefreshInterval,
+        soundEnabled,
+        notificationsEnabled,
+        useAiQualification,
+        aiTopNCount,
+      },
+    };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
-    e.preventDefault();
-    const parsedSkills = skillsStr
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    updateProfile({
-      name: name.trim(),
-      specialization: specialization.trim() || 'Видеомонтажёр',
-      portfolioUrl: portfolioUrl.trim(),
-      telegram: telegram.trim(),
-      minRate: minRate ? parseInt(minRate, 10) : undefined,
-      skills: parsedSkills,
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], {
+      type: 'application/json',
     });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leadhunter_backup_v2_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
 
     addToast({
       type: 'success',
-      title: 'Профиль сохранён',
-      message: 'Данные профиля обновлены для авто-откликов.',
+      title: 'Резервная копия создана (v2)',
+      message: `Выгружено ${leads.length} лидов, ${templates.length} шаблонов и все настройки.`,
     });
   };
 
-  const handleTestAiKey = async () => {
-    setIsTestingKey(true);
-    try {
-      const res = await rewritePitchWithAi({
-        text: 'Привет, я монтажер. Смонтирую тестовый ролик.',
-      });
-      if (res.rewritten) {
-        addToast({ type: 'success', message: 'API-ключ проверен! ИИ отвечает.' });
+  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target?.result as string);
+        if (!parsed || typeof parsed !== 'object') {
+          throw new Error('Некорректный JSON');
+        }
+
+        let importedLeadsCount = 0;
+        let importedTemplatesCount = 0;
+
+        // 1. Leads
+        if (Array.isArray(parsed.leads)) {
+          importLeads(parsed.leads);
+          importedLeadsCount = parsed.leads.length;
+        }
+
+        // 2. Templates (v2)
+        if (Array.isArray(parsed.templates)) {
+          setTemplates(parsed.templates);
+          importedTemplatesCount = parsed.templates.length;
+        }
+
+        // 3. Settings (handles both v2 format and flat v1 format)
+        const cfg = parsed.settings || parsed;
+        if (cfg.profile) updateProfile(cfg.profile);
+        if (typeof cfg.dailyGoal === 'number') setDailyGoal(cfg.dailyGoal);
+        if (Array.isArray(cfg.followUpIntervals)) setFollowUpIntervals(cfg.followUpIntervals);
+        if (typeof cfg.duplicateToTelegram === 'boolean') setDuplicateToTelegram(cfg.duplicateToTelegram);
+        if (typeof cfg.autoRefreshInterval === 'number') setAutoRefreshInterval(cfg.autoRefreshInterval);
+        if (typeof cfg.soundEnabled === 'boolean') setSoundEnabled(cfg.soundEnabled);
+        if (typeof cfg.notificationsEnabled === 'boolean') setNotificationsEnabled(cfg.notificationsEnabled);
+        if (typeof cfg.useAiQualification === 'boolean') setUseAiQualification(cfg.useAiQualification);
+        if (typeof cfg.aiTopNCount === 'number') setAiTopNCount(cfg.aiTopNCount);
+
+        addToast({
+          type: 'success',
+          title: 'Данные успешно импортированы',
+          message: `Восстановлено: ${importedLeadsCount} лидов, ${importedTemplatesCount} шаблонов и конфигурация.`,
+        });
+      } catch {
+        addToast({
+          type: 'error',
+          title: 'Ошибка импорта',
+          message: 'Не удалось прочитать JSON файл резервной копии.',
+        });
       }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Ошибка проверки ключа';
-      addToast({ type: 'error', message: `Ошибка AI: ${msg}` });
-    } finally {
-      setIsTestingKey(false);
-    }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
-  const handleExportCsv = () => {
-    if (leads.length === 0) {
-      addToast({ type: 'info', message: 'В воронке нет клиентов для экспорта.' });
-      return;
-    }
-    exportLeadsToCsv(leads);
-    addToast({ type: 'success', message: 'CSV файл успешно скачан.' });
-  };
-
-  const handleConfirmClear = () => {
+  const handleClearAllConfirm = () => {
     clearAllLeads();
     clearAllVacancies();
+    resetQuota();
     setClearModalOpen(false);
     addToast({
       type: 'info',
       title: 'Данные очищены',
-      message: 'Все лиды и кэш вакансий удалены.',
+      message: 'Хранилище браузера успешно очищено.',
     });
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
-      <div className="pb-3 border-b border-border">
-        <h1 className="text-xl md:text-2xl font-bold text-text">Настройки</h1>
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-8">
+      {/* Header */}
+      <div>
+        <h1 className="text-xl md:text-2xl font-bold text-text flex items-center gap-2">
+          <SettingsIcon size={22} className="text-accent" />
+          <span>Настройки LeadHunter</span>
+        </h1>
+        <p className="text-xs md:text-sm text-text-muted mt-0.5">
+          Конфигурация профиля видеомонтажёра, нормы касаний и статуса API-ключей.
+        </p>
       </div>
 
-      {/* 1. Раздел: Профиль */}
-      <div className="bg-surface rounded-card p-5 border border-border space-y-4">
-        <div className="flex items-center gap-2 text-text font-semibold text-sm">
-          <User size={16} className="text-accent" />
-          <h2>Профиль видеомонтажёра</h2>
+      {/* Profile Section */}
+      <div className="bg-surface rounded-card p-6 border border-border space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-border">
+          <User size={18} className="text-accent" />
+          <h2 className="text-sm font-bold uppercase tracking-wider text-text">
+            Профиль видеомонтажёра
+          </h2>
         </div>
 
-        <form onSubmit={handleSaveProfile} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-text-muted mb-1 font-medium">Ваше имя</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Иван"
-                className="w-full bg-surface-2 text-text rounded-control border border-border px-3 py-2 focus:outline-none focus:border-accent min-h-[38px]"
-              />
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div>
+            <label className="block text-text-muted mb-1 font-medium">
+              Ваше имя (для подстановки в сообщения)
+            </label>
+            <input
+              type="text"
+              value={profile.name}
+              onChange={(e) => updateProfile({ name: e.target.value })}
+              className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent"
+              placeholder="Тимур"
+            />
+          </div>
 
-            <div>
-              <label className="block text-text-muted mb-1 font-medium">Специализация</label>
-              <input
-                type="text"
-                value={specialization}
-                onChange={(e) => setSpecialization(e.target.value)}
-                placeholder="YouTube-ролики, Reels, подкасты"
-                className="w-full bg-surface-2 text-text rounded-control border border-border px-3 py-2 focus:outline-none focus:border-accent min-h-[38px]"
-              />
-            </div>
+          <div>
+            <label className="block text-text-muted mb-1 font-medium">
+              Специализация / УТП
+            </label>
+            <input
+              type="text"
+              value={profile.specialization}
+              onChange={(e) => updateProfile({ specialization: e.target.value })}
+              className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent"
+              placeholder="Динамичный YouTube-монтаж (MrBeast / Vox style)"
+            />
+          </div>
 
-            <div>
-              <label className="block text-text-muted mb-1 font-medium">Ссылка на портфолио</label>
-              <input
-                type="text"
-                value={portfolioUrl}
-                onChange={(e) => setPortfolioUrl(e.target.value)}
-                placeholder="https://t.me/your_channel или ссылка на диск"
-                className="w-full bg-surface-2 text-text rounded-control border border-border px-3 py-2 focus:outline-none focus:border-accent min-h-[38px]"
-              />
-            </div>
+          <div>
+            <label className="block text-text-muted mb-1 font-medium">
+              Telegram username
+            </label>
+            <input
+              type="text"
+              value={profile.telegram}
+              onChange={(e) => updateProfile({ telegram: e.target.value })}
+              className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text font-mono focus:outline-none focus:border-accent"
+              placeholder="@editor_timur"
+            />
+          </div>
 
-            <div>
-              <label className="block text-text-muted mb-1 font-medium">Контакт в Telegram</label>
-              <input
-                type="text"
-                value={telegram}
-                onChange={(e) => setTelegram(e.target.value)}
-                placeholder="@username"
-                className="w-full bg-surface-2 text-text rounded-control border border-border px-3 py-2 focus:outline-none focus:border-accent min-h-[38px]"
-              />
-            </div>
+          <div>
+            <label className="block text-text-muted mb-1 font-medium">
+              Ссылка на портфолио
+            </label>
+            <input
+              type="text"
+              value={profile.portfolioUrl}
+              onChange={(e) => updateProfile({ portfolioUrl: e.target.value })}
+              className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text font-mono focus:outline-none focus:border-accent"
+              placeholder="https://fleur-editor.netlify.app/ru/"
+            />
+          </div>
 
+          <div>
+            <label className="block text-text-muted mb-1 font-medium">
+              Email для связи
+            </label>
+            <input
+              type="email"
+              value={profile.email}
+              onChange={(e) => updateProfile({ email: e.target.value })}
+              className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text font-mono focus:outline-none focus:border-accent"
+              placeholder="editor.timur@gmail.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-text-muted mb-1 font-medium">
+              Ссылка на сэмпл (ре-эдит для огнемёта)
+            </label>
+            <input
+              type="text"
+              value={profile.sampleUrl}
+              onChange={(e) => updateProfile({ sampleUrl: e.target.value })}
+              className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text font-mono focus:outline-none focus:border-accent"
+              placeholder="https://youtu.be/sample_edit"
+            />
+          </div>
+
+          {/* Min Rate and Currency */}
+          <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-text-muted mb-1 font-medium">Минимальная ставка (₽ за ролик)</label>
+              <label className="block text-text-muted mb-1 font-medium">
+                Мин. ставка (за проект / ролик)
+              </label>
               <input
                 type="number"
-                value={minRate}
-                onChange={(e) => setMinRate(e.target.value)}
+                min="0"
+                step="500"
+                value={profile.minRate ?? 3000}
+                onChange={(e) => updateProfile({ minRate: Number(e.target.value) || 0 })}
+                className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent font-mono"
                 placeholder="3000"
-                className="w-full bg-surface-2 text-text rounded-control border border-border px-3 py-2 focus:outline-none focus:border-accent min-h-[38px]"
               />
             </div>
-
             <div>
-              <label className="block text-text-muted mb-1 font-medium">Стек программ (через запятую)</label>
-              <input
-                type="text"
-                value={skillsStr}
-                onChange={(e) => setSkillsStr(e.target.value)}
-                placeholder="Premiere Pro, After Effects, DaVinci"
-                className="w-full bg-surface-2 text-text rounded-control border border-border px-3 py-2 focus:outline-none focus:border-accent min-h-[38px]"
-              />
+              <label className="block text-text-muted mb-1 font-medium">
+                Валюта ставки
+              </label>
+              <select
+                value={profile.minRateCurrency ?? 'RUB'}
+                onChange={(e) => updateProfile({ minRateCurrency: e.target.value as 'RUB' | 'USD' })}
+                className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent"
+              >
+                <option value="RUB">RUB (₽)</option>
+                <option value="USD">USD ($)</option>
+              </select>
             </div>
           </div>
-
-          <div className="flex justify-end pt-2">
-            <button
-              type="submit"
-              className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-control font-semibold transition-colors min-h-[36px]"
-            >
-              Сохранить профиль
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* 2. Раздел: Уведомления */}
-      <div className="bg-surface rounded-card p-5 border border-border space-y-4">
-        <div className="flex items-center gap-2 text-text font-semibold text-sm">
-          <Bell size={16} className="text-warning" />
-          <h2>Уведомления</h2>
         </div>
 
-        <div className="space-y-3 text-xs">
-          <div className="flex items-center justify-between p-3 bg-surface-2/40 rounded-control border border-border">
-            <div>
-              <div className="font-semibold text-text">Браузерные push-уведомления</div>
-              <div className="text-text-muted text-[11px]">Оповещать о новых горячих заказах</div>
+        {/* Formats and Skills */}
+        <div className="pt-2 border-t border-border space-y-3 text-xs">
+          <div>
+            <label className="block text-text-muted mb-1.5 font-medium">
+              Целевые форматы видео
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {(['YouTube', 'Shorts/Reels', 'Подкасты', 'Реклама'] as const).map((fmt) => {
+                const currentFormats = profile.formats || ['YouTube', 'Shorts/Reels', 'Подкасты'];
+                const isSelected = currentFormats.includes(fmt);
+                return (
+                  <button
+                    key={fmt}
+                    type="button"
+                    onClick={() => {
+                      const updated = isSelected
+                        ? currentFormats.filter((f) => f !== fmt)
+                        : [...currentFormats, fmt];
+                      updateProfile({ formats: updated });
+                    }}
+                    className={`px-3 py-1.5 rounded-control text-xs font-medium border transition-colors ${
+                      isSelected
+                        ? 'bg-accent/20 border-accent text-accent'
+                        : 'bg-surface-2 border-border text-text-muted hover:border-accent/40'
+                    }`}
+                  >
+                    {isSelected ? '✓ ' : '+ '}{fmt}
+                  </button>
+                );
+              })}
             </div>
-            <input
-              type="checkbox"
-              checked={notificationsEnabled}
-              onChange={(e) => setNotificationsEnabled(e.target.checked)}
-              className="w-4 h-4 rounded text-accent focus:ring-accent"
-            />
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-surface-2/40 rounded-control border border-border">
-            <div>
-              <div className="font-semibold text-text">Звуковой сигнал</div>
-              <div className="text-text-muted text-[11px]">Короткий звук при появлении горячей вакансии</div>
+          <div>
+            <label className="block text-text-muted mb-1.5 font-medium">
+              Используемый софт и навыки (для скоринга вакансий)
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                'Premiere Pro',
+                'After Effects',
+                'DaVinci Resolve',
+                'CapCut',
+                'Blender',
+                'Photoshop',
+                'Final Cut Pro',
+              ].map((skill) => {
+                const currentSkills = profile.skills || ['Premiere Pro', 'After Effects', 'DaVinci Resolve', 'CapCut'];
+                const isSelected = currentSkills.includes(skill);
+                return (
+                  <button
+                    key={skill}
+                    type="button"
+                    onClick={() => {
+                      const updated = isSelected
+                        ? currentSkills.filter((s) => s !== skill)
+                        : [...currentSkills, skill];
+                      updateProfile({ skills: updated });
+                    }}
+                    className={`px-3 py-1.5 rounded-control text-xs font-medium border transition-colors ${
+                      isSelected
+                        ? 'bg-accent/20 border-accent text-accent'
+                        : 'bg-surface-2 border-border text-text-muted hover:border-accent/40'
+                    }`}
+                  >
+                    {isSelected ? '✓ ' : '+ '}{skill}
+                  </button>
+                );
+              })}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Target & Follow-ups */}
+      <div className="bg-surface rounded-card p-6 border border-border space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-border">
+          <Target size={18} className="text-warning" />
+          <h2 className="text-sm font-bold uppercase tracking-wider text-text">
+            План отправки и график повторных сообщений
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div>
+            <label className="block text-text-muted mb-1 font-medium">
+              Дневная норма отправки сообщений (в день)
+            </label>
             <input
-              type="checkbox"
-              checked={soundEnabled}
-              onChange={(e) => setSoundEnabled(e.target.checked)}
-              className="w-4 h-4 rounded text-accent focus:ring-accent"
+              type="number"
+              min="1"
+              max="100"
+              value={dailyGoal}
+              onChange={(e) => setDailyGoal(Math.max(1, Number(e.target.value)))}
+              className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text font-mono focus:outline-none focus:border-accent"
             />
+            <p className="text-[11px] text-muted mt-1">
+              Рекомендуемая норма: 15–20 персонализированных сообщений в день.
+            </p>
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-surface-2/40 rounded-control border border-border">
-            <div>
-              <div className="font-semibold text-text">Дублировать лиды в личный Telegram</div>
-              <div className="text-text-muted text-[11px]">Отправлять уведомления через подключённого бота</div>
+          <div>
+            <label className="block text-text-muted mb-1 font-medium">
+              Интервалы между повторными сообщениями (дней)
+            </label>
+            <div className="flex items-center gap-2">
+              {followUpIntervals.map((val, idx) => (
+                <div key={idx} className="flex-1">
+                  <span className="text-[10px] text-muted block mb-0.5">
+                    Касание #{idx + 1}:
+                  </span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={val}
+                    onChange={(e) => {
+                      const copy = [...followUpIntervals];
+                      copy[idx] = Number(e.target.value);
+                      setFollowUpIntervals(copy);
+                    }}
+                    className="w-full bg-surface-2 border border-border rounded-control p-2 text-text font-mono text-center"
+                  />
+                </div>
+              ))}
             </div>
-            <input
-              type="checkbox"
-              checked={duplicateToTelegram}
-              onChange={(e) => setDuplicateToTelegram(e.target.checked)}
-              className="w-4 h-4 rounded text-accent focus:ring-accent"
-            />
+            <p className="text-[11px] text-muted mt-1">
+              По умолчанию: через 2 дня, еще через 2 дня, затем через 3 дня.
+            </p>
           </div>
+        </div>
 
-          <div className="p-3 bg-surface-2/40 rounded-control border border-border space-y-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-semibold text-text">Тихие часы</div>
-                <div className="text-text-muted text-[11px]">Не присылать уведомления в указанное время</div>
-              </div>
+        {/* 5.9 Quiet Hours Setting */}
+        <div className="pt-3 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer font-medium text-text">
               <input
                 type="checkbox"
-                checked={quietHoursEnabled}
-                onChange={(e) => setQuietHours(e.target.checked, quietHoursStart, quietHoursEnd)}
-                className="w-4 h-4 rounded text-accent focus:ring-accent"
+                checked={quietHoursEnabled ?? false}
+                onChange={(e) => setQuietHours(e.target.checked, quietHoursStart ?? 23, quietHoursEnd ?? 8)}
+                className="rounded bg-surface-2 border-border text-accent focus:ring-accent w-4 h-4"
               />
-            </div>
-            {quietHoursEnabled && (
-              <div className="flex items-center gap-2 pt-1 font-mono text-xs">
-                <span>с</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="23"
-                  value={quietHoursStart}
-                  onChange={(e) => setQuietHours(true, parseInt(e.target.value, 10) || 0, quietHoursEnd)}
-                  className="bg-surface px-2 py-1 rounded border border-border text-text w-16"
-                />
-                <span>до</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="23"
-                  value={quietHoursEnd}
-                  onChange={(e) => setQuietHours(true, quietHoursStart, parseInt(e.target.value, 10) || 0)}
-                  className="bg-surface px-2 py-1 rounded border border-border text-text w-16"
-                />
-                <span>:00</span>
-              </div>
-            )}
+              <span>Тихие часы (не беспокоить звуками и уведомлениями ночью)</span>
+            </label>
+            <p className="text-[11px] text-muted pl-6 mt-0.5">
+              В этот период звуковые сигналы и всплывающие окна блокируются.
+            </p>
           </div>
+
+          {quietHoursEnabled && (
+            <div className="flex items-center gap-2 pl-6 sm:pl-0 font-mono text-xs">
+              <span className="text-text-muted">С</span>
+              <input
+                type="number"
+                min="0"
+                max="23"
+                value={quietHoursStart ?? 23}
+                onChange={(e) => setQuietHours(true, Number(e.target.value), quietHoursEnd ?? 8)}
+                className="w-14 bg-surface-2 border border-border rounded p-1 text-center text-text"
+              />
+              <span className="text-text-muted">:00 до</span>
+              <input
+                type="number"
+                min="0"
+                max="23"
+                value={quietHoursEnd ?? 8}
+                onChange={(e) => setQuietHours(true, quietHoursStart ?? 23, Number(e.target.value))}
+                className="w-14 bg-surface-2 border border-border rounded p-1 text-center text-text"
+              />
+              <span className="text-text-muted">:00</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 3. Раздел: Подключения */}
-      <div className="bg-surface rounded-card p-5 border border-border space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-text font-semibold text-sm">
-            <LinkIcon size={16} className="text-emerald-400" />
-            <h2>Подключения и API</h2>
+      {/* AI Qualification Section */}
+      <div className="bg-surface rounded-card p-6 border border-border space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Sparkles size={20} className="text-accent" />
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-text">
+                ИИ-модель и автоматический скоринг
+              </h2>
+              <p className="text-[11px] text-text-muted mt-0.5">
+                Автоматическая квалификация каналов: выявление болей, проверка монетизации и генерация первой строки.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-text-muted">Использовать ИИ:</span>
+            <button
+              type="button"
+              onClick={() => setUseAiQualification(!useAiQualification)}
+              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
+                useAiQualification ? 'bg-accent justify-end' : 'bg-surface-2 border border-border justify-start'
+              }`}
+            >
+              <div className="w-4 h-4 rounded-full bg-white shadow" />
+            </button>
+          </div>
+        </div>
+
+        {/* Stats & Batch settings */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-3.5 bg-surface-2/40 rounded-card border border-border flex items-center justify-between">
+            <div>
+              <span className="text-[11px] text-muted block">Оценено лидов через ИИ</span>
+              <span className="font-mono text-lg font-bold text-text mt-0.5 block">
+                {evaluatedLeadsCount} <span className="text-xs font-normal text-muted">каналов</span>
+              </span>
+            </div>
+            <div className="p-2.5 rounded-full bg-accent-soft text-accent">
+              <Sparkles size={18} />
+            </div>
+          </div>
+
+          <div className="p-3.5 bg-surface-2/40 rounded-card border border-border space-y-1.5">
+            <label className="text-[11px] text-muted block font-medium">
+              Топ-N каналов для авто-скоринга в Finder
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={5}
+                max={100}
+                value={aiTopNCount}
+                onChange={(e) => setAiTopNCount(Math.max(1, Number(e.target.value)))}
+                className="w-24 bg-surface border border-border rounded-control px-2.5 py-1 text-xs font-mono text-text focus:outline-none focus:border-accent"
+              />
+              <span className="text-[11px] text-text-muted">
+                каналов пачками по 5 (с паузой 2 сек)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Custom AI API Key Configuration */}
+        <div className="p-4 bg-surface-2/30 rounded-card border border-border space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <span className="text-xs font-semibold text-text uppercase tracking-wider block">
+                Персональный API-ключ ИИ
+              </span>
+              <p className="text-[11px] text-text-muted mt-0.5">
+                Используется для кнопки «AI-версия» отклика в ленте и умного скоринга каналов.
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <label className="text-xs text-text-muted">Провайдер:</label>
+              <select
+                value={customAiProvider || 'gemini'}
+                onChange={(e) => setCustomAiProvider(e.target.value as any)}
+                className="bg-surface border border-border rounded-control px-2.5 py-1 text-xs text-text focus:outline-none focus:border-accent"
+              >
+                <option value="gemini">Google Gemini (AIzaSy...)</option>
+                <option value="groq">Groq (gsk_...)</option>
+                <option value="openrouter">OpenRouter (sk-or-...)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="password"
+              placeholder={
+                customAiProvider === 'groq'
+                  ? 'gsk_...'
+                  : customAiProvider === 'openrouter'
+                  ? 'sk-or-...'
+                  : 'AIzaSy... или AQ.Ab...'
+              }
+              value={customAiApiKey || ''}
+              onChange={(e) => setCustomAiApiKey(e.target.value)}
+              className="flex-1 bg-surface border border-border rounded-control px-3 py-2 text-xs font-mono text-text focus:outline-none focus:border-accent"
+            />
+            <button
+              type="button"
+              disabled={!customAiApiKey?.trim() || isTestingKey}
+              onClick={handleTestCustomAiKey}
+              className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-xs font-semibold rounded-control transition-colors shrink-0 flex items-center justify-center gap-1.5"
+            >
+              {isTestingKey ? 'Проверяю...' : 'Проверить ключ'}
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between text-[11px] text-muted gap-2">
+            <span>
+              {customAiApiKey?.trim() ? (
+                <span className="text-emerald-400 font-medium">✓ Ключ сохранён в браузере</span>
+              ) : (
+                <span>Ключ не задан (будут использоваться серверные переменные Netlify)</span>
+              )}
+            </span>
+            <div className="flex items-center gap-3">
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noreferrer"
+                className="text-accent hover:underline"
+              >
+                Бесплатный ключ Gemini →
+              </a>
+              <a
+                href="https://console.groq.com/keys"
+                target="_blank"
+                rel="noreferrer"
+                className="text-accent hover:underline"
+              >
+                Бесплатный ключ Groq →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* AI Providers Status */}
+        <div className="space-y-2">
+          <span className="text-xs font-semibold text-text uppercase tracking-wider block">
+            Статус AI-провайдеров (цепочка fallback)
+          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            {/* Gemini */}
+            <div className="p-3.5 bg-surface-2/40 rounded-card border border-border space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-text">1. Google Gemini</span>
+                {health.providers?.gemini ? (
+                  <CheckCircle2 size={16} className="text-success" />
+                ) : (
+                  <AlertCircle size={16} className="text-muted" />
+                )}
+              </div>
+              <div className="text-[11px] text-muted leading-relaxed">
+                {health.providers?.gemini ? (
+                  <span className="text-success font-medium">GEMINI_API_KEY активен</span>
+                ) : (
+                  <span>GEMINI_API_KEY не задан</span>
+                )}
+              </div>
+              <div className="text-[10px] text-muted font-mono truncate">
+                Модель: {health.models?.gemini || 'gemini-3.8-flash'}
+              </div>
+            </div>
+
+            {/* Groq */}
+            <div className="p-3.5 bg-surface-2/40 rounded-card border border-border space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-text">2. Groq (Fallback)</span>
+                {health.providers?.groq ? (
+                  <CheckCircle2 size={16} className="text-success" />
+                ) : (
+                  <span className="w-2 h-2 rounded-full bg-muted" />
+                )}
+              </div>
+              <div className="text-[11px] text-muted leading-relaxed">
+                {health.providers?.groq ? (
+                  <span className="text-success font-medium">GROQ_API_KEY активен</span>
+                ) : (
+                  <span>GROQ_API_KEY не задан</span>
+                )}
+              </div>
+              <div className="text-[10px] text-muted font-mono truncate">
+                Модель: {health.models?.groq || 'llama-3.3-70b-versatile'}
+              </div>
+            </div>
+
+            {/* OpenRouter */}
+            <div className="p-3.5 bg-surface-2/40 rounded-card border border-border space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-text">3. OpenRouter</span>
+                {health.providers?.openrouter ? (
+                  <CheckCircle2 size={16} className="text-success" />
+                ) : (
+                  <span className="w-2 h-2 rounded-full bg-muted" />
+                )}
+              </div>
+              <div className="text-[11px] text-muted leading-relaxed">
+                {health.providers?.openrouter ? (
+                  <span className="text-success font-medium">OPENROUTER_API_KEY активен</span>
+                ) : (
+                  <span>OPENROUTER_API_KEY не задан</span>
+                )}
+              </div>
+              <div className="text-[10px] text-muted font-mono truncate">
+                Модель: {health.models?.openrouter || 'meta-llama/llama-3.3-70b-instruct:free'}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Guidance if no AI key configured */}
+        {!health.providers?.gemini && !health.providers?.groq && !health.providers?.openrouter && (
+          <div className="p-3.5 bg-warning-soft/15 border border-warning/30 rounded-card text-xs text-text-muted space-y-1.5">
+            <div className="flex items-center gap-1.5 font-semibold text-warning">
+              <AlertCircle size={14} />
+              <span>Ни один ключ AI-провайдера не настроен</span>
+            </div>
+            <p className="leading-relaxed text-[11px]">
+              Для включения функции ИИ-квалификации добавьте переменные окружения в панели Netlify (Site configuration &gt; Environment variables):
+            </p>
+            <ul className="list-disc list-inside text-[11px] space-y-0.5 font-mono text-text">
+              <li>GEMINI_API_KEY (Google AI Studio — бесплатный)</li>
+              <li>GROQ_API_KEY (Groq Cloud — быстрый бесплатный)</li>
+              <li>OPENROUTER_API_KEY (OpenRouter :free)</li>
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* API Health & Environment Status */}
+      <div className="bg-surface rounded-card p-6 border border-border space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Key size={18} className="text-info" />
+            <h2 className="text-sm font-bold uppercase tracking-wider text-text">
+              Статус подключения API (Netlify Environment)
+            </h2>
           </div>
           <button
-            type="button"
             onClick={checkHealth}
             disabled={isCheckingHealth}
-            className="flex items-center gap-1 text-xs text-text-muted hover:text-text px-2 py-1 rounded border border-border transition-colors disabled:opacity-50"
+            className="text-xs text-accent hover:underline disabled:opacity-50"
           >
-            <RotateCw size={12} className={isCheckingHealth ? 'animate-spin' : ''} />
-            <span>Проверить</span>
+            {isCheckingHealth ? 'Проверяю...' : 'Проверить снова'}
           </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-          <div className="p-3 bg-surface-2/40 rounded-control border border-border flex items-center justify-between">
-            <span className="font-medium text-text">Telegram-бот:</span>
-            {health.telegram ? (
-              <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-                <CheckCircle2 size={13} /> Работает
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-danger font-semibold">
-                <AlertCircle size={13} /> Не отвечает
-              </span>
-            )}
+          {/* YouTube API */}
+          <div className="p-3.5 bg-surface-2/40 rounded-card border border-border space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-text">YouTube Data API v3</span>
+              {health.youtube ? (
+                <CheckCircle2 size={16} className="text-success" />
+              ) : (
+                <AlertCircle size={16} className="text-warning" />
+              )}
+            </div>
+            <div className="text-[11px] text-muted leading-relaxed">
+              {health.youtube ? (
+                <span className="text-success font-medium">Ключ YOUTUBE_API_KEY активен</span>
+              ) : (
+                <span className="text-warning">
+                  Не настроен. Добавьте в Netlify Environment Variables.
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="p-3 bg-surface-2/40 rounded-control border border-border flex items-center justify-between">
-            <span className="font-medium text-text">YouTube API:</span>
-            {health.youtube ? (
-              <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-                <CheckCircle2 size={13} /> Подключён
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-warning font-semibold">
-                <AlertCircle size={13} /> Нет ключа
-              </span>
-            )}
+          {/* Telegram Notifications */}
+          <div className="p-3.5 bg-surface-2/40 rounded-card border border-border space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-text">Telegram Bot Alerts</span>
+              {health.telegram ? (
+                <CheckCircle2 size={16} className="text-success" />
+              ) : (
+                <span className="w-2 h-2 rounded-full bg-muted" />
+              )}
+            </div>
+            <div className="text-[11px] text-muted leading-relaxed">
+              {health.telegram ? (
+                <span className="text-success font-medium">Бот подключён</span>
+              ) : (
+                <span>Опционально (TELEGRAM_BOT_TOKEN и CHAT_ID)</span>
+              )}
+            </div>
           </div>
 
-          <div className="p-3 bg-surface-2/40 rounded-control border border-border flex items-center justify-between">
-            <span className="font-medium text-text">Gemini AI:</span>
-            {health.ai ? (
-              <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-                <CheckCircle2 size={13} /> Активен
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-warning font-semibold">
-                <AlertCircle size={13} /> Недоступен
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Custom AI Key input */}
-        <div className="pt-2 border-t border-border space-y-2 text-xs">
-          <label className="block text-text-muted font-medium">Свой ключ Gemini API (опционально)</label>
-          <div className="flex gap-2">
-            <input
-              type="password"
-              value={customAiApiKey || ''}
-              onChange={(e) => setCustomAiApiKey(e.target.value.trim())}
-              placeholder="AIzaSy..."
-              className="flex-1 bg-surface-2 text-text font-mono rounded-control border border-border px-3 py-2 focus:outline-none focus:border-accent min-h-[38px]"
-            />
-            <button
-              type="button"
-              onClick={handleTestAiKey}
-              disabled={isTestingKey || !customAiApiKey}
-              className="px-3.5 py-2 bg-surface-2 hover:bg-surface-3 text-text rounded-control border border-border font-medium transition-colors disabled:opacity-50 min-h-[38px]"
-            >
-              {isTestingKey ? 'Проверка...' : 'Проверить'}
-            </button>
+          {/* AI Rewrite */}
+          <div className="p-3.5 bg-surface-2/40 rounded-card border border-border space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-text">Claude AI Rewrite</span>
+              {health.ai ? (
+                <CheckCircle2 size={16} className="text-success" />
+              ) : (
+                <span className="w-2 h-2 rounded-full bg-muted" />
+              )}
+            </div>
+            <div className="text-[11px] text-muted leading-relaxed">
+              {health.ai ? (
+                <span className="text-success font-medium">ANTHROPIC_API_KEY активен</span>
+              ) : (
+                <span>Опционально (кнопка AI рерайтера)</span>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 4. Раздел: Данные */}
-      <div className="bg-surface rounded-card p-5 border border-border space-y-4">
-        <div className="flex items-center gap-2 text-text font-semibold text-sm">
-          <Database size={16} className="text-blue-400" />
-          <h2>Управление данными</h2>
+      {/* Data Management */}
+      <div className="bg-surface rounded-card p-6 border border-border space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-border">
+          <Database size={18} className="text-accent" />
+          <h2 className="text-sm font-bold uppercase tracking-wider text-text">
+            Управление данными и резервное копирование
+          </h2>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 text-xs">
+        <p className="text-xs text-text-muted leading-relaxed">
+          Все ваши лиды, заметки и настройки хранятся локально в вашем браузере. Вы можете экспортировать их в файл или восстановить в один клик.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-3 pt-2">
           <button
-            type="button"
-            onClick={handleExportCsv}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-surface-2 hover:bg-surface-3 text-text rounded-control border border-border font-medium transition-colors min-h-[38px]"
+            onClick={handleExportJson}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-surface-2 hover:bg-surface-3 text-text rounded-control border border-border text-xs font-semibold transition-colors"
+          >
+            <Download size={14} />
+            <span>Экспорт полного JSON</span>
+          </button>
+
+          <label className="flex items-center gap-1.5 px-3.5 py-2 bg-surface-2 hover:bg-surface-3 text-text rounded-control border border-border text-xs font-semibold transition-colors cursor-pointer">
+            <Upload size={14} />
+            <span>Импорт JSON</span>
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImportJson}
+              className="hidden"
+            />
+          </label>
+
+          <button
+            onClick={() => exportLeadsToCsv(leads)}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-surface-2 hover:bg-surface-3 text-text rounded-control border border-border text-xs font-semibold transition-colors"
           >
             <Download size={14} />
             <span>Экспорт лидов в CSV</span>
           </button>
 
           <button
-            type="button"
             onClick={() => setClearModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-danger hover:bg-danger/10 rounded-control border border-danger/30 font-medium transition-colors min-h-[38px]"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-danger-soft text-danger hover:bg-danger/20 rounded-control border border-danger/30 text-xs font-semibold transition-colors ml-auto"
           >
             <Trash2 size={14} />
             <span>Очистить все данные</span>
@@ -427,29 +881,28 @@ export const Settings: React.FC = () => {
       <Modal
         isOpen={clearModalOpen}
         onClose={() => setClearModalOpen(false)}
-        title="Подтверждение очистки данных"
-      >
-        <div className="space-y-4 text-xs">
-          <p className="text-text-muted leading-relaxed">
-            Вы уверены? Это действие безвозвратно удалит всех сохранённых лидов и кэш вакансий из локального хранилища браузера.
-          </p>
-          <div className="flex justify-end gap-2 pt-2">
+        maxWidth="md"
+        title="Подтверждение удаления"
+        footer={
+          <div className="flex items-center gap-2">
             <button
-              type="button"
               onClick={() => setClearModalOpen(false)}
-              className="px-3 py-1.5 bg-surface-2 hover:bg-surface-3 text-text rounded border border-border transition-colors"
+              className="px-3 py-1.5 text-xs text-text-muted hover:text-text"
             >
               Отмена
             </button>
             <button
-              type="button"
-              onClick={handleConfirmClear}
-              className="px-3.5 py-1.5 bg-danger hover:bg-danger/80 text-white rounded font-semibold transition-colors"
+              onClick={handleClearAllConfirm}
+              className="px-4 py-1.5 bg-danger hover:bg-danger/90 text-white text-xs font-semibold rounded-control"
             >
-              Да, удалить
+              Да, удалить всё
             </button>
           </div>
-        </div>
+        }
+      >
+        <p className="text-xs text-text-muted leading-relaxed">
+          Вы уверены, что хотите удалить всех лидов, историю касаний и сохранённые вакансии? Это действие нельзя будет отменить, если вы предварительно не сделали экспорт в JSON.
+        </p>
       </Modal>
     </div>
   );

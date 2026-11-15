@@ -514,8 +514,10 @@ export const useVacanciesStore = create<VacanciesState>()(
               )
               .slice(0, 300);
           }
-          if (!state.sources || state.sources.length < 150) {
+          const enabledCount = (state.sources || []).filter((s) => s.enabled).length;
+          if (!state.sources || state.sources.length < 150 || enabledCount < 50) {
             setTimeout(() => {
+              useVacanciesStore.getState().enableAllSources();
               useVacanciesStore.getState().syncWithCatalog();
             }, 0);
           }

@@ -14,12 +14,14 @@ function getInitialActiveSources(): string[] {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) return parsed.map((x) => String(x).toLowerCase());
+      if (Array.isArray(parsed) && parsed.length >= 50) {
+        return parsed.map((x) => String(x).toLowerCase());
+      }
     }
   } catch {
     // ignore json error
   }
-  // Default: all recommended items
+  // Default: all recommended items (full 152 catalog sources)
   return typedCatalog.filter((s) => s.recommended).map((s) => s.id);
 }
 
@@ -99,6 +101,8 @@ interface CatalogState {
   setSortBy: (sort: SortOption) => void;
 
   toggleActive: (id: string) => void;
+  enableAllSources: () => void;
+  disableAllSources: () => void;
   enableRecommended: () => void;
   addActiveBatch: (ids: string[]) => void;
   removeActiveBatch: (ids: string[]) => void;
@@ -155,6 +159,25 @@ export const useCatalogStore = create<CatalogState>((set, get) => {
       }
       syncToVacanciesStore(arr);
       set({ activeSources: current });
+    },
+
+    enableAllSources: () => {
+      const allIds = get().catalog.map((s) => s.id.toLowerCase());
+      const next = new Set(allIds);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)));
+      }
+      syncToVacanciesStore(Array.from(next));
+      set({ activeSources: next });
+    },
+
+    disableAllSources: () => {
+      const next = new Set<string>();
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+      }
+      syncToVacanciesStore([]);
+      set({ activeSources: next });
     },
 
     enableRecommended: () => {
