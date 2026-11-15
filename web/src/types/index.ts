@@ -100,6 +100,7 @@ export interface Vacancy {
     unit?: 'per_video' | 'per_month' | 'per_hour' | 'per_minute' | 'project';
   } | null;
   fromWorker?: boolean;
+  crossPostChannels?: string[];
 }
 
 export interface SavedSearchPreset {
@@ -115,6 +116,9 @@ export interface SavedSearchPreset {
 
 export type TemplateType =
   | 'shotgun'
+  | 'youtube_dynamic'
+  | 'reels_viral'
+  | 'podcast_clean'
   | 'sniper'
   | 'fire_question'
   | 'fire_sample'

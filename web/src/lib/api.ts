@@ -161,6 +161,11 @@ async function handleApiResponse<T>(res: Response): Promise<T> {
   return data as unknown as T;
 }
 
+export async function fetchHealth(): Promise<HealthStatus> {
+  const res = await fetch('/api/health');
+  return handleApiResponse<HealthStatus>(res);
+}
+
 export async function loginWithPassword(password: string): Promise<{ ok: boolean; devMode?: boolean }> {
   const res = await fetch('/api/auth-login', {
     method: 'POST',

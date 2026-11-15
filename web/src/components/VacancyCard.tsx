@@ -6,6 +6,9 @@ import { computeProfileFit } from '../lib/profileFit';
 import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
 import { rewritePitchWithAi } from '../lib/api';
+import { parseStructuredVacancy } from '../shared/vacancyParser';
+import { RateCalculatorModal } from './RateCalculatorModal';
+import { ClientBriefModal } from './ClientBriefModal';
 import {
   ExternalLink,
   Send,
@@ -21,6 +24,9 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  Calculator,
+  FileQuestion,
+  MessageSquare,
 } from 'lucide-react';
 
 interface VacancyCardProps {
@@ -44,8 +50,25 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
 }) => {
   const profile = useSettingsStore((s) => s.profile);
   const addToast = useToastStore((s) => s.addToast);
+  const [showRateCalculator, setShowRateCalculator] = useState(false);
+  const [showClientBrief, setShowClientBrief] = useState(false);
+
+  // 3.3 & 3.7 Структурированный парсинг вакансии (софт, дедлайн, хронометраж, закрытость)
+  const structured = useMemo(() => parseStructuredVacancy(vacancy.text), [vacancy.text]);
+
   const fitScore = vacancy.profileFit ?? computeProfileFit(vacancy, profile);
-  const isHot = vacancy.statusBadge === 'hot' || Date.now() - new Date(vacancy.postedAt).getTime() < 15 * 60 * 1000;
+  const isHot =
+    !structured.isClosed &&
+    (vacancy.statusBadge === 'hot' || Date.now() - new Date(vacancy.postedAt).getTime() < 15 * 60 * 1000);
+
+  // 3.4 Поиск прямого контакта в тексте для кнопки «Написать»
+  const directTgContact = useMemo(() => {
+    const match = vacancy.text.match(/@([a-zA-Z0-9_]{4,})/);
+    if (match && match[1].toLowerCase() !== vacancy.channel.toLowerCase().replace(/^@/, '')) {
+      return match[1];
+    }
+    return null;
+  }, [vacancy.text, vacancy.channel]);
 
   const [copied, setCopied] = useState(false);
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
@@ -227,6 +250,52 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         </div>
       </div>
 
+      {/* 3.3 & 3.7 Структурированные бейджи: Закрытость, Дедлайн, Хронометраж, Исходники */}
+      {(structured.isClosed || structured.deadline || structured.duration || structured.footageText) && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          {structured.isClosed && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-danger bg-danger/15 px-2 py-0.5 rounded border border-danger/30">
+              <AlertTriangle size={12} />
+              <span>Похоже, уже закрыта</span>
+            </span>
+          )}
+          {structured.deadline && (
+            <span className="text-[11px] font-medium text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/25">
+              {structured.deadline}
+            </span>
+          )}
+          {structured.duration && (
+            <span className="text-[11px] font-medium text-blue-300 bg-blue-400/10 px-2 py-0.5 rounded border border-blue-400/25">
+              ⏱️ {structured.duration}
+            </span>
+          )}
+          {structured.footageText && (
+            <span className="text-[11px] font-medium text-emerald-300 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/25">
+              📁 {structured.footageText}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* 3.4 Кнопка быстрого перехода к контакту @username */}
+      {directTgContact && (
+        <div className="flex items-center justify-between p-2 bg-accent/10 border border-accent/25 rounded-control text-xs">
+          <div className="flex items-center gap-1.5 text-accent font-medium truncate">
+            <MessageSquare size={14} className="shrink-0" />
+            <span className="truncate">Контакт заказчика: @{directTgContact}</span>
+          </div>
+          <a
+            href={`https://t.me/${directTgContact}?text=${encodeURIComponent(activeDraft)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-2.5 py-1 bg-accent hover:bg-accent-hover text-white text-[11px] font-semibold rounded flex items-center gap-1 transition-colors shrink-0"
+          >
+            <span>Написать</span>
+            <ExternalLink size={11} />
+          </a>
+        </div>
+      )}
+
       {/* Post Text */}
       <div className="text-xs text-text leading-relaxed whitespace-pre-wrap line-clamp-5 select-text font-sans">
         {renderHighlightedText(vacancy.text)}
@@ -365,7 +434,29 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setShowRateCalculator(true)}
+            title="Рассчитать рентабельность ставки под хронометраж и моушн"
+            className="text-muted hover:text-accent p-1.5 rounded-control hover:bg-surface-2 transition-colors text-xs flex items-center gap-1 min-h-[36px]"
+            aria-label="Калькулятор ставки"
+          >
+            <Calculator size={13} />
+            <span className="hidden md:inline">Ставка</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowClientBrief(true)}
+            title="Сгенерировать готовые вопросы для брифа клиента"
+            className="text-muted hover:text-accent p-1.5 rounded-control hover:bg-surface-2 transition-colors text-xs flex items-center gap-1 min-h-[36px]"
+            aria-label="Бриф клиента"
+          >
+            <FileQuestion size={13} />
+            <span className="hidden md:inline">Бриф</span>
+          </button>
+
           <button
             onClick={onConvertToLead}
             title="Создать лида в воронке"
@@ -384,6 +475,21 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
           </button>
         </div>
       </div>
+
+      {/* 3.9 & 3.10 Modals */}
+      <RateCalculatorModal
+        isOpen={showRateCalculator}
+        onClose={() => setShowRateCalculator(false)}
+        vacancyBudget={vacancy.budget?.max ?? vacancy.budget?.min ?? null}
+        vacancyCurrency={vacancy.budget?.currency}
+      />
+
+      <ClientBriefModal
+        isOpen={showClientBrief}
+        onClose={() => setShowClientBrief(false)}
+        leadTitle={`@${vacancy.channel}`}
+        videoType={structured.duration || 'YouTube'}
+      />
     </div>
   );
 };

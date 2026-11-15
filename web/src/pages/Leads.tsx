@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLeadsStore } from '../store/leadsStore';
 import { useToastStore } from '../store/toastStore';
@@ -16,6 +16,8 @@ import {
   Table as TableIcon,
   Search,
   Download,
+  Clock,
+  AlertTriangle,
 } from 'lucide-react';
 
 export const Leads: React.FC = () => {
@@ -41,6 +43,17 @@ export const Leads: React.FC = () => {
 
   const [pitchLead, setPitchLead] = useState<Lead | null>(null);
   const [pitchOpeningAngle, setPitchOpeningAngle] = useState<string | undefined>(undefined);
+
+  // 3.11 Загрузка недели (в работе: call, replied, followup)
+  const activeWorkloadHours = useMemo(() => {
+    const inProgressCount = leads.filter(
+      (l) => l.status === 'call' || l.status === 'replied' || l.status === 'followup'
+    ).length;
+    return inProgressCount * 8;
+  }, [leads]);
+
+  const maxWeeklyHours = 40;
+  const isOverloaded = activeWorkloadHours > maxWeeklyHours;
 
   // Filter leads
   const filteredLeads = leads.filter((lead) => {
@@ -166,6 +179,29 @@ export const Leads: React.FC = () => {
               <span>Таблица</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* 3.11 Загрузка недели & Follow-up правила 1-2-3 */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-surface rounded-card border border-border text-xs">
+        <div className="flex items-center gap-2">
+          <Clock size={16} className={isOverloaded ? 'text-danger' : 'text-accent'} />
+          <span>
+            <strong className="text-text">Загрузка недели:</strong>{' '}
+            <span className={isOverloaded ? 'text-danger font-bold' : 'text-text font-medium'}>
+              {activeWorkloadHours} / {maxWeeklyHours} ч
+            </span>
+          </span>
+          {isOverloaded && (
+            <span className="px-2 py-0.5 rounded bg-danger/20 text-danger text-[10px] font-semibold border border-danger/30 flex items-center gap-1">
+              <AlertTriangle size={11} /> Перегрузка недели! Повышайте ставку
+            </span>
+          )}
+        </div>
+
+        <div className="text-[11px] text-muted flex items-center gap-1">
+          <span>Правило фоллоу-апов:</span>
+          <span className="font-mono text-text">1-й через 2 дня • 2-й через 2 дня • 3-й через 3 дня</span>
         </div>
       </div>
 

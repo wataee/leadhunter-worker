@@ -18,6 +18,7 @@ import { EmptyState } from '../components/EmptyState';
 import { CardSkeleton } from '../components/Skeleton';
 import { Vacancy, SavedSearchPreset } from '../types';
 import { computeProfileFit } from '../lib/profileFit';
+import { normalizeText, computeTextHash } from '../shared/filter.js';
 import {
   Radio,
   Plus,
@@ -556,6 +557,79 @@ export const Vacancies: React.FC = () => {
       }
       return new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime();
     });
+
+  // 3.6 Дедупликация кросс-постов (кластеризация одинаковых объявлений по нормализованному хэшу)
+  const clusteredVacancies = useMemo(() => {
+    const clusters = new Map<string, Vacancy[]>();
+    for (const v of displayedVacancies) {
+      const norm = normalizeText(v.text).slice(0, 160);
+      const hash = computeTextHash(norm);
+      const list = clusters.get(hash) || [];
+      list.push(v);
+      clusters.set(hash, list);
+    }
+
+    const result: (Vacancy & { crossPostChannels?: string[] })[] = [];
+    for (const list of clusters.values()) {
+      const primary = { ...list[0] };
+      const otherChannels = Array.from(
+        new Set(
+          list
+            .slice(1)
+            .map((x) => x.channel.replace(/^@/, ''))
+            .filter((ch) => ch.toLowerCase() !== primary.channel.toLowerCase().replace(/^@/, ''))
+        )
+      );
+      if (otherChannels.length > 0) {
+        primary.crossPostChannels = otherChannels;
+      }
+      result.push(primary);
+    }
+    return result;
+  }, [displayedVacancies]);
+
+  // 3.5 Режим Inbox: навигация клавишами j/k, e (в воронку), a (скрыть), r (отклик)
+  const [focusedIndex, setFocusedIndex] = useState<number>(0);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.key === 'j') {
+        e.preventDefault();
+        setFocusedIndex((prev) => Math.min(prev + 1, clusteredVacancies.length - 1));
+      } else if (e.key === 'k') {
+        e.preventDefault();
+        setFocusedIndex((prev) => Math.max(prev - 1, 0));
+      } else if (e.key === 'e') {
+        e.preventDefault();
+        const cur = clusteredVacancies[focusedIndex];
+        if (cur) handleConvertToLead(cur);
+      } else if (e.key === 'a') {
+        e.preventDefault();
+        const cur = clusteredVacancies[focusedIndex];
+        if (cur) hideVacancy(cur.id);
+      } else if (e.key === 'r') {
+        e.preventDefault();
+        const cur = clusteredVacancies[focusedIndex];
+        if (cur) {
+          markSeen(cur.id);
+          setActivePitchVacancy(cur);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [focusedIndex, clusteredVacancies, handleConvertToLead, hideVacancy, markSeen]);
 
   const renderFiltersSidebar = () => (
     <div className="space-y-5">
@@ -1235,28 +1309,54 @@ export const Vacancies: React.FC = () => {
             />
           )}
 
+          {/* 3.5 Inbox Mode Bar */}
+          {clusteredVacancies.length > 0 && (
+            <div className="flex items-center justify-between px-3 py-1.5 bg-surface-2/60 rounded-control border border-border text-[11px] text-muted">
+              <span>
+                ⌨️ <strong className="text-text">Режим Inbox:</strong> [j / k] след / пред • [e] в воронку • [a] скрыть • [r] отклик
+              </span>
+              <span className="font-mono">
+                {focusedIndex + 1} / {clusteredVacancies.length}
+              </span>
+            </div>
+          )}
+
           {/* Vacancy cards list */}
           <div className="space-y-3">
-            {displayedVacancies.map((vacancy) => (
-              <VacancyCard
+            {clusteredVacancies.map((vacancy, idx) => (
+              <div
                 key={vacancy.id}
-                vacancy={vacancy}
-                highlightWords={includeKeywords}
-                onApply={() => {
-                  markSeen(vacancy.id);
-                  setActivePitchVacancy(vacancy);
-                }}
-                onConvertToLead={() => handleConvertToLead(vacancy)}
-                onHide={() => hideVacancy(vacancy.id)}
-                onToggleFavorite={() => toggleFavorite(vacancy.id)}
-                onHideChannel={(ch) => {
-                  hideChannel(ch);
-                  addToast({
-                    type: 'info',
-                    message: `Канал @${ch} скрыт из ленты. Вы можете вернуть его в левой панели.`,
-                  });
-                }}
-              />
+                className={`transition-all rounded-card ${
+                  focusedIndex === idx ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg' : ''
+                }`}
+              >
+                {vacancy.crossPostChannels && vacancy.crossPostChannels.length > 0 && (
+                  <div className="text-[11px] font-medium text-text-muted bg-surface-2 px-3 py-1 rounded-t-control border-t border-x border-border flex items-center gap-1.5">
+                    <span>
+                      📢 Опубликовано в {vacancy.crossPostChannels.length + 1} каналах: @{vacancy.channel.replace(/^@/, '')},{' '}
+                      {vacancy.crossPostChannels.map((c) => `@${c}`).join(', ')}
+                    </span>
+                  </div>
+                )}
+                <VacancyCard
+                  vacancy={vacancy}
+                  highlightWords={includeKeywords}
+                  onApply={() => {
+                    markSeen(vacancy.id);
+                    setActivePitchVacancy(vacancy);
+                  }}
+                  onConvertToLead={() => handleConvertToLead(vacancy)}
+                  onHide={() => hideVacancy(vacancy.id)}
+                  onToggleFavorite={() => toggleFavorite(vacancy.id)}
+                  onHideChannel={(ch) => {
+                    hideChannel(ch);
+                    addToast({
+                      type: 'info',
+                      message: `Канал @${ch} скрыт из ленты. Вы можете вернуть его в левой панели.`,
+                    });
+                  }}
+                />
+              </div>
             ))}
           </div>
         </div>

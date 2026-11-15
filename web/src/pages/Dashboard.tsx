@@ -11,6 +11,8 @@ import { TierBadge } from '../components/TierBadge';
 import { LeadDrawer } from '../components/LeadDrawer';
 import { PitchGeneratorModal } from '../components/PitchGeneratorModal';
 import { EmptyState } from '../components/EmptyState';
+import { OnboardingModal } from '../components/OnboardingModal';
+import { SystemHealthModal } from '../components/SystemHealthModal';
 import { formatDate, isOverdue, isToday } from '../lib/time';
 import { notifyFollowUps } from '../lib/reminders';
 import {
@@ -29,6 +31,7 @@ import {
   DollarSign,
   Award,
   BellRing,
+  Activity,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -58,6 +61,10 @@ export const Dashboard: React.FC = () => {
   const [activePitchLead, setActivePitchLead] = useState<Lead | null>(null);
   const [activePitchVacancy, setActivePitchVacancy] = useState<Vacancy | null>(null);
   const [activeOpeningAngle, setActiveOpeningAngle] = useState<string | undefined>(undefined);
+  const [showSystemHealth, setShowSystemHealth] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem('leadhunter_onboarding_completed');
+  });
 
   // Metrics calculation
   const totalLeads = leads.length;
@@ -245,13 +252,33 @@ export const Dashboard: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => navigate('/finder')}
-          className="flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-control shadow-subtle self-start sm:self-auto transition-colors"
-        >
-          <Sparkles size={14} />
-          <span>Найти новых клиентов на YouTube</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => setShowSystemHealth(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-surface-2 hover:bg-surface-3 text-text text-xs font-medium rounded-control border border-border transition-colors min-h-[36px]"
+            title="Проверить статус воркера, сессии и AI"
+          >
+            <Activity size={14} className="text-emerald-400" />
+            <span>Всё ли работает?</span>
+          </button>
+
+          <button
+            onClick={() => setShowOnboarding(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-surface-2 hover:bg-surface-3 text-text text-xs font-medium rounded-control border border-border transition-colors min-h-[36px]"
+            title="Пройти мастер настройки профиля монтажёра"
+          >
+            <Sparkles size={14} className="text-accent" />
+            <span>Онбординг</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/finder')}
+            className="flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-control shadow-subtle transition-colors min-h-[36px]"
+          >
+            <Sparkles size={14} />
+            <span>Найти клиентов</span>
+          </button>
+        </div>
       </div>
 
       {/* Daily Goal & Key Metrics */}
@@ -783,6 +810,17 @@ export const Dashboard: React.FC = () => {
         lead={activePitchLead}
         vacancy={activePitchVacancy}
         initialOpeningAngle={activeOpeningAngle}
+      />
+
+      {/* 3.1 & 3.2 Modals */}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+      />
+
+      <SystemHealthModal
+        isOpen={showSystemHealth}
+        onClose={() => setShowSystemHealth(false)}
       />
     </div>
   );

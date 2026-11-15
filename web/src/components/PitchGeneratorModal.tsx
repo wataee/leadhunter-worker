@@ -18,6 +18,7 @@ import {
   Check,
   AlertTriangle,
   Info,
+  Split,
 } from 'lucide-react';
 
 interface PitchGeneratorModalProps {
@@ -47,6 +48,7 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
   const [pitchText, setPitchText] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
+  const [showDiffView, setShowDiffView] = useState<boolean>(false);
 
   // Pick suitable template
   useEffect(() => {
@@ -320,22 +322,57 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
             <label className="text-xs font-medium text-text-muted">
               Текст сообщения
             </label>
-            <button
-              onClick={handleAiImprove}
-              disabled={isAiLoading}
-              className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover transition-colors disabled:opacity-50"
-            >
-              <Sparkles size={12} className={isAiLoading ? 'animate-spin' : ''} />
-              <span>{isAiLoading ? 'Оптимизирую...' : 'Улучшить с помощью ИИ'}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {vacancy && (
+                <button
+                  type="button"
+                  onClick={() => setShowDiffView(!showDiffView)}
+                  className="flex items-center gap-1 text-[11px] font-medium text-accent hover:underline px-2 py-0.5 rounded bg-accent/10 border border-accent/20 transition-colors"
+                >
+                  <Split size={12} />
+                  <span>{showDiffView ? 'Скрыть оригинал' : 'Сравнить с вакансией'}</span>
+                </button>
+              )}
+              <button
+                onClick={handleAiImprove}
+                disabled={isAiLoading}
+                className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover transition-colors disabled:opacity-50"
+              >
+                <Sparkles size={12} className={isAiLoading ? 'animate-spin' : ''} />
+                <span>{isAiLoading ? 'Оптимизирую...' : 'Улучшить с помощью ИИ'}</span>
+              </button>
+            </div>
           </div>
-          <textarea
-            value={pitchText}
-            onChange={(e) => setPitchText(e.target.value)}
-            rows={5}
-            className="w-full bg-surface-2 text-text text-sm rounded-control border border-border p-3 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors leading-relaxed font-sans resize-y"
-            placeholder="Введите текст сообщения..."
-          />
+
+          {showDiffView && vacancy ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
+              <div className="p-3 bg-surface rounded-control border border-border text-xs space-y-1.5 max-h-48 overflow-y-auto">
+                <span className="text-[10px] font-bold text-muted uppercase block">
+                  Требования вакансии (@{vacancy.channel}):
+                </span>
+                <p className="text-text-muted leading-relaxed whitespace-pre-wrap font-sans">
+                  {vacancy.text}
+                </p>
+              </div>
+              <div>
+                <textarea
+                  value={pitchText}
+                  onChange={(e) => setPitchText(e.target.value)}
+                  rows={7}
+                  className="w-full bg-surface-2 text-text text-sm rounded-control border border-border p-3 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors leading-relaxed font-sans resize-y"
+                  placeholder="Введите текст сообщения..."
+                />
+              </div>
+            </div>
+          ) : (
+            <textarea
+              value={pitchText}
+              onChange={(e) => setPitchText(e.target.value)}
+              rows={5}
+              className="w-full bg-surface-2 text-text text-sm rounded-control border border-border p-3 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors leading-relaxed font-sans resize-y"
+              placeholder="Введите текст сообщения..."
+            />
+          )}
         </div>
 
         {/* Quality Diagnostics Warnings */}

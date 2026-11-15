@@ -385,6 +385,63 @@ async function dispatchLeadNotification(leadItem) {
   }
 }
 
+// 3.12 Утренний (9:00 MSK) и еженедельный пятничный (18:00 MSK) дайджесты
+let lastMorningDigestDate = '';
+let lastWeeklyDigestDate = '';
+const recentCollectedLeads = [];
+
+function trackRecentLead(leadItem) {
+  recentCollectedLeads.push({ ...leadItem, collectedAt: Date.now() });
+  if (recentCollectedLeads.length > 200) {
+    recentCollectedLeads.shift();
+  }
+}
+
+async function checkScheduledDigests() {
+  const now = new Date();
+  const mskTime = new Date(now.getTime() + 3 * 3600 * 1000);
+  const mskHours = mskTime.getUTCHours();
+  const mskDay = mskTime.getUTCDay();
+  const dateStr = mskTime.toISOString().slice(0, 10);
+
+  // 1. Morning Digest at 9:00 MSK
+  if (mskHours === 9 && lastMorningDigestDate !== dateStr) {
+    lastMorningDigestDate = dateStr;
+    const nightLeads = recentCollectedLeads.filter(
+      (l) => Date.now() - l.collectedAt <= 14 * 3600 * 1000
+    );
+    if (nightLeads.length > 0) {
+      const top5 = nightLeads.slice(-5).reverse();
+      const summary = top5
+        .map((l, i) => `${i + 1}. <b>@${l.channel}</b>: ${l.text.slice(0, 80)}...\n🔗 ${l.url}`)
+        .join('\n\n');
+      const payload = {
+        title: '🌅 Утренний дайджест вакансий',
+        text: `Доброе утро! Топ-5 свежих вакансий монтажа за ночь:\n\n${summary}`,
+        url: top5[0].url,
+        channel: 'LeadHunter Digest',
+      };
+      await sendWebhookWithRetry(payload).catch(() => {});
+      console.log(`[Digest] Утренний дайджест отправлен (${top5.length} лидов)`);
+    }
+  }
+
+  // 2. Weekly Report on Friday at 18:00 MSK
+  if (mskDay === 5 && mskHours === 18 && lastWeeklyDigestDate !== dateStr) {
+    lastWeeklyDigestDate = dateStr;
+    const payload = {
+      title: '📊 Итоги недели LeadHunter',
+      text: `За прошедшую неделю перехвачено ${stats.leadsFound} вакансий монтажа. Обработано сообщений: ${stats.messagesProcessed}. Удачных откликов и закрытых проектов!`,
+      url: 'https://fleurleads-work.netlify.app/vacancies',
+      channel: 'LeadHunter Stats',
+    };
+    await sendWebhookWithRetry(payload).catch(() => {});
+    console.log('[Digest] Еженедельный дайджест отправлен');
+  }
+}
+
+setInterval(checkScheduledDigests, 60 * 1000);
+
 // 6. Проверка секрета для защищённых эндпоинтов
 function verifySecret(provided) {
   if (!WEBHOOK_SECRET || WEBHOOK_SECRET.length < 16) return false;
@@ -662,6 +719,7 @@ async function connectTelegram() {
         console.log(`Ссылка: ${postUrl}\n`);
 
         storage.addRecentLead(leadItem);
+        trackRecentLead(leadItem);
         await dispatchLeadNotification(leadItem);
       } catch (err) {
         errorsCount++;
