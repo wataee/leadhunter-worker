@@ -1,11 +1,12 @@
 import fs from 'fs';
 import path from 'path';
+import { computeTextHash } from './web/src/shared/filter.js';
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 export const MAX_QUEUE_ATTEMPTS = 10;
 
-class FileStorageDriver {
+export class FileStorageDriver {
   constructor(dataDir = 'data') {
     this.dataDir = path.resolve(dataDir);
     this.recentFile = path.join(this.dataDir, 'recent.json');
@@ -17,6 +18,12 @@ class FileStorageDriver {
 
     this.ensureDir();
     this.load();
+
+    // B8: Periodic cleanup once per minute instead of on every check
+    this.cleanupTimer = setInterval(() => {
+      this.cleanupOldCache();
+    }, 60 * 1000);
+    if (this.cleanupTimer.unref) this.cleanupTimer.unref();
   }
 
   ensureDir() {
@@ -45,6 +52,7 @@ class FileStorageDriver {
 
           for (const lead of this.recentLeads) {
             if (lead.id) this.deduplicationCache.set(lead.id, Date.now());
+            if (lead.text) this.deduplicationCache.set(computeTextHash(lead.text), Date.now());
           }
         }
       }
@@ -59,7 +67,6 @@ class FileStorageDriver {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
           const now = Date.now();
-          // Отсеиваем старше 24 часов и превысившие попытки
           this.failedQueue = parsed.filter(
             (item) =>
               now - (item.firstAttemptAt || 0) <= TWENTY_FOUR_HOURS_MS &&
@@ -95,15 +102,17 @@ class FileStorageDriver {
     }
   }
 
-  isDuplicate(leadId, textHash) {
+  cleanupOldCache() {
     const now = Date.now();
-    // Очистка старых
     for (const [key, ts] of this.deduplicationCache.entries()) {
       if (now - ts > TWENTY_FOUR_HOURS_MS) {
         this.deduplicationCache.delete(key);
       }
     }
+  }
 
+  isDuplicate(leadId, textHash) {
+    const now = Date.now();
     if (this.deduplicationCache.has(leadId) || this.deduplicationCache.has(textHash)) {
       return true;
     }
@@ -127,7 +136,6 @@ class FileStorageDriver {
 
   getFailedQueue() {
     const now = Date.now();
-    // Фильтруем старше 24 часов
     this.failedQueue = this.failedQueue.filter(
       (item) =>
         now - (item.firstAttemptAt || 0) <= TWENTY_FOUR_HOURS_MS &&
@@ -171,11 +179,12 @@ class FileStorageDriver {
   }
 }
 
-class UpstashRedisDriver {
+export class UpstashRedisDriver {
   constructor(url, token, fallbackDriver) {
     this.baseUrl = url.replace(/\/$/, '');
     this.token = token;
     this.fallback = fallbackDriver;
+    this.lastRedisWarnAt = 0;
   }
 
   async command(cmd, ...args) {
@@ -192,27 +201,63 @@ class UpstashRedisDriver {
         throw new Error(`Upstash HTTP ${res.status}`);
       }
       const data = await res.json();
-      return data.result;
+      if (data && data.error) {
+        throw new Error(`Upstash Redis Error: ${data.error}`);
+      }
+      return data?.result;
     } catch (err) {
-      console.warn(`[Upstash Redis] Ошибка команды ${cmd}:`, err.message);
-      return null;
+      const now = Date.now();
+      if (now - this.lastRedisWarnAt > 5 * 60 * 1000) {
+        this.lastRedisWarnAt = now;
+        console.warn(`[Upstash Redis] Ошибка команды ${cmd}: ${err.message}. Временный переход на memory fallback.`);
+      }
+      throw err;
     }
   }
 
+  // B8: Warmup memory deduplication cache from Redis recent leads
+  async warmup() {
+    try {
+      const items = await this.command('LRANGE', 'leadhunter:recent', '0', '499');
+      if (Array.isArray(items)) {
+        for (const itemStr of items) {
+          try {
+            const item = typeof itemStr === 'string' ? JSON.parse(itemStr) : itemStr;
+            if (item && item.id) {
+              this.fallback.deduplicationCache.set(item.id, Date.now());
+            }
+            if (item && item.text) {
+              this.fallback.deduplicationCache.set(computeTextHash(item.text), Date.now());
+            }
+          } catch {}
+        }
+        console.log(`[Storage] Прогрет кэш дедупликации из Redis (${items.length} записей)`);
+      }
+    } catch (err) {
+      console.warn('[Storage] Не удалось прогреть кэш из Redis:', err.message);
+    }
+  }
+
+  // B1: Atomic EXISTS check, fall back to memory on error
   async isDuplicate(leadId, textHash) {
     const keyId = `leadhunter:dedup:${leadId}`;
     const keyHash = `leadhunter:dedup:${textHash}`;
 
     try {
-      const res1 = await this.command('SET', keyId, '1', 'EX', '86400', 'NX');
-      const res2 = await this.command('SET', keyHash, '1', 'EX', '86400', 'NX');
-
-      if (res1 === null || res2 === null) {
-        // Одно из значений уже существовало -> дубликат
+      const count = await this.command('EXISTS', keyId, keyHash);
+      if (typeof count === 'number' && count > 0) {
         return true;
       }
+      // Keys do not exist: mark with 24h TTL
+      await Promise.all([
+        this.command('SET', keyId, '1', 'EX', '86400'),
+        this.command('SET', keyHash, '1', 'EX', '86400'),
+      ]);
+      // Also register in memory fallback
+      this.fallback.isDuplicate(leadId, textHash);
       return false;
     } catch {
+      // Redis unavailable/network error -> transparently use memory fallback
       return this.fallback.isDuplicate(leadId, textHash);
     }
   }
@@ -223,7 +268,7 @@ class UpstashRedisDriver {
 
   addRecentLead(lead) {
     this.fallback.addRecentLead(lead);
-    // Асинхронно кэшируем в Redis
+    // Asynchronously push to Redis
     this.command('LPUSH', 'leadhunter:recent', JSON.stringify(lead)).catch(() => {});
     this.command('LTRIM', 'leadhunter:recent', '0', '499').catch(() => {});
   }
@@ -256,7 +301,9 @@ export function createStorage() {
 
   if (redisUrl && redisToken) {
     console.log('[Storage] Инициализация Upstash Redis REST хранилища...');
-    return new UpstashRedisDriver(redisUrl, redisToken, fileDriver);
+    const redisDriver = new UpstashRedisDriver(redisUrl, redisToken, fileDriver);
+    redisDriver.warmup().catch(() => {});
+    return redisDriver;
   }
 
   console.log('[Storage] Инициализация файлового хранилища (data/recent.json, data/failed-queue.json)');

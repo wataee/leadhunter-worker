@@ -15,13 +15,22 @@ interface HandlerEvent {
   body: string | null;
 }
 
+interface BudgetObject {
+  min?: number | null;
+  max?: number | null;
+  currency?: string | null;
+  unit?: string | null;
+}
+
 interface NotifyBody {
   id?: string;
   title?: string;
   text: string;
   url: string;
   channel?: string;
-  budget?: string | null;
+  budget?: string | BudgetObject | null;
+  type?: 'lead' | 'digest';
+  kind?: 'lead' | 'digest';
 }
 
 function escapeHtml(str: string): string {
@@ -30,6 +39,37 @@ function escapeHtml(str: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function formatBudget(budget: string | BudgetObject | null | undefined): string {
+  if (!budget) return '';
+  if (typeof budget === 'string') return budget;
+  if (typeof budget === 'object') {
+    if (budget.currency === 'NEGOTIABLE') return '💰 По договорённости';
+    const cur = budget.currency === 'RUB' ? '₽' : budget.currency === 'USD' ? '$' : (budget.currency || '');
+    const unit = budget.unit === 'per_video' ? ' / ролик' : budget.unit === 'per_month' ? ' / мес' : budget.unit === 'project' ? ' за проект' : '';
+    if (budget.min && budget.max) {
+      return `💰 ${budget.min.toLocaleString('ru-RU')}–${budget.max.toLocaleString('ru-RU')} ${cur}${unit}`.trim();
+    }
+    if (budget.min) {
+      return `💰 от ${budget.min.toLocaleString('ru-RU')} ${cur}${unit}`.trim();
+    }
+    if (budget.max) {
+      return `💰 до ${budget.max.toLocaleString('ru-RU')} ${cur}${unit}`.trim();
+    }
+  }
+  return '';
+}
+
+// Ensure string fits in byte limit (e.g. Telegram 64 bytes limit for callback_data)
+function truncateToBytes(str: string, maxBytes: number): string {
+  const buf = Buffer.from(str, 'utf8');
+  if (buf.length <= maxBytes) return str;
+  let end = maxBytes;
+  while (end > 0 && (buf[end] & 0xc0) === 0x80) {
+    end--;
+  }
+  return buf.subarray(0, end).toString('utf8');
 }
 
 export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
@@ -107,56 +147,113 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return errorResponse(400, 'Отсутствуют обязательные текстовые поля: text или url', null, origin);
   }
 
-  // 1.5 Валидация URL: строго ссылки на посты в Telegram
+  const isDigest = body.type === 'digest' || body.kind === 'digest';
   const cleanUrl = body.url.trim();
-  const isTgUrl = /^https:\/\/t\.me\/(?:[a-zA-Z0-9_+/=-]+)$/.test(cleanUrl);
-  if (!isTgUrl) {
-    return errorResponse(
-      400,
-      'Недопустимый URL. Разрешены только ссылки вида https://t.me/...',
-      null,
-      origin
-    );
+
+  // B6: URL validation
+  if (!isDigest) {
+    const isTgUrl = /^https:\/\/t\.me\/(?:[a-zA-Z0-9_+/=-]+)$/.test(cleanUrl);
+    if (!isTgUrl) {
+      return errorResponse(
+        400,
+        'Недопустимый URL. Разрешены только ссылки вида https://t.me/...',
+        null,
+        origin
+      );
+    }
+  } else {
+    try {
+      const parsed = new URL(cleanUrl);
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+        return errorResponse(400, 'Недопустимый URL дайджеста', null, origin);
+      }
+    } catch {
+      return errorResponse(400, 'Некорректный URL дайджеста', null, origin);
+    }
   }
 
-  // 1.5 Экранирование для HTML parse_mode
-  const cleanSnippet = escapeHtml(body.text.slice(0, 500).trim());
-  const safeChannel = body.channel && typeof body.channel === 'string' ? escapeHtml(body.channel.trim()) : '';
-  const safeTitle = body.title && typeof body.title === 'string' ? escapeHtml(body.title.trim()) : 'Новая вакансия';
+  let message = '';
+  const inlineButtons: Array<Array<{ text: string; url?: string; callback_data?: string }>> = [];
 
-  const message = [
-    `🎯 <b>${safeTitle}</b> ${safeChannel ? `(${safeChannel})` : ''}`,
-    '',
-    cleanSnippet,
-    body.text.length > 500 ? '...' : '',
-    '',
-    `🔗 <a href="${cleanUrl}">Открыть пост в Telegram</a>`,
-  ].join('\n');
+  if (isDigest) {
+    const hasHtml = /<\/?(?:b|i|a|code|pre|em|strong)[\s>]/i.test(body.text);
+    const content = hasHtml ? body.text : escapeHtml(body.text);
+    const safeTitle = body.title ? escapeHtml(body.title) : 'Дайджест вакансий LeadHunter';
 
-  try {
-    const channelSlug = (body.channel || '').replace(/^@/, '').slice(0, 40);
-    const leadSlug = (body.id || channelSlug || 'lead').slice(0, 40);
+    message = [
+      `📊 <b>${safeTitle}</b>`,
+      '',
+      content,
+      '',
+      `🔗 <a href="${cleanUrl}">Открыть в LeadHunter</a>`,
+    ].join('\n');
 
-    // Сохраняем снимок лида в Redis на 7 дней для возможности добавления в воронку по кнопке
+    inlineButtons.push([{ text: '🔗 Открыть LeadHunter', url: cleanUrl }]);
+  } else {
+    const cleanSnippet = escapeHtml(body.text.slice(0, 500).trim());
+    const safeChannel = body.channel && typeof body.channel === 'string' ? escapeHtml(body.channel.trim()) : '';
+    const safeTitle = body.title && typeof body.title === 'string' ? escapeHtml(body.title.trim()) : 'Новая вакансия';
+    const formattedBudget = formatBudget(body.budget);
+
+    const messageLines = [
+      `🎯 <b>${safeTitle}</b> ${safeChannel ? `(${safeChannel})` : ''}`,
+    ];
+    if (formattedBudget) {
+      messageLines.push(`<b>${escapeHtml(formattedBudget)}</b>`);
+    }
+    messageLines.push('');
+    messageLines.push(cleanSnippet + (body.text.length > 500 ? '...' : ''));
+    messageLines.push('');
+    messageLines.push(`🔗 <a href="${cleanUrl}">Открыть пост в Telegram</a>`);
+    message = messageLines.join('\n');
+
+    // C2: Limit callback_data under 64 bytes total
+    const rawChan = (body.channel || '').replace(/^@/, '').trim();
+    const chanBytes = truncateToBytes(rawChan, 50); // 'hide:' is 5 bytes -> max 55 bytes
+    const leadId = (body.id || `lead_${Date.now()}`).trim();
+    const leadBytes = truncateToBytes(leadId, 50); // 'lead:' is 5 bytes -> max 55 bytes
+
+    const row: Array<{ text: string; url?: string; callback_data?: string }> = [
+      { text: '🔗 Открыть', url: cleanUrl },
+    ];
+
+    if (chanBytes) {
+      row.push({ text: '🙈 Скрыть источник', callback_data: `hide:${chanBytes}` });
+    }
+    row.push({ text: '📥 В воронку', callback_data: `lead:${leadBytes}` });
+    inlineButtons.push(row);
+
+    // C2: Save snapshot to Redis via POST command array
     const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
     const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
     if (redisUrl && redisToken) {
       const snapshot = {
-        id: body.id || leadSlug,
+        id: leadBytes,
         text: body.text,
         url: cleanUrl,
-        channel: body.channel || channelSlug,
-        budget: body.budget || null,
+        channel: body.channel || chanBytes,
+        budget: typeof body.budget === 'string' ? body.budget : formattedBudget || null,
         postedAt: new Date().toISOString(),
       };
-      // POST into Redis via REST endpoint
-      fetchWithTimeout(
-        `${redisUrl}/set/leadhunter:lead_snapshots:${encodeURIComponent(leadSlug)}/${encodeURIComponent(JSON.stringify(snapshot))}/ex/604800`,
-        { headers: { Authorization: `Bearer ${redisToken}` } },
-        2500
-      ).catch(() => {});
-    }
 
+      fetchWithTimeout(
+        redisUrl,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${redisToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(['SET', `leadhunter:lead_snapshots:${leadBytes}`, JSON.stringify(snapshot), 'EX', '604800']),
+        },
+        3000
+      ).catch((e) => {
+        console.warn('[Redis] Ошибка сохранения снимка лида:', e.message);
+      });
+    }
+  }
+
+  try {
     const res = await fetchWithTimeout(
       `https://api.telegram.org/bot${token}/sendMessage`,
       {
@@ -170,22 +267,18 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
           parse_mode: 'HTML',
           disable_web_page_preview: false,
           reply_markup: {
-            inline_keyboard: [
-              [
-                { text: '🔗 Открыть', url: cleanUrl },
-                { text: '🙈 Скрыть источник', callback_data: `hide:${channelSlug}` },
-                { text: '📥 В воронку', callback_data: `lead:${leadSlug}` },
-              ],
-            ],
+            inline_keyboard: inlineButtons,
           },
         }),
       },
       8000
     );
 
-    const data = await res.json();
+    const data = await res.json().catch(() => null);
     if (!res.ok) {
-      return errorResponse(res.status, 'Ошибка отправки сообщения в Telegram Bot API', null, origin);
+      const desc = data?.description || `HTTP ${res.status}`;
+      console.warn(`[Telegram Bot API Error]: ${desc}`);
+      return errorResponse(res.status, `Telegram Bot API Error: ${desc}`, null, origin);
     }
 
     return jsonResponse(200, { success: true }, origin);

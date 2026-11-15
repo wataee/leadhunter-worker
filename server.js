@@ -22,7 +22,7 @@ const rawApiId = process.env.API_ID?.trim();
 const API_HASH = process.env.API_HASH?.trim();
 const SESSION_STRING = process.env.SESSION_STRING?.trim() || '';
 const PORT = parseInt(process.env.PORT || '8080', 10);
-const rawWebhookUrl = process.env.WEBHOOK_URL?.trim();
+const rawWebhookUrl = process.env.WEBHOOK_URL?.trim() || '';
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET?.trim() || '';
 const ALLOWED_CHATS_RAW = process.env.ALLOWED_CHATS?.trim() || '';
 const RATE_LIMIT_PER_MINUTE = parseInt(process.env.RATE_LIMIT_PER_MINUTE || '5', 10);
@@ -50,61 +50,73 @@ if (!WEBHOOK_SECRET || WEBHOOK_SECRET.length < 16) {
   process.exit(1);
 }
 
-// 1.4 Валидация WEBHOOK_URL: обязателен, https, совпадение с ALLOWED_ORIGIN или ALLOW_ANY_WEBHOOK_HOST=1
-if (!rawWebhookUrl) {
-  console.error('[КРИТИЧЕСКАЯ ОШИБКА] Переменная WEBHOOK_URL обязательна!');
-  console.error('Укажите URL эндпоинта tg-notify (например: https://fleurleads-work.netlify.app/api/tg-notify)');
-  process.exit(1);
-}
-
-let parsedWebhook;
-try {
-  parsedWebhook = new URL(rawWebhookUrl);
-} catch {
-  console.error('[КРИТИЧЕСКАЯ ОШИБКА] WEBHOOK_URL имеет невалидный формат URL.');
-  process.exit(1);
-}
-
-if (
-  parsedWebhook.protocol !== 'https:' &&
-  parsedWebhook.hostname !== 'localhost' &&
-  parsedWebhook.hostname !== '127.0.0.1'
-) {
-  console.error('[КРИТИЧЕСКАЯ ОШИБКА] WEBHOOK_URL должен использовать протокол HTTPS!');
-  process.exit(1);
-}
-
+// B4: WEBHOOK_URL опционален для старта воркера
+let WEBHOOK_URL = '';
 const allowAnyHost =
   process.env.ALLOW_ANY_WEBHOOK_HOST === '1' ||
   process.env.ALLOW_ANY_WEBHOOK_HOST === 'true';
 const allowedOriginRaw = process.env.ALLOWED_ORIGIN?.trim() || '';
 
-if (!allowAnyHost && allowedOriginRaw) {
-  const allowedHosts = allowedOriginRaw
-    .split(',')
-    .map((o) => {
-      try {
-        return new URL(o.trim()).hostname;
-      } catch {
-        return o.trim().replace(/^https?:\/\//, '').split('/')[0];
-      }
-    })
-    .filter(Boolean);
-
-  if (allowedHosts.length > 0 && !allowedHosts.includes(parsedWebhook.hostname)) {
-    console.error(
-      `[КРИТИЧЕСКАЯ ОШИБКА] Домен WEBHOOK_URL (${parsedWebhook.hostname}) не совпадает с ALLOWED_ORIGIN (${allowedHosts.join(', ')}).`
-    );
-    console.error('Задайте ALLOW_ANY_WEBHOOK_HOST=1 для отключения этой проверки.');
+if (!rawWebhookUrl) {
+  console.warn(
+    '[ВНИМАНИЕ] WEBHOOK_URL не задан: уведомления в Netlify/бота отключены, посты собираются только в recent.json / memory'
+  );
+} else {
+  let parsedWebhook;
+  try {
+    parsedWebhook = new URL(rawWebhookUrl);
+  } catch {
+    console.error('[КРИТИЧЕСКАЯ ОШИБКА] WEBHOOK_URL имеет невалидный формат URL.');
     process.exit(1);
   }
+
+  if (
+    parsedWebhook.protocol !== 'https:' &&
+    parsedWebhook.hostname !== 'localhost' &&
+    parsedWebhook.hostname !== '127.0.0.1'
+  ) {
+    console.error('[КРИТИЧЕСКАЯ ОШИБКА] WEBHOOK_URL должен использовать протокол HTTPS!');
+    process.exit(1);
+  }
+
+  if (!allowAnyHost && allowedOriginRaw) {
+    const allowedHosts = allowedOriginRaw
+      .split(',')
+      .map((o) => {
+        try {
+          return new URL(o.trim()).hostname;
+        } catch {
+          return o.trim().replace(/^https?:\/\//, '').split('/')[0];
+        }
+      })
+      .filter(Boolean);
+
+    if (allowedHosts.length > 0 && !allowedHosts.includes(parsedWebhook.hostname)) {
+      console.error(
+        `[КРИТИЧЕСКАЯ ОШИБКА] Домен WEBHOOK_URL (${parsedWebhook.hostname}) не совпадает с ALLOWED_ORIGIN (${allowedHosts.join(', ')}).`
+      );
+      console.error('Укажите ALLOW_ANY_WEBHOOK_HOST=1 или добавьте домен в ALLOWED_ORIGIN');
+      process.exit(1);
+    }
+  }
+
+  WEBHOOK_URL = rawWebhookUrl;
 }
 
-const WEBHOOK_URL = rawWebhookUrl;
-
 const ALLOWED_CHATS_FILE = process.env.ALLOWED_CHATS_FILE?.trim() || '';
-
 let allowedChatsSet = null;
+
+// B2: Вывод размера и первых 10 каналов в лог при старте
+function logAllowedChatsSummary(chats) {
+  if (!chats || chats.size === 0) {
+    console.warn(
+      '[AllowedChats] ВНИМАНИЕ: мониторинг не будет находить вакансии, так как список разрешённых каналов пуст!'
+    );
+    return;
+  }
+  const sample = Array.from(chats).slice(0, 10).map((c) => `@${c}`).join(', ');
+  console.log(`[AllowedChats] Белый список активен (${chats.size} каналов). Первые: ${sample}`);
+}
 
 function loadAllowedChats() {
   const chats = new Set();
@@ -115,7 +127,7 @@ function loadAllowedChats() {
       .filter(Boolean)
       .forEach((c) => chats.add(c));
   }
-  // 2. From ALLOWED_CHATS_FILE (reloaded every 10 mins)
+  // 2. From ALLOWED_CHATS_FILE
   if (ALLOWED_CHATS_FILE && fs.existsSync(ALLOWED_CHATS_FILE)) {
     try {
       const content = fs.readFileSync(ALLOWED_CHATS_FILE, 'utf8');
@@ -129,7 +141,7 @@ function loadAllowedChats() {
     }
   }
 
-  // 3. Fallback: load verified catalog (152 sources) if neither env nor file is provided
+  // 3. Fallback: verified catalog (152 sources)
   if (chats.size === 0) {
     try {
       const catalogPath = './web/src/shared/sources.catalog.json';
@@ -150,27 +162,30 @@ function loadAllowedChats() {
 
   if (chats.size > 0) {
     allowedChatsSet = chats;
-    console.log(`[AllowedChats] Белый список активен (${chats.size} чатов/каналов)`);
+    logAllowedChatsSummary(chats);
   } else {
     allowedChatsSet = null;
+    logAllowedChatsSummary(null);
   }
 }
 
 // Initial load
 loadAllowedChats();
 
-// Auto-reload every 10 minutes if ALLOWED_CHATS_FILE is set
 if (ALLOWED_CHATS_FILE) {
   setInterval(loadAllowedChats, 10 * 60 * 1000);
 }
 
-// 2.5 Периодическая синхронизация активных источников через API /api/sources/enabled раз в 5 минут
+// B5: Периодическая синхронизация источников с обработкой ошибок и rate-limit логов
+let lastSyncErrorStatus = 0;
+let lastSyncErrorLogAt = 0;
+
 async function syncEnabledSourcesFromApi() {
   if (!WEBHOOK_URL || !WEBHOOK_SECRET) return;
 
   try {
     const originUrl = new URL(WEBHOOK_URL).origin;
-    const apiUrl = `${originUrl}/api/sources/enabled`;
+    const apiUrl = `${originUrl}/api/sources-enabled`;
 
     const res = await fetch(apiUrl, {
       headers: {
@@ -182,25 +197,39 @@ async function syncEnabledSourcesFromApi() {
 
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data?.sources) && data.sources.length > 0) {
-        const chats = new Set(data.sources.map((s) => String(s).toLowerCase().replace(/^@/, '')));
-        allowedChatsSet = chats;
-        console.log(`[AllowedChats] Белый список обновлён из API (${chats.size} каналов)`);
+      if (Array.isArray(data?.sources)) {
+        if (data.sources.length > 0) {
+          const chats = new Set(data.sources.map((s) => String(s).toLowerCase().replace(/^@/, '')));
+          allowedChatsSet = chats;
+          console.log(`[AllowedChats] Белый список обновлён из API (${chats.size} каналов)`);
+        } else {
+          console.warn('[AllowedChats Sync] sources-enabled вернул пустой список источников, сохраняем текущий белый список');
+        }
+      } else {
+        console.warn('[AllowedChats Sync] sources-enabled вернул не массив sources, игнорируем ответ');
+      }
+    } else {
+      const now = Date.now();
+      if (res.status !== lastSyncErrorStatus || now - lastSyncErrorLogAt > 30 * 60 * 1000) {
+        lastSyncErrorStatus = res.status;
+        lastSyncErrorLogAt = now;
+        const textSnippet = (await res.text().catch(() => '')).slice(0, 200);
+        console.warn(`[AllowedChats Sync] Ошибка синхронизации источников: HTTP ${res.status} (${textSnippet})`);
       }
     }
   } catch (err) {
-    // Не крашим процесс при сетевых ошибках
+    const now = Date.now();
+    if (now - lastSyncErrorLogAt > 30 * 60 * 1000) {
+      lastSyncErrorLogAt = now;
+      console.warn(`[AllowedChats Sync] Сетевая ошибка при синхронизации источников: ${err.message}`);
+    }
   }
 }
 
-// Запускаем синхронизацию через 15 секунд после старта и затем каждые 5 минут
 setTimeout(syncEnabledSourcesFromApi, 15000);
 setInterval(syncEnabledSourcesFromApi, 5 * 60 * 1000);
 
-// Backward compatibility alias for diagnostics
-const ALLOWED_CHATS = allowedChatsSet ? Array.from(allowedChatsSet) : null;
-
-// 2. Хранилище (Storage abstraction: File or Upstash Redis)
+// 2. Хранилище (File or Upstash Redis)
 const storage = createStorage();
 
 // 3. Статистика
@@ -209,6 +238,13 @@ const stats = {
   messagesProcessed: 0,
   leadsFound: 0,
   lastLeadAt: null,
+  lastMatchedAt: null,
+  duplicates: 0,
+};
+
+const filterStats = {
+  total: 0,
+  reasons: {},
 };
 
 const privacyStats = {
@@ -219,6 +255,11 @@ const privacyStats = {
 };
 
 let errorsCount = 0;
+
+// Poller stats
+let pollerLastRunAt = null;
+let pollerChannelsOk = 0;
+let pollerChannelsFailed = 0;
 
 // 4. Rate Limiter для уведомлений и группировка в дайджест
 const notificationTimestamps = [];
@@ -262,6 +303,12 @@ async function sendWebhookWithRetry(payload, maxRetries = 3) {
         return true;
       }
 
+      // C2: Permanent 4xx errors should not be endlessly retried
+      if ([400, 401, 403, 404].includes(res.status)) {
+        console.warn(`[Вебхук] Постоянная ошибка HTTP ${res.status}: дальнейшие повторы отменены`);
+        return false;
+      }
+
       console.warn(`[Вебхук] HTTP ${res.status} на попытке ${attempt + 1}/${maxRetries}`);
     } catch (err) {
       clearTimeout(timeout);
@@ -294,7 +341,7 @@ async function processFailedQueue() {
   }
 }
 
-// 1.5 Кэш скрытых источников из Redis (обновляется раз в минуту)
+// 1.5 Кэш скрытых источников из Redis
 let cachedHiddenChannels = new Set();
 let lastHiddenChannelsFetch = 0;
 
@@ -321,9 +368,7 @@ async function getHiddenChannels() {
         lastHiddenChannelsFetch = now;
       }
     }
-  } catch (err) {
-    // При ошибке сети сохраняем предыдущий кэш
-  }
+  } catch {}
   return cachedHiddenChannels;
 }
 
@@ -340,11 +385,14 @@ async function dispatchLeadNotification(leadItem) {
   if (checkRateLimit()) {
     notificationTimestamps.push(Date.now());
     const payload = {
+      id: leadItem.id,
       title: `Вакансия монтажёра (${leadItem.channel})`,
       text: leadItem.text,
       url: leadItem.url,
       channel: leadItem.channel,
       budget: leadItem.budget,
+      type: 'lead',
+      kind: 'lead',
     };
 
     const sent = await sendWebhookWithRetry(payload);
@@ -371,6 +419,8 @@ async function dispatchLeadNotification(leadItem) {
           text: `Найдено ${count} вакансий за последнюю минуту:\n\n${digestSummary}`,
           url: pendingDigestLeads[0].url,
           channel: 'LeadHunter Digest',
+          type: 'digest',
+          kind: 'digest',
         };
 
         pendingDigestLeads = [];
@@ -385,7 +435,7 @@ async function dispatchLeadNotification(leadItem) {
   }
 }
 
-// 3.12 Утренний (9:00 MSK) и еженедельный пятничный (18:00 MSK) дайджесты
+// B6: Утренний (9:00 MSK) и еженедельный пятничный (18:00 MSK) дайджесты с обработкой ошибок
 let lastMorningDigestDate = '';
 let lastWeeklyDigestDate = '';
 const recentCollectedLeads = [];
@@ -420,23 +470,38 @@ async function checkScheduledDigests() {
         text: `Доброе утро! Топ-5 свежих вакансий монтажа за ночь:\n\n${summary}`,
         url: top5[0].url,
         channel: 'LeadHunter Digest',
+        type: 'digest',
+        kind: 'digest',
       };
-      await sendWebhookWithRetry(payload).catch(() => {});
-      console.log(`[Digest] Утренний дайджест отправлен (${top5.length} лидов)`);
+      const sent = await sendWebhookWithRetry(payload);
+      if (!sent) {
+        console.warn('[Digest] Ошибка доставки утреннего дайджеста, сохраняем в очередь');
+        storage.enqueueFailed(payload, 'Morning digest delivery failed');
+      } else {
+        console.log(`[Digest] Утренний дайджест отправлен (${top5.length} лидов)`);
+      }
     }
   }
 
   // 2. Weekly Report on Friday at 18:00 MSK
   if (mskDay === 5 && mskHours === 18 && lastWeeklyDigestDate !== dateStr) {
     lastWeeklyDigestDate = dateStr;
+    const siteUrl = allowedOriginRaw ? allowedOriginRaw.split(',')[0].trim() : 'https://fleurleads-work.netlify.app';
     const payload = {
       title: '📊 Итоги недели LeadHunter',
       text: `За прошедшую неделю перехвачено ${stats.leadsFound} вакансий монтажа. Обработано сообщений: ${stats.messagesProcessed}. Удачных откликов и закрытых проектов!`,
-      url: 'https://fleurleads-work.netlify.app/vacancies',
+      url: `${siteUrl}/vacancies`,
       channel: 'LeadHunter Stats',
+      type: 'digest',
+      kind: 'digest',
     };
-    await sendWebhookWithRetry(payload).catch(() => {});
-    console.log('[Digest] Еженедельный дайджест отправлен');
+    const sent = await sendWebhookWithRetry(payload);
+    if (!sent) {
+      console.warn('[Digest] Ошибка доставки еженедельного дайджеста, сохраняем в очередь');
+      storage.enqueueFailed(payload, 'Weekly digest delivery failed');
+    } else {
+      console.log('[Digest] Еженедельный дайджест отправлен');
+    }
   }
 }
 
@@ -453,14 +518,196 @@ function verifySecret(provided) {
 
 // 7. Состояние подключения Telegram
 let telegramConnected = false;
+let connectedAt = 0;
 let lastMessageAt = null;
-let disconnectedSince = Date.now(); // 2.1 Явное состояние отключения на старте
+let disconnectedSince = Date.now();
 let client = null;
 let eventHandlerRef = null;
 let reconnectTimer = null;
 let reconnectDelayMs = 5000;
-const MAX_RECONNECT_DELAY_MS = 5 * 60 * 1000; // 5 минут
+const MAX_RECONNECT_DELAY_MS = 5 * 60 * 1000;
+let isConnecting = false;
 let isShuttingDown = false;
+const reconnectFailures = [];
+
+// B2: Вынесенная функция обработки входящего сообщения (для listener и polling)
+async function processIncomingMessage(message, chatMeta = {}) {
+  if (!message || !message.text) return;
+
+  lastMessageAt = new Date().toISOString();
+
+  let chatTitle = chatMeta.chatTitle || 'Telegram';
+  let chatUsername = chatMeta.chatUsername ? chatMeta.chatUsername.toLowerCase().replace(/^@/, '') : '';
+  let rawChatId = chatMeta.rawChatId || message.chatId || '';
+
+  if (!chatUsername && message.getChat) {
+    try {
+      const chat = await message.getChat();
+      if (chat) {
+        if ('bot' in chat && chat.bot) {
+          privacyStats.skippedBots++;
+          return;
+        }
+        chatTitle = chat.title || chat.username || chatTitle;
+        chatUsername = chat.username ? chat.username.toLowerCase().replace(/^@/, '') : '';
+        if (chat.id) rawChatId = chat.id;
+      }
+    } catch (chatErr) {
+      // B2: Попытка получить сущность через getEntity(message.peerId)
+      if (message.peerId && client?.getEntity) {
+        try {
+          const entity = await client.getEntity(message.peerId);
+          if (entity) {
+            chatTitle = entity.title || entity.username || chatTitle;
+            chatUsername = entity.username ? entity.username.toLowerCase().replace(/^@/, '') : chatUsername;
+            if (entity.id) rawChatId = entity.id;
+          }
+        } catch (peerErr) {
+          console.warn(`[Telegram] Не удалось получить сущность для peerId: ${peerErr.message}`);
+        }
+      }
+    }
+  }
+
+  const cleanCId = cleanChatId(rawChatId);
+
+  if (allowedChatsSet && allowedChatsSet.size > 0) {
+    const isAllowed =
+      (chatUsername && allowedChatsSet.has(chatUsername)) ||
+      (cleanCId && allowedChatsSet.has(cleanCId));
+
+    if (!isAllowed) {
+      privacyStats.skippedNotAllowed++;
+      return;
+    }
+  }
+
+  stats.messagesProcessed++;
+
+  const matchResult = matchesVacancy(message.text);
+  if (!matchResult.isMatch) {
+    filterStats.total++;
+    const reason = matchResult.reason || 'no_core_keywords';
+    filterStats.reasons[reason] = (filterStats.reasons[reason] || 0) + 1;
+    return;
+  }
+
+  const leadId = buildLeadId(rawChatId, message.id);
+  const textHash = computeTextHash(message.text);
+
+  const isDup = await storage.isDuplicate(leadId, textHash);
+  if (isDup) {
+    stats.duplicates++;
+    return;
+  }
+
+  stats.leadsFound++;
+  stats.lastLeadAt = new Date().toISOString();
+  stats.lastMatchedAt = new Date().toISOString();
+
+  const postUrl = buildPostUrl(
+    chatUsername ? { username: chatUsername } : { id: rawChatId },
+    message.id
+  );
+
+  const budget = parseBudget(message.text);
+  const postedAt = message.date
+    ? new Date(message.date * 1000).toISOString()
+    : new Date().toISOString();
+
+  const leadItem = {
+    id: leadId,
+    channel: chatUsername ? `@${chatUsername}` : chatTitle,
+    text: message.text,
+    url: postUrl,
+    matchedKeywords: matchResult.matched || [],
+    budget,
+    postedAt,
+  };
+
+  console.log(`\n🔥 [НАЙДЕНА ВАКАНСИЯ] в "${chatTitle}" (${(matchResult.matched || []).join(', ')})`);
+  if (budget) {
+    console.log(`💰 Бюджет: ${budget.currency === 'NEGOTIABLE' ? 'Договорной' : `${budget.min || ''}-${budget.max || ''} ${budget.currency}`}`);
+  }
+  console.log(`Текст: ${message.text.slice(0, 140)}...`);
+  console.log(`Ссылка: ${postUrl}\n`);
+
+  storage.addRecentLead(leadItem);
+  trackRecentLead(leadItem);
+  await dispatchLeadNotification(leadItem);
+}
+
+// B2: Fallback-поллинг каждые 3 минуты (round-robin по 20 каналов с задержкой 1.5с)
+let channelPollIndex = 0;
+const lastPolledIdMap = new Map();
+const disabledPollChannels = new Map();
+
+async function runPollingCycle() {
+  if (!client || !telegramConnected) return;
+
+  const validChannels = Array.from(allowedChatsSet || [])
+    .filter((c) => /^[a-zA-Z][a-zA-Z0-9_]{3,31}$/.test(c))
+    .filter((c) => {
+      const disabledUntil = disabledPollChannels.get(c);
+      return !disabledUntil || Date.now() > disabledUntil;
+    });
+
+  if (validChannels.length === 0) return;
+
+  pollerLastRunAt = new Date().toISOString();
+  const batchSize = Math.min(20, validChannels.length);
+  const batch = [];
+  for (let i = 0; i < batchSize; i++) {
+    batch.push(validChannels[(channelPollIndex + i) % validChannels.length]);
+  }
+  channelPollIndex = (channelPollIndex + batchSize) % validChannels.length;
+
+  for (const username of batch) {
+    if (!telegramConnected || !client) break;
+    await new Promise((r) => setTimeout(r, 1500));
+
+    try {
+      const msgs = await client.getMessages(username, { limit: 15 });
+      pollerChannelsOk++;
+      const lastId = lastPolledIdMap.get(username) || 0;
+      let maxId = lastId;
+
+      const newMsgs = msgs
+        .filter((m) => m && m.id && m.text && m.id > lastId)
+        .reverse();
+
+      for (const msg of newMsgs) {
+        if (msg.id > maxId) maxId = msg.id;
+        await processIncomingMessage(msg, {
+          chatTitle: `@${username}`,
+          chatUsername: username,
+          rawChatId: msg.chatId || '',
+        });
+      }
+
+      if (maxId > lastId) {
+        lastPolledIdMap.set(username, maxId);
+      }
+    } catch (err) {
+      pollerChannelsFailed++;
+      const errMsg = String(err.message || err);
+      if (/FLOOD_WAIT_(\d+)/i.test(errMsg)) {
+        const waitSec = parseInt(errMsg.match(/FLOOD_WAIT_(\d+)/i)[1], 10);
+        console.warn(`[Poller FLOOD_WAIT] Пауза опроса на ${waitSec}с:`, errMsg);
+        break;
+      }
+      if (/USERNAME_NOT_OCCUPIED|USERNAME_INVALID|CHANNEL_PRIVATE/i.test(errMsg)) {
+        console.warn(`[Poller] Канал @${username} недоступен (${errMsg}), отключён на 24ч`);
+        disabledPollChannels.set(username, Date.now() + 24 * 3600 * 1000);
+      } else {
+        console.warn(`[Poller] Ошибка опроса @${username}:`, errMsg);
+      }
+    }
+  }
+}
+
+setInterval(runPollingCycle, 3 * 60 * 1000);
+setTimeout(runPollingCycle, 30 * 1000);
 
 // 8. Встроенный Health-check HTTP сервер
 const server = http.createServer((req, res) => {
@@ -491,7 +738,7 @@ const server = http.createServer((req, res) => {
     );
   }
 
-  // 2.2 Защищённый эндпоинт /metrics
+  // B2: Защищённый эндпоинт /metrics с подробной диагностикой
   if (urlObj.pathname === '/metrics') {
     const authHeader = req.headers['x-webhook-secret'] || '';
     const queryKey = urlObj.searchParams.get('key') || '';
@@ -502,6 +749,11 @@ const server = http.createServer((req, res) => {
       return res.end(JSON.stringify({ error: 'Unauthorized: invalid or missing secret' }));
     }
 
+    const topReasons = Object.entries(filterStats.reasons)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([reason, count]) => ({ reason, count }));
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(
       JSON.stringify(
@@ -511,8 +763,19 @@ const server = http.createServer((req, res) => {
           telegramConnected,
           disconnectedSince: disconnectedSince ? new Date(disconnectedSince).toISOString() : null,
           lastMessageAt,
+          lastMatchedAt: stats.lastMatchedAt,
+          pollerLastRunAt,
+          pollerChannelsOk,
+          pollerChannelsFailed,
           stats,
-          privacyStats,
+          privacyStats: {
+            ...privacyStats,
+            duplicates: stats.duplicates,
+            skippedByFilter: {
+              total: filterStats.total,
+              topReasons,
+            },
+          },
           failedQueueCount: storage.getFailedQueue().length,
           recentLeadsCount: storage.getRecentLeads().length,
           errorsCount,
@@ -524,7 +787,6 @@ const server = http.createServer((req, res) => {
   }
 
   // Публичный health-check эндпоинт
-  // Возвращаем HTTP 200 (даже если статус degraded), чтобы оркестратор Render не убивал процесс во время реконнекта
   const isStalled = disconnectedSince && Date.now() - disconnectedSince > 2 * 60 * 1000;
 
   res.setHeader('Content-Type', 'application/json');
@@ -554,7 +816,6 @@ server.listen(PORT, '0.0.0.0', () => {
     processFailedQueue().catch((err) => console.warn('[Очередь] Ошибка фоновой очистки:', err.message));
   }, 2 * 60 * 1000);
 
-  // Автоматический keep-alive самопинг: используем RENDER_EXTERNAL_URL или автоматический хостнейм Render
   const selfUrl =
     process.env.RENDER_EXTERNAL_URL?.trim() ||
     (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null);
@@ -564,7 +825,6 @@ server.listen(PORT, '0.0.0.0', () => {
     setInterval(async () => {
       try {
         await fetch(`${selfUrl}/`);
-        console.log(`[Keep-Alive] Самопинг OK → ${selfUrl}`);
       } catch (err) {
         console.warn(`[Keep-Alive] Ошибка самопинга: ${err.message}`);
       }
@@ -572,7 +832,63 @@ server.listen(PORT, '0.0.0.0', () => {
   }
 });
 
-// 9. Запуск Telegram MTProto клиента с обработкой разрывов и экспоненциальным backoff
+// B7: Корректное отключение старого клиента
+async function cleanupOldClient() {
+  if (client) {
+    try {
+      if (eventHandlerRef) {
+        client.removeEventHandler(eventHandlerRef);
+        eventHandlerRef = null;
+      }
+      await Promise.race([
+        Promise.allSettled([
+          client.disconnect?.(),
+          client.destroy?.(),
+        ]),
+        new Promise((_, r) => setTimeout(() => r(new Error('disconnect timeout')), 5000)),
+      ]);
+    } catch (e) {
+      console.warn('[Telegram] Ошибка очистки старого клиента:', e.message);
+    }
+    client = null;
+  }
+}
+
+function scheduleReconnect(customDelayMs) {
+  if (isConnecting || isShuttingDown) return;
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+
+  const delay = typeof customDelayMs === 'number' ? customDelayMs : reconnectDelayMs;
+  reconnectDelayMs = Math.min(reconnectDelayMs * 2, MAX_RECONNECT_DELAY_MS);
+
+  console.log(`[Telegram Reconnect] Запланировано переподключение через ${Math.round(delay / 1000)} сек...`);
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    connectTelegram();
+  }, delay);
+}
+
+// B3: Watchdog проверки зависания сокета (каждые 60 сек)
+setInterval(() => {
+  if (telegramConnected && !isConnecting) {
+    const lastActivity = Math.max(
+      new Date(lastMessageAt || 0).getTime(),
+      new Date(pollerLastRunAt || 0).getTime(),
+      connectedAt
+    );
+    if (Date.now() - lastActivity > 15 * 60 * 1000) {
+      console.warn('[Watchdog] Нет активности более 15 минут при статусе connected. Принудительный реконнект...');
+      telegramConnected = false;
+      disconnectedSince = Date.now();
+      scheduleReconnect(1000);
+    }
+  }
+}, 60 * 1000);
+
+// 9. Запуск Telegram MTProto клиента
 if (!SESSION_STRING) {
   console.error('\n[ВНИМАНИЕ] SESSION_STRING не задан в .env файле!');
   console.error('Сначала выполните команду: npm run auth\n');
@@ -580,19 +896,10 @@ if (!SESSION_STRING) {
 }
 
 async function connectTelegram() {
-  if (isShuttingDown) return;
+  if (isShuttingDown || isConnecting) return;
+  isConnecting = true;
 
-  // Очистка предыдущего клиента и слушателей во избежание дубликатов
-  if (client) {
-    try {
-      if (eventHandlerRef) {
-        client.removeEventHandler(eventHandlerRef);
-        eventHandlerRef = null;
-      }
-      await client.disconnect();
-    } catch {}
-    client = null;
-  }
+  await cleanupOldClient();
 
   console.log('[Telegram] Подключение к Telegram через MTProto...');
   disconnectedSince = disconnectedSince || Date.now();
@@ -600,8 +907,11 @@ async function connectTelegram() {
 
   try {
     const stringSession = new StringSession(SESSION_STRING);
+    // B7: Параметры autoReconnect и floodSleepThreshold
     client = new TelegramClient(stringSession, API_ID, API_HASH, {
-      connectionRetries: 3,
+      connectionRetries: 5,
+      autoReconnect: true,
+      floodSleepThreshold: 60,
       useWSS: false,
     });
 
@@ -610,23 +920,37 @@ async function connectTelegram() {
     const me = await client.getMe();
     console.log(`[Telegram] Успешно подключено под аккаунтом: ${me.firstName} (@${me.username || me.phone})`);
 
-    telegramConnected = true;
-    disconnectedSince = null;
-    reconnectDelayMs = 5000; // Сброс задержки при успехе
-
-    if (ALLOWED_CHATS) {
-      console.log(`[Telegram] Белый список чатов активен (${ALLOWED_CHATS.length} чатов)`);
+    // B2: Загрузка диалогов и catchUp
+    try {
+      console.log('[Telegram] Загрузка списка диалогов (getDialogs)...');
+      await client.getDialogs({ limit: 300 });
+      console.log('[Telegram] Диалоги успешно загружены.');
+    } catch (diagErr) {
+      console.warn('[Telegram] Ошибка при вызове getDialogs:', diagErr.message);
     }
-    console.log('[Telegram] Режим слушателя активен: отслеживаю каналы и группы 24/7...\n');
 
+    try {
+      if (typeof client.catchUp === 'function') {
+        await client.catchUp();
+        console.log('[Telegram] catchUp успешно выполнен.');
+      }
+    } catch (catchUpErr) {
+      console.warn('[Telegram] catchUp не поддерживается или завершился с ошибкой:', catchUpErr.message);
+    }
+
+    telegramConnected = true;
+    connectedAt = Date.now();
+    disconnectedSince = null;
+    reconnectDelayMs = 5000;
+
+    console.log('[Telegram] Режим слушателя активен: отслеживаю каналы и группы 24/7...\n');
     processFailedQueue().catch(() => {});
 
+    // B3: NewMessage обработчик с перехватом сетевых ошибок
     eventHandlerRef = async (event) => {
       try {
         const message = event.message;
         if (!message || !message.text) return;
-
-        lastMessageAt = new Date().toISOString();
 
         if (message.out) {
           privacyStats.skippedOutgoing++;
@@ -642,88 +966,18 @@ async function connectTelegram() {
           return;
         }
 
-        let chatTitle = 'Telegram';
-        let chatUsername = '';
-        let rawChatId = message.chatId || '';
-
-        try {
-          const chat = await message.getChat();
-          if (chat) {
-            if ('bot' in chat && chat.bot) {
-              privacyStats.skippedBots++;
-              return;
-            }
-            chatTitle = chat.title || chat.username || 'Чат';
-            chatUsername = chat.username ? chat.username.toLowerCase().replace(/^@/, '') : '';
-            if (chat.id) rawChatId = chat.id;
-          }
-        } catch {}
-
-        const cleanCId = cleanChatId(rawChatId);
-
-        if (allowedChatsSet && allowedChatsSet.size > 0) {
-          const isAllowed =
-            (chatUsername && allowedChatsSet.has(chatUsername)) ||
-            (cleanCId && allowedChatsSet.has(cleanCId));
-
-          if (!isAllowed) {
-            privacyStats.skippedNotAllowed++;
-            return;
-          }
-        }
-
-        stats.messagesProcessed++;
-
-        // 2.4 Фильтрация вакансий с регулярными выражениями и стоп-листом соискателей
-        const matchResult = matchesVacancy(message.text);
-        if (!matchResult.isMatch) {
-          return;
-        }
-
-        const leadId = buildLeadId(rawChatId, message.id);
-        const textHash = computeTextHash(message.text);
-
-        if (await storage.isDuplicate(leadId, textHash)) {
-          return;
-        }
-
-        stats.leadsFound++;
-        stats.lastLeadAt = new Date().toISOString();
-
-        const postUrl = buildPostUrl(
-          chatUsername ? { username: chatUsername } : { id: rawChatId },
-          message.id
-        );
-
-        const budget = parseBudget(message.text);
-
-        const postedAt = message.date
-          ? new Date(message.date * 1000).toISOString()
-          : new Date().toISOString();
-
-        const leadItem = {
-          id: leadId,
-          channel: chatUsername ? `@${chatUsername}` : chatTitle,
-          text: message.text,
-          url: postUrl,
-          matchedKeywords: matchResult.matched,
-          budget,
-          postedAt,
-        };
-
-        console.log(`\n🔥 [НАЙДЕНА ВАКАНСИЯ] в "${chatTitle}" (${matchResult.matched.join(', ')})`);
-        if (budget) {
-          console.log(`💰 Бюджет: ${budget.currency === 'NEGOTIABLE' ? 'Договорной' : `${budget.min || ''}-${budget.max || ''} ${budget.currency}`}`);
-        }
-        console.log(`Текст: ${message.text.slice(0, 140)}...`);
-        console.log(`Ссылка: ${postUrl}\n`);
-
-        storage.addRecentLead(leadItem);
-        trackRecentLead(leadItem);
-        await dispatchLeadNotification(leadItem);
+        await processIncomingMessage(message);
       } catch (err) {
         errorsCount++;
-        console.error('[Ошибка обработки сообщения]:', err.message);
+        const msg = String(err?.message || err);
+        console.error('[NewMessage Error]:', msg);
+
+        if (/TIMEOUT|ECONNRESET|ETIMEDOUT|Not connected|Connection closed/i.test(msg)) {
+          console.warn('[Telegram] Разрыв соединения в NewMessage. Запуск реконнекта...');
+          telegramConnected = false;
+          disconnectedSince = Date.now();
+          scheduleReconnect();
+        }
       }
     };
 
@@ -743,24 +997,35 @@ async function connectTelegram() {
       return;
     }
 
+    // B3: Отслеживание числа падений реконнекта (более 5 за 10 мин -> выход)
+    const now = Date.now();
+    reconnectFailures.push(now);
+    while (reconnectFailures.length > 0 && now - reconnectFailures[0] > 10 * 60 * 1000) {
+      reconnectFailures.shift();
+    }
+    if (reconnectFailures.length >= 5) {
+      console.error('[Telegram КРИТИЧЕСКАЯ ОШИБКА] Более 5 сбоев подключения подряд за 10 минут!');
+      await handleShutdown('EXCESSIVE_RECONNECT_FAILURES', 1);
+      return;
+    }
+
     const floodMatch = errStr.match(/FLOOD_WAIT_(\d+)/i);
     let waitMs = reconnectDelayMs;
     if (floodMatch) {
       const waitSeconds = parseInt(floodMatch[1], 10);
       console.warn(`[Telegram FLOOD_WAIT] Telegram запросил ожидание ${waitSeconds} секунд`);
       waitMs = (waitSeconds + 2) * 1000;
-    } else {
-      reconnectDelayMs = Math.min(reconnectDelayMs * 2, MAX_RECONNECT_DELAY_MS);
     }
 
-    console.log(`[Telegram Reconnect] Повторная попытка подключения через ${Math.round(waitMs / 1000)} сек...`);
-    reconnectTimer = setTimeout(connectTelegram, waitMs);
+    scheduleReconnect(waitMs);
+  } finally {
+    isConnecting = false;
   }
 }
 
 connectTelegram();
 
-// 10. Глобальный перехват ошибок и Graceful Shutdown (2.1)
+// 10. Глобальный перехват ошибок и Graceful Shutdown (B3)
 async function handleShutdown(signal, exitCode = 0) {
   if (isShuttingDown) return;
   isShuttingDown = true;
@@ -773,12 +1038,8 @@ async function handleShutdown(signal, exitCode = 0) {
     if (server) {
       server.close(() => console.log('[Shutdown] HTTP-сервер остановлен'));
     }
-    if (client) {
-      const disconnectPromise = client.disconnect();
-      const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 3000));
-      await Promise.race([disconnectPromise, timeoutPromise]);
-      console.log('[Shutdown] Telegram MTProto отключен');
-    }
+    await cleanupOldClient();
+    console.log('[Shutdown] Telegram MTProto отключен');
   } catch (err) {
     console.error('[Shutdown] Ошибка при завершении:', err.message);
   } finally {
@@ -787,14 +1048,38 @@ async function handleShutdown(signal, exitCode = 0) {
 }
 
 process.on('unhandledRejection', (reason) => {
-  console.error('[unhandledRejection] Необработанное отклонение промиса:', reason);
+  const msg = String(reason?.message || reason || '');
+  console.error('[unhandledRejection]:', msg);
   errorsCount++;
-  handleShutdown('unhandledRejection', 1);
+
+  if (/TIMEOUT|ECONNRESET|ETIMEDOUT|Not connected|Connection closed/i.test(msg)) {
+    console.warn('[unhandledRejection] Сетевой сбой MTProto — запуск переподключения без остановки процесса.');
+    telegramConnected = false;
+    disconnectedSince = disconnectedSince || Date.now();
+    scheduleReconnect();
+    return;
+  }
+  if (msg.includes('AUTH_KEY_UNREGISTERED') || msg.includes('SESSION_REVOKED')) {
+    handleShutdown('FATAL_AUTH_ERROR', 1);
+  }
 });
 
 process.on('uncaughtException', (err) => {
-  console.error('[uncaughtException] Необработанное исключение:', err);
+  const msg = String(err?.message || err || '');
+  console.error('[uncaughtException]:', msg);
   errorsCount++;
+
+  if (/TIMEOUT|ECONNRESET|ETIMEDOUT|Not connected|Connection closed/i.test(msg)) {
+    console.warn('[uncaughtException] Сетевой сбой MTProto — запуск переподключения без остановки процесса.');
+    telegramConnected = false;
+    disconnectedSince = disconnectedSince || Date.now();
+    scheduleReconnect();
+    return;
+  }
+  if (msg.includes('AUTH_KEY_UNREGISTERED') || msg.includes('SESSION_REVOKED')) {
+    handleShutdown('FATAL_AUTH_ERROR', 1);
+    return;
+  }
   handleShutdown('uncaughtException', 1);
 });
 
