@@ -15,6 +15,8 @@ interface SettingsState extends UserSettings {
   setNotificationsEnabled: (enabled: boolean) => void;
   setUseAiQualification: (enabled: boolean) => void;
   setAiTopNCount: (count: number) => void;
+  setCustomAiApiKey: (key: string) => void;
+  setCustomAiProvider: (provider: 'gemini' | 'groq' | 'openrouter') => void;
   setQuietHours: (enabled: boolean, start?: number, end?: number) => void;
   addQuotaUsed: (units: number) => void;
   resetQuota: () => void;
@@ -49,6 +51,11 @@ export const useSettingsStore = create<SettingsState>()(
       sessionQuotaUsed: 0,
       useAiQualification: true,
       aiTopNCount: 30,
+      customAiApiKey: '',
+      customAiProvider: 'gemini',
+      setCustomAiApiKey: (customAiApiKey: string) => set({ customAiApiKey }),
+      setCustomAiProvider: (customAiProvider: 'gemini' | 'groq' | 'openrouter') =>
+        set({ customAiProvider }),
       quietHoursEnabled: false,
       quietHoursStart: 23,
       quietHoursEnd: 8,

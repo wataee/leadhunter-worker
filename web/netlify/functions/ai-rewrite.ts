@@ -22,6 +22,8 @@ interface RewriteBody {
     channel?: string;
     niche?: string;
   };
+  customApiKey?: string;
+  customProvider?: string;
 }
 
 const SYSTEM_PROMPT =
@@ -82,8 +84,26 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     clientName ? ` (Клиент: ${clientName})` : ''
   }:\n\n${wrapUserData(cleanText, 'PITCH_DRAFT')}`;
 
+  const customKey = (
+    event.headers?.['x-custom-ai-key'] ||
+    (event.headers as any)?.['X-Custom-Ai-Key'] ||
+    body.customApiKey ||
+    ''
+  ).trim();
+
+  const customProvider = (
+    event.headers?.['x-custom-ai-provider'] ||
+    (event.headers as any)?.['X-Custom-Ai-Provider'] ||
+    body.customProvider ||
+    ''
+  ).trim();
+
   try {
-    const result = await generateAiCompletion(SYSTEM_PROMPT, userPrompt);
+    const result = await generateAiCompletion(
+      SYSTEM_PROMPT,
+      userPrompt,
+      customKey ? { apiKey: customKey, provider: customProvider } : undefined
+    );
     return jsonResponse(
       200,
       {

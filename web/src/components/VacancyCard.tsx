@@ -95,8 +95,12 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         setCustomDraft(res.rewritten);
         addToast({ type: 'success', message: 'AI подготовил персонализированный отклик!' });
       }
-    } catch {
-      addToast({ type: 'error', message: 'Ошибка генерации AI. Проверьте настройки ключей.' });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Ошибка генерации AI. Проверьте настройки ключей в Настройках.';
+      addToast({
+        type: 'error',
+        message: msg.length > 120 ? `${msg.slice(0, 120)}...` : msg,
+      });
     } finally {
       setIsGeneratingAi(false);
     }

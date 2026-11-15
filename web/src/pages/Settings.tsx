@@ -4,7 +4,7 @@ import { useLeadsStore } from '../store/leadsStore';
 import { useVacanciesStore } from '../store/vacanciesStore';
 import { useTemplatesStore } from '../store/templatesStore';
 import { useToastStore } from '../store/toastStore';
-import { checkApiHealth, HealthStatus } from '../lib/api';
+import { checkApiHealth, HealthStatus, rewritePitchWithAi } from '../lib/api';
 import { exportLeadsToCsv } from '../lib/csv';
 import { Modal } from '../components/Modal';
 import {
@@ -35,6 +35,10 @@ export const Settings: React.FC = () => {
     quietHoursEnd,
     useAiQualification,
     aiTopNCount,
+    customAiApiKey,
+    customAiProvider,
+    setCustomAiApiKey,
+    setCustomAiProvider,
     setUseAiQualification,
     setAiTopNCount,
     setQuietHours,
@@ -62,6 +66,24 @@ export const Settings: React.FC = () => {
   });
   const [isCheckingHealth, setIsCheckingHealth] = useState(false);
   const [clearModalOpen, setClearModalOpen] = useState(false);
+  const [isTestingKey, setIsTestingKey] = useState(false);
+
+  const handleTestCustomAiKey = async () => {
+    setIsTestingKey(true);
+    try {
+      const res = await rewritePitchWithAi({
+        text: 'Привет, я монтажер. Готов сделать тестовый ролик.',
+      });
+      if (res.rewritten) {
+        addToast({ type: 'success', message: 'Ключ проверен успешно! ИИ работает.' });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Ошибка проверки ключа';
+      addToast({ type: 'error', message: `Ошибка AI: ${msg}` });
+    } finally {
+      setIsTestingKey(false);
+    }
+  };
 
   useEffect(() => {
     checkHealth();
@@ -549,6 +571,84 @@ export const Settings: React.FC = () => {
               <span className="text-[11px] text-text-muted">
                 каналов пачками по 5 (с паузой 2 сек)
               </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Custom AI API Key Configuration */}
+        <div className="p-4 bg-surface-2/30 rounded-card border border-border space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <span className="text-xs font-semibold text-text uppercase tracking-wider block">
+                Персональный API-ключ ИИ
+              </span>
+              <p className="text-[11px] text-text-muted mt-0.5">
+                Используется для кнопки «AI-версия» отклика в ленте и умного скоринга каналов.
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <label className="text-xs text-text-muted">Провайдер:</label>
+              <select
+                value={customAiProvider || 'gemini'}
+                onChange={(e) => setCustomAiProvider(e.target.value as any)}
+                className="bg-surface border border-border rounded-control px-2.5 py-1 text-xs text-text focus:outline-none focus:border-accent"
+              >
+                <option value="gemini">Google Gemini (AIzaSy...)</option>
+                <option value="groq">Groq (gsk_...)</option>
+                <option value="openrouter">OpenRouter (sk-or-...)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="password"
+              placeholder={
+                customAiProvider === 'groq'
+                  ? 'gsk_...'
+                  : customAiProvider === 'openrouter'
+                  ? 'sk-or-...'
+                  : 'AIzaSy...'
+              }
+              value={customAiApiKey || ''}
+              onChange={(e) => setCustomAiApiKey(e.target.value)}
+              className="flex-1 bg-surface border border-border rounded-control px-3 py-2 text-xs font-mono text-text focus:outline-none focus:border-accent"
+            />
+            <button
+              type="button"
+              disabled={!customAiApiKey?.trim() || isTestingKey}
+              onClick={handleTestCustomAiKey}
+              className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white text-xs font-semibold rounded-control transition-colors shrink-0 flex items-center justify-center gap-1.5"
+            >
+              {isTestingKey ? 'Проверяю...' : 'Проверить ключ'}
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between text-[11px] text-muted gap-2">
+            <span>
+              {customAiApiKey?.trim() ? (
+                <span className="text-emerald-400 font-medium">✓ Ключ сохранён в браузере</span>
+              ) : (
+                <span>Ключ не задан (будут использоваться серверные переменные Netlify)</span>
+              )}
+            </span>
+            <div className="flex items-center gap-3">
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noreferrer"
+                className="text-accent hover:underline"
+              >
+                Бесплатный ключ Gemini →
+              </a>
+              <a
+                href="https://console.groq.com/keys"
+                target="_blank"
+                rel="noreferrer"
+                className="text-accent hover:underline"
+              >
+                Бесплатный ключ Groq →
+              </a>
             </div>
           </div>
         </div>

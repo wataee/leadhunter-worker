@@ -264,9 +264,27 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   const userPrompt = buildUserPrompt(leads, body.examples);
 
+  const customKey = (
+    event.headers?.['x-custom-ai-key'] ||
+    (event.headers as any)?.['X-Custom-Ai-Key'] ||
+    (body as any)?.customApiKey ||
+    ''
+  ).trim();
+
+  const customProvider = (
+    event.headers?.['x-custom-ai-provider'] ||
+    (event.headers as any)?.['X-Custom-Ai-Provider'] ||
+    (body as any)?.customProvider ||
+    ''
+  ).trim();
+
   let completionResult;
   try {
-    completionResult = await generateAiCompletion(SYSTEM_PROMPT, userPrompt);
+    completionResult = await generateAiCompletion(
+      SYSTEM_PROMPT,
+      userPrompt,
+      customKey ? { apiKey: customKey, provider: customProvider } : undefined
+    );
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Все настроенные AI-провайдеры вернули ошибку.';
     return errorResponse(502, msg, null, origin);

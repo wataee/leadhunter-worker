@@ -1,3 +1,5 @@
+import { useSettingsStore } from '../store/settingsStore';
+
 export interface HealthStatus {
   youtube: boolean;
   telegram: boolean;
@@ -232,9 +234,18 @@ export async function rewritePitchWithAi(payload: {
   text: string;
   leadContext?: { name?: string; channel?: string; niche?: string };
 }): Promise<{ rewritten: string }> {
+  const { customAiApiKey, customAiProvider } = useSettingsStore.getState();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (customAiApiKey?.trim()) {
+    headers['x-custom-ai-key'] = customAiApiKey.trim();
+  }
+  if (customAiProvider) {
+    headers['x-custom-ai-provider'] = customAiProvider;
+  }
+
   const res = await fetch('/api/ai-rewrite', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(payload),
   });
 
@@ -248,9 +259,18 @@ export async function scoreLeadsWithAi(payload: {
     bad?: AiScoreExample[];
   };
 }): Promise<AiScoreResponse> {
+  const { customAiApiKey, customAiProvider } = useSettingsStore.getState();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (customAiApiKey?.trim()) {
+    headers['x-custom-ai-key'] = customAiApiKey.trim();
+  }
+  if (customAiProvider) {
+    headers['x-custom-ai-provider'] = customAiProvider;
+  }
+
   const res = await fetch('/api/ai-score', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(payload),
   });
 

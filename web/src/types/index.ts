@@ -157,6 +157,8 @@ export interface UserSettings {
   // AI Settings
   useAiQualification: boolean;
   aiTopNCount: number; // Top N leads to qualify with AI (default 30)
+  customAiApiKey?: string;
+  customAiProvider?: 'gemini' | 'groq' | 'openrouter';
 
   // Quiet Hours (5.9)
   quietHoursEnabled?: boolean;
