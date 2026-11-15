@@ -52,7 +52,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
       ai: hasAi,
       activeProvider: hasGemini ? 'gemini' : hasGroq ? 'groq' : hasOpenRouter ? 'openrouter' : hasAnthropic ? 'anthropic' : null,
       providers: {
-        gemini: { configured: hasGemini, model: process.env.GEMINI_MODEL || 'gemini-1.5-flash' },
+        gemini: { configured: hasGemini, model: process.env.GEMINI_MODEL || 'gemini-2.5-flash' },
         groq: { configured: hasGroq, model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile' },
         openrouter: { configured: hasOpenRouter, model: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free' },
         anthropic: { configured: hasAnthropic, model: process.env.ANTHROPIC_MODEL || 'claude-3-5-haiku-20241022' },
