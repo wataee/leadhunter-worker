@@ -45,30 +45,34 @@ async function callGemini(
   apiKey: string,
   modelName: string
 ): Promise<string> {
-  if (!apiKey || !apiKey.startsWith('AIzaSy')) {
-    throw new Error(
-      'Неверный формат ключа Gemini API. Ключ должен начинаться с "AIzaSy" (получите бесплатный ключ на https://aistudio.google.com/app/apikey).'
-    );
+  if (!apiKey || !apiKey.trim()) {
+    throw new Error('Ключ Gemini API не передан.');
   }
 
-  const modelsToTry = [modelName || GEMINI_DEFAULT_MODEL, 'gemini-2.0-flash', 'gemini-1.5-pro'].filter(
-    (m, idx, arr) => arr.indexOf(m) === idx
-  );
+  const cleanKey = apiKey.trim();
+  const modelsToTry = [
+    modelName || GEMINI_DEFAULT_MODEL,
+    'gemini-1.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-pro',
+  ].filter((m, idx, arr) => Boolean(m) && arr.indexOf(m) === idx);
 
   let lastError: Error | null = null;
 
   for (const model of modelsToTry) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(cleanKey)}`;
 
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': cleanKey,
+      };
+
       const res = await fetchWithTimeout(
         url,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey,
-          },
+          headers,
           body: JSON.stringify({
             contents: [
               {

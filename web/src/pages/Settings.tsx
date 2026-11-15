@@ -608,7 +608,7 @@ export const Settings: React.FC = () => {
                   ? 'gsk_...'
                   : customAiProvider === 'openrouter'
                   ? 'sk-or-...'
-                  : 'AIzaSy...'
+                  : 'AIzaSy... или AQ.Ab...'
               }
               value={customAiApiKey || ''}
               onChange={(e) => setCustomAiApiKey(e.target.value)}
