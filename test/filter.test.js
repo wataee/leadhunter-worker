@@ -88,3 +88,63 @@ test('2.4 matchesVacancy - 60+ comprehensive test cases', () => {
   assert.equal(matchesVacancy('Просто текст без роли и без ключевиков про погоду').isMatch, false);
   assert.equal(matchesVacancy('').isMatch, false);
 });
+
+test('A1: two-level stop words and soft applicant phrases handling (12+ cases)', () => {
+  // --- 1. Vacancies containing soft applicant keywords (MUST PASS because hiring intent is present) ---
+  // Case 1: «резюме» in genuine vacancy
+  const v1 = matchesVacancy('Ищем видеомонтажёра на YouTube-канал. Оплата 40 000 ₽. Присылайте резюме и портфолио в лс.');
+  assert.equal(v1.isMatch, true, 'Vacancy with резюме and портфолио must pass');
+
+  // Case 2: «CV» in genuine vacancy
+  const v2 = matchesVacancy('Требуется монтажёр reels, отправляйте CV в телеграм @hr_lead');
+  assert.equal(v2.isMatch, true, 'Vacancy with CV must pass');
+
+  // Case 3: «портфолио:» in genuine vacancy
+  const v3 = matchesVacancy('Вакансия: монтажёр. Портфолио: обязательно присылать ссылкой на гугл диск.');
+  assert.equal(v3.isMatch, true, 'Vacancy with портфолио: must pass');
+
+  // Case 4: «Услуги монтажа не предлагать»
+  const v4 = matchesVacancy('Ищем видеомонтажёра в продакшн. Услуги монтажа от агентств не предлагать, только инхаус.');
+  assert.equal(v4.isMatch, true, 'Vacancy with "услуги монтажа не предлагать" must pass');
+
+  // Case 5: «обо мне» in genuine vacancy
+  const v5 = matchesVacancy('Ищем рилсмейкера на долгосрок! Краткий рассказ о себе и кейсы в ЛС.');
+  assert.equal(v5.isMatch, true, 'Vacancy with о себе must pass');
+
+  // Case 6: «резюме» with explicit header
+  const v6 = matchesVacancy('#вакансия\nМонтаж видео для онлайн-школы. Ждем ваше резюме и примеры работ.');
+  assert.equal(v6.isMatch, true, 'Header #вакансия with резюме must pass');
+
+  // Case 7: English hiring phrase with CV
+  const v7 = matchesVacancy('Looking for a video editor for daily vlogs. Send your CV and portfolio to email.');
+  assert.equal(v7.isMatch, true, 'English vacancy with CV and portfolio must pass');
+
+  // --- 2. Job seekers / self-promoters and non-video (MUST BE REJECTED) ---
+  // Case 8: Job seeker with portfolio
+  const s1 = matchesVacancy('Ищу работу, моё портфолио: https://t.me/my_edits. Сделаю динамично.');
+  assert.equal(s1.isMatch, false, 'Job seeker with "ищу работу, моё портфолио" must be rejected');
+
+  // Case 9: Self-promoter offering services
+  const s2 = matchesVacancy('Я монтажёр, предлагаю услуги монтажа для блогеров.');
+  assert.equal(s2.isMatch, false, 'Self promoter "я монтажёр, предлагаю услуги" must be rejected');
+
+  // Case 10: Construction montage
+  const c1 = matchesVacancy('Срочно требуется монтаж окон ПВХ и балконных блоков на объекте.');
+  assert.equal(c1.isMatch, false, 'Window montage must be rejected');
+
+  // Case 11: Air conditioner montage
+  const c2 = matchesVacancy('Нужен монтаж кондиционеров в серверную.');
+  assert.equal(c2.isMatch, false, 'AC montage must be rejected');
+
+  // Case 12: Ceiling montage
+  const c3 = matchesVacancy('Бригада ищет заказы: монтаж натяжных потолков под ключ.');
+  assert.equal(c3.isMatch, false, 'Ceiling montage must be rejected');
+
+  // Case 13: Course seller
+  const crs = matchesVacancy('Курс по монтажу роликов с нуля! Скидка 50% только сегодня.');
+  assert.equal(crs.isMatch, false, 'Course ad must be rejected');
+
+  // Case 14: Job seeker with resume and no hiring intent
+  const app = matchesVacancy('Видеомонтажер. Мое резюме и портфолио: https://hh.ru/resume/123.');
+  assert.equal(app.isMatch, false, 'Applicant resume without hiring signals must be rejected');
+});

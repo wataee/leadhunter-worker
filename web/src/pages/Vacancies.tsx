@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useVacanciesStore } from '../store/vacanciesStore';
 import { useLeadsStore } from '../store/leadsStore';
@@ -28,6 +28,8 @@ export const Vacancies: React.FC = () => {
     excludeKeywords,
     lastRefreshedAt,
     isLoading,
+    lastError,
+    scrapeOffset,
     hiddenChannels,
     mergeNewVacancies,
     markSeen,
@@ -35,6 +37,8 @@ export const Vacancies: React.FC = () => {
     hideChannel,
     setLoading,
     setLastRefreshedAt,
+    setLastError,
+    setScrapeOffset,
   } = useVacanciesStore();
 
   const addLead = useLeadsStore((s) => s.addLead);
@@ -43,6 +47,7 @@ export const Vacancies: React.FC = () => {
 
   const [activePitchVacancy, setActivePitchVacancy] = useState<Vacancy | null>(null);
   const [showShady, setShowShady] = useState(false);
+  const isRefreshingRef = useRef(false);
 
   // 2 URL Filters: Hot (<20 min) and Format
   const hotOnly = searchParams.get('hot') === '1';
@@ -66,25 +71,49 @@ export const Vacancies: React.FC = () => {
     });
   };
 
-  // Channel polling & refresh
+  // Channel polling & refresh with round-robin rotation
   const handleRefresh = useCallback(async () => {
-    const activeUsernames = sources
-      .filter((s) => s.enabled && !hiddenChannels.includes(s.username.toLowerCase()))
-      .map((s) => s.username);
+    if (isRefreshingRef.current) return;
+    isRefreshingRef.current = true;
 
-    if (activeUsernames.length === 0) return;
+    // Filter only eligible channels (no groups, enabled, not hidden)
+    const hiddenSet = new Set(hiddenChannels.map((c) => c.toLowerCase()));
+    const eligibleChannels = sources.filter(
+      (s) => s.enabled && s.type !== 'group' && !hiddenSet.has(s.username.toLowerCase())
+    );
+
+    // Prioritize recommended channels
+    eligibleChannels.sort((a, b) => {
+      const aScore = (a as any).recommended ? 2 : 1;
+      const bScore = (b as any).recommended ? 2 : 1;
+      return bScore - aScore;
+    });
+
+    if (eligibleChannels.length === 0) {
+      isRefreshingRef.current = false;
+      return;
+    }
+
+    // Round-robin slice of 15 channels
+    const batchSize = 15;
+    const currentOffset = scrapeOffset % eligibleChannels.length;
+    const batchChannels: string[] = [];
+    for (let i = 0; i < Math.min(batchSize, eligibleChannels.length); i++) {
+      const idx = (currentOffset + i) % eligibleChannels.length;
+      batchChannels.push(eligibleChannels[idx].username);
+    }
+    const nextOffset = (currentOffset + batchSize) % eligibleChannels.length;
+    setScrapeOffset(nextOffset);
 
     setLoading(true);
     try {
-      const res = await fetchTelegramFeed(activeUsernames.slice(0, 15));
+      const res = await fetchTelegramFeed(batchChannels);
+      setLastError(null);
       const processed: Vacancy[] = [];
 
       for (const msg of res.allMessages) {
-        const isWorkerLead = Boolean(
-          (msg as any).views === 'MTProto 24/7' ||
-          msg.id.startsWith('tg_') ||
-          (msg as any).fromWorker
-        );
+        // A3.a: Only genuine worker leads have fromWorker === true
+        const isWorkerLead = Boolean((msg as any).fromWorker === true);
 
         const {
           relevance,
@@ -137,29 +166,70 @@ export const Vacancies: React.FC = () => {
           );
         }
       }
-    } catch {
-      // Background poll failure is silent
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Ошибка при получении вакансий';
+      setLastError(msg);
     } finally {
       setLoading(false);
+      isRefreshingRef.current = false;
     }
   }, [
     sources,
+    scrapeOffset,
     hiddenChannels,
     includeKeywords,
     excludeKeywords,
     mergeNewVacancies,
     setLoading,
     setLastRefreshedAt,
+    setLastError,
+    setScrapeOffset,
     soundEnabled,
     notificationsEnabled,
   ]);
 
-  // Initial fetch on mount
+  // A3.b: Polling every 60s while tab is visible, immediate on mount and visibility change
   useEffect(() => {
-    if (vacancies.length === 0) {
-      handleRefresh();
+    handleRefresh();
+
+    let intervalId: any = null;
+
+    const startPolling = () => {
+      if (!intervalId) {
+        intervalId = setInterval(() => {
+          if (document.visibilityState === 'visible') {
+            handleRefresh();
+          }
+        }, 60000);
+      }
+    };
+
+    const stopPolling = () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleRefresh();
+        startPolling();
+      } else {
+        stopPolling();
+      }
+    };
+
+    if (document.visibilityState === 'visible') {
+      startPolling();
     }
-  }, [vacancies.length, handleRefresh]);
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      stopPolling();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [handleRefresh]);
 
   // Active sources count (sources with leads in last 7 days)
   const activeSourcesCount = useMemo(() => {
@@ -239,6 +309,20 @@ export const Vacancies: React.FC = () => {
   const displayedList = showShady ? clusteredVacancies : normalVacancies;
 
   const handleConvertToLead = (vac: Vacancy) => {
+    const existingLeads = useLeadsStore.getState().leads;
+    const isAlreadyLead = existingLeads.some(
+      (l) => Boolean(l.channelUrl && vac.url && l.channelUrl.trim() === vac.url.trim())
+    );
+
+    if (isAlreadyLead) {
+      addToast({
+        type: 'info',
+        title: 'Уже в воронке',
+        message: `Этот заказ из @${vac.channel} уже добавлен в воронку.`,
+      });
+      return;
+    }
+
     addLead({
       name: `@${vac.channel.replace(/^@/, '')}`,
       channelUrl: vac.url,
@@ -260,6 +344,7 @@ export const Vacancies: React.FC = () => {
         lastRefreshedAt={lastRefreshedAt}
         isLoading={isLoading}
         onRefresh={handleRefresh}
+        lastError={lastError}
       />
 
       {/* 2.5 Filters: Hot toggle + Format dropdown + Sources link */}
@@ -281,19 +366,36 @@ export const Vacancies: React.FC = () => {
           </div>
         ) : displayedList.length === 0 ? (
           <div className="bg-surface rounded-card p-8 border border-border text-center space-y-3">
-            <p className="text-sm text-text-muted">
-              {hotOnly
-                ? 'Сейчас нет горящих вакансий за последние 20 минут.'
-                : 'По выбранным фильтрам пока нет вакансий.'}
-            </p>
-            {hotOnly && (
-              <button
-                type="button"
-                onClick={() => setHotOnly(false)}
-                className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-control transition-colors"
-              >
-                Показать все вакансии
-              </button>
+            {lastError ? (
+              <div className="space-y-3">
+                <p className="text-sm text-danger font-medium">
+                  Ошибка загрузки вакансий: {lastError}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleRefresh}
+                  className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-control transition-colors"
+                >
+                  Повторить запрос
+                </button>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-text-muted">
+                  {hotOnly
+                    ? 'Сейчас нет горящих вакансий за последние 20 минут.'
+                    : 'По выбранным фильтрам пока нет вакансий.'}
+                </p>
+                {hotOnly && (
+                  <button
+                    type="button"
+                    onClick={() => setHotOnly(false)}
+                    className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-control transition-colors"
+                  >
+                    Показать все вакансии
+                  </button>
+                )}
+              </>
             )}
           </div>
         ) : (

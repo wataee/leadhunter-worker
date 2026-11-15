@@ -56,4 +56,27 @@ describe('Zustand Persist Migration v6', () => {
     expect(migratedLead).toBeDefined();
     expect(migratedLead?.name).toBe('@channel_editor');
   });
+
+  it('correctly migrates v6 state to v7 removing legacy stopPhrases from excludeKeywords', () => {
+    const legacyV6State = {
+      excludeKeywords: [
+        'строительный монтаж',
+        'ищу работу',
+        'резюме',
+        'cv',
+        'портфолио:',
+        'продаю',
+        'моя_кастомная_стоп_фраза',
+        'крипта',
+      ],
+      vacancies: [],
+      sources: [],
+    };
+
+    const persistOptions = (useVacanciesStore as any).persist?.getOptions?.();
+    const migrateFn = persistOptions?.migrate;
+    const migrated = migrateFn(legacyV6State, 6);
+
+    expect(migrated.excludeKeywords).toEqual(['моя_кастомная_стоп_фраза', 'крипта']);
+  });
 });

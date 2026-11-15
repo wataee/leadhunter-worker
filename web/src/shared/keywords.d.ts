@@ -3,6 +3,8 @@ export interface KeywordsConfig {
   hiringPhrases: string[];
   secondaryTerms: string[];
   hiringSignals: string[];
+  hardStopPhrases: string[];
+  softApplicantPhrases: string[];
   stopPhrases: string[];
 }
 

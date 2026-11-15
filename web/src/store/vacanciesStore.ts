@@ -4,7 +4,7 @@ import { Vacancy } from '../types';
 import { useLeadsStore } from './leadsStore';
 import KEYWORDS from '../shared/keywords.js';
 import { parseBudget, BudgetResult } from '../shared/budget.js';
-import { matchesVacancy, detectVacancyRisks } from '../shared/filter.js';
+import { matchesVacancy, detectVacancyRisks, buildWordBoundaryRegex } from '../shared/filter.js';
 
 export interface TelegramSource {
   username: string;
@@ -21,6 +21,8 @@ interface VacanciesState {
   excludeKeywords: string[];
   lastRefreshedAt: string | null;
   isLoading: boolean;
+  lastError: string | null;
+  scrapeOffset: number;
   selectedVacancyForPitch: Vacancy | null;
   hiddenChannels: string[];
 
@@ -49,12 +51,14 @@ interface VacanciesState {
 
   setLoading: (loading: boolean) => void;
   setLastRefreshedAt: (date: string) => void;
+  setLastError: (err: string | null) => void;
+  setScrapeOffset: (offset: number) => void;
 
   clearAllVacancies: () => void;
 }
 
-export const DEFAULT_INCLUDE_KEYWORDS = KEYWORDS.coreRoles;
-export const DEFAULT_EXCLUDE_KEYWORDS = KEYWORDS.stopPhrases;
+export const DEFAULT_INCLUDE_KEYWORDS: string[] = [];
+export const DEFAULT_EXCLUDE_KEYWORDS: string[] = [];
 
 import rawCatalog from '../shared/sources.catalog.json';
 
@@ -95,8 +99,19 @@ export function computeVacancyRelevance(
 } {
   const lower = text.toLowerCase();
 
-  // Exclude check
-  const isExcluded = excludeKeywords.some((kw) => lower.includes(kw.toLowerCase()));
+  // Exclude check: user custom exclude keywords matching with word boundaries
+  const isExcluded =
+    excludeKeywords.length > 0 &&
+    excludeKeywords.some((kw) => {
+      const clean = kw.trim();
+      if (!clean) return false;
+      try {
+        return buildWordBoundaryRegex(clean).test(text);
+      } catch {
+        return lower.includes(clean.toLowerCase());
+      }
+    });
+
   if (isExcluded) {
     return {
       relevance: 0,
@@ -112,9 +127,7 @@ export function computeVacancyRelevance(
   }
 
   const matchCheck = matchesVacancy(text);
-  let matchedKeywords = matchCheck.isMatch
-    ? matchCheck.matched
-    : includeKeywords.filter((kw) => lower.includes(kw.toLowerCase()));
+  let matchedKeywords = matchCheck.isMatch ? matchCheck.matched : [];
 
   if (matchedKeywords.length === 0) {
     if (!isWorkerLead) {
@@ -249,6 +262,8 @@ export const useVacanciesStore = create<VacanciesState>()(
       excludeKeywords: DEFAULT_EXCLUDE_KEYWORDS,
       lastRefreshedAt: null,
       isLoading: false,
+      lastError: null,
+      scrapeOffset: 0,
       selectedVacancyForPitch: null,
       hiddenChannels: [],
 
@@ -442,15 +457,42 @@ export const useVacanciesStore = create<VacanciesState>()(
 
       setLoading: (isLoading) => set({ isLoading }),
       setLastRefreshedAt: (lastRefreshedAt) => set({ lastRefreshedAt }),
+      setLastError: (lastError) => set({ lastError }),
+      setScrapeOffset: (scrapeOffset) => set({ scrapeOffset }),
 
       clearAllVacancies: () => set({ vacancies: [] }),
     }),
     {
       name: 'leadhunter_vacancies',
-      version: 6,
+      version: 7,
       storage: safeLocalStorage as any,
       migrate: (persistedState: any, version: number) => {
         if (persistedState) {
+          // A2: Clean legacy stopPhrases from persisted excludeKeywords
+          if (version < 7) {
+            const legacyStops = new Set([
+              ...(KEYWORDS.hardStopPhrases || []),
+              ...(KEYWORDS.softApplicantPhrases || []),
+              ...(KEYWORDS.stopPhrases || []),
+              'строительный монтаж',
+              'ищу работу',
+              'резюме',
+              'cv',
+              'портфолио:',
+              'продаю',
+              'услуги монтажа',
+              'монтаж от меня',
+            ].map((s) => s.toLowerCase().trim()));
+
+            if (Array.isArray(persistedState.excludeKeywords)) {
+              persistedState.excludeKeywords = persistedState.excludeKeywords.filter(
+                (kw: any) => typeof kw === 'string' && !legacyStops.has(kw.toLowerCase().trim())
+              );
+            } else {
+              persistedState.excludeKeywords = [];
+            }
+          }
+
           // 2.6 Migrate any old favorites directly to leads
           if (Array.isArray(persistedState.vacancies)) {
             const favorites = persistedState.vacancies.filter((v: any) => v && v.isFavorite);

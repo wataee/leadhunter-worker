@@ -1,11 +1,12 @@
 import React from 'react';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, AlertCircle } from 'lucide-react';
 
 interface VacancyHeaderProps {
   count: number;
   lastRefreshedAt: string | null;
   isLoading: boolean;
   onRefresh: () => void;
+  lastError?: string | null;
 }
 
 export const VacancyHeader: React.FC<VacancyHeaderProps> = ({
@@ -13,6 +14,7 @@ export const VacancyHeader: React.FC<VacancyHeaderProps> = ({
   lastRefreshedAt,
   isLoading,
   onRefresh,
+  lastError,
 }) => {
   const formatUpdatedTime = () => {
     if (!lastRefreshedAt) return 'только что';
@@ -28,8 +30,19 @@ export const VacancyHeader: React.FC<VacancyHeaderProps> = ({
         <span className="text-sm font-mono text-text-muted">{count}</span>
       </div>
 
-      <div className="flex items-center gap-3 self-start sm:self-auto">
-        <span className="text-xs text-muted">обновлено {formatUpdatedTime()}</span>
+      <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+        {lastError ? (
+          <span
+            className="inline-flex items-center gap-1.5 text-xs text-danger font-medium max-w-xs truncate"
+            title={`Ошибка обновления: ${lastError}`}
+          >
+            <AlertCircle size={13} className="shrink-0 text-danger" />
+            <span className="truncate">Ошибка: {lastError}</span>
+          </span>
+        ) : (
+          <span className="text-xs text-muted">обновлено {formatUpdatedTime()}</span>
+        )}
+
         <button
           onClick={onRefresh}
           disabled={isLoading}

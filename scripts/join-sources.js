@@ -36,7 +36,7 @@ const MAX_DELAY_SEC = 120;
 function parseArgs() {
   const args = process.argv.slice(2);
   const options = {
-    categories: ['editors_community', 'clients_entrepreneurs'],
+    categories: ['jobs_video', 'jobs_remote_freelance', 'editors_community'],
     recommendedOnly: false,
     dryRun: true,
     printAllowed: false,

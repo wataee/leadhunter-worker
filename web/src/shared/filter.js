@@ -123,7 +123,12 @@ export function buildPostUrl(chat, messageId) {
 }
 
 // Pre-compiled regex caches for performance
-const STOP_REGEXES = KEYWORDS.stopPhrases.map((phrase) => ({
+const HARD_STOP_REGEXES = (KEYWORDS.hardStopPhrases || KEYWORDS.stopPhrases).map((phrase) => ({
+  phrase,
+  regex: buildWordBoundaryRegex(phrase),
+}));
+
+const SOFT_APPLICANT_REGEXES = (KEYWORDS.softApplicantPhrases || []).map((phrase) => ({
   phrase,
   regex: buildWordBoundaryRegex(phrase),
 }));
@@ -156,21 +161,29 @@ export function matchesVacancy(text) {
     return { isMatch: false, matched: [], reason: 'empty_text' };
   }
 
-  // 1. Проверка стоп-фраз (соискатели, резюме, строительный монтаж, курсы, спам)
-  for (const { phrase, regex } of STOP_REGEXES) {
+  // 1. Уровень 1: HARD_STOP — безусловный отказ (строительный монтаж, продажа курсов, "я монтажер", "ищу работу")
+  for (const { phrase, regex } of HARD_STOP_REGEXES) {
     if (regex.test(text)) {
-      return { isMatch: false, matched: [], reason: `stop_phrase: ${phrase}` };
+      return { isMatch: false, matched: [], reason: `hard_stop_phrase: ${phrase}` };
     }
   }
 
-  // 2. Прямые составные фразы найма (например "ищем видеомонтажера", "looking for video editor")
+  // 2. Определение наличия сигнала найма (hiringPhrases / EXPLICIT_VACANCY_HEADER / coreRole + proximity hiringSignal)
+  let hasHiringIntent = false;
+  const matchedHiringPhrases = [];
   for (const { phrase, regex } of HIRING_PHRASE_REGEXES) {
     if (regex.test(text)) {
-      return { isMatch: true, matched: [phrase] };
+      hasHiringIntent = true;
+      matchedHiringPhrases.push(phrase);
     }
   }
 
-  // 3. Поиск первичных маркеров (роли видеомонтажа)
+  const hasExplicitHeader = EXPLICIT_VACANCY_HEADER.test(text);
+  if (hasExplicitHeader) {
+    hasHiringIntent = true;
+  }
+
+  // Поиск первичных маркеров (роли видеомонтажа)
   const foundRoles = [];
   for (const { role, regex } of CORE_ROLE_REGEXES) {
     const match = regex.exec(text);
@@ -179,44 +192,65 @@ export function matchesVacancy(text) {
     }
   }
 
+  const matchedRoleSignals = [];
+  if (foundRoles.length > 0) {
+    const foundSignals = [];
+    for (const { signal, regex } of HIRING_SIGNAL_REGEXES) {
+      let match;
+      const globalRegex = new RegExp(regex.source, 'giu');
+      while ((match = globalRegex.exec(text)) !== null) {
+        foundSignals.push({ signal, index: match.index, length: match[0].length });
+      }
+    }
+
+    for (const r of foundRoles) {
+      for (const s of foundSignals) {
+        const distance =
+          s.index > r.index
+            ? s.index - (r.index + r.length)
+            : r.index - (s.index + s.length);
+
+        if (distance <= 40) {
+          hasHiringIntent = true;
+          matchedRoleSignals.push(`${s.signal} + ${r.role}`);
+          break;
+        }
+      }
+      if (matchedRoleSignals.length > 0) break;
+    }
+  }
+
+  // 3. Уровень 2: SOFT-маркеры соискателя (резюме, портфолио, cv, обо мне)
+  // Блокируют ТОЛЬКО если в посте НЕТ сигнала найма. Если сигнал найма есть — пост пропускается.
+  if (!hasHiringIntent) {
+    for (const { phrase, regex } of SOFT_APPLICANT_REGEXES) {
+      if (regex.test(text)) {
+        return { isMatch: false, matched: [], reason: `soft_stop_phrase: ${phrase}` };
+      }
+    }
+  }
+
   // Первичный маркер обязателен! Без него это не вакансия монтажера.
   if (foundRoles.length === 0) {
     return { isMatch: false, matched: [], reason: 'no_core_role' };
   }
 
-  // 4. Проверка явного заголовка вакансии в начале поста или строки
-  if (EXPLICIT_VACANCY_HEADER.test(text)) {
+  if (matchedHiringPhrases.length > 0) {
+    return { isMatch: true, matched: matchedHiringPhrases };
+  }
+
+  if (hasExplicitHeader) {
     return {
       isMatch: true,
       matched: foundRoles.map((r) => r.role),
     };
   }
 
-  // 5. Проверка близости вторичного маркера найма (в пределах 40 символов от первичного)
-  const foundSignals = [];
-  for (const { signal, regex } of HIRING_SIGNAL_REGEXES) {
-    let match;
-    const globalRegex = new RegExp(regex.source, 'giu');
-    while ((match = globalRegex.exec(text)) !== null) {
-      foundSignals.push({ signal, index: match.index, length: match[0].length });
-    }
-  }
-
-  for (const r of foundRoles) {
-    for (const s of foundSignals) {
-      // Расстояние между границами слов
-      const distance =
-        s.index > r.index
-          ? s.index - (r.index + r.length)
-          : r.index - (s.index + s.length);
-
-      if (distance <= 40) {
-        return {
-          isMatch: true,
-          matched: [`${s.signal} + ${r.role}`],
-        };
-      }
-    }
+  if (matchedRoleSignals.length > 0) {
+    return {
+      isMatch: true,
+      matched: matchedRoleSignals,
+    };
   }
 
   return {
