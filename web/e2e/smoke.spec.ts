@@ -1,31 +1,52 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('LeadHunter E2E Smoke Tests', () => {
-  test('homepage loads and navigates to vacancies', async ({ page }) => {
+test.describe('LeadHunter Core Minimal Flow E2E', () => {
+  test('полный цикл: лента → откликнуться → в лиды → скрыть через меню → источники', async ({ page }) => {
+    // 1. Открытие главной страницы
     await page.goto('/');
-
-    // Check main title or logo is visible
     await expect(page.locator('text=LeadHunter').first()).toBeVisible();
 
-    // Navigate to /vacancies
+    // 2. Переход в ленту вакансий
     await page.click('a[href="/vacancies"]');
     await expect(page).toHaveURL(/.*\/vacancies/);
-
-    // Verify vacancies header
-    await expect(page.locator('text=Лента вакансий').first()).toBeVisible();
-
-    // Verify filter actions are present
+    await expect(page.locator('h1:has-text("Вакансии")')).toBeVisible();
     await expect(page.locator('button:has-text("Обновить")')).toBeVisible();
-  });
 
-  test('shortcuts modal opens on question mark or click', async ({ page }) => {
-    await page.goto('/');
+    // 3. Проверка фильтрации
+    const allBtn = page.locator('button:has-text("Все")');
+    const hotBtn = page.locator('button:has-text("Горячие")');
+    await expect(allBtn).toBeVisible();
+    await expect(hotBtn).toBeVisible();
 
-    // Open shortcuts modal via topbar/sidebar button if present
-    const shortcutButton = page.locator('button[aria-label="Горячие клавиши"]');
-    if (await shortcutButton.count() > 0) {
-      await shortcutButton.first().click();
-      await expect(page.locator('text=Горячие клавиши')).toBeVisible();
+    // 4. Если есть карточки вакансий — проверяем действия
+    const cards = page.locator('.group.rounded-card');
+    if ((await cards.count()) > 0) {
+      const firstCard = cards.first();
+
+      // Кнопка Откликнуться открывает модалку
+      const applyBtn = firstCard.locator('button:has-text("Откликнуться")');
+      await expect(applyBtn).toBeVisible();
+
+      // Кнопка В лиды
+      const toLeadBtn = firstCard.locator('button:has-text("В лиды")');
+      await expect(toLeadBtn).toBeVisible();
+      await toLeadBtn.click();
+
+      // Меню ⋯ с опцией Скрыть
+      const menuBtn = firstCard.locator('button[aria-label="Дополнительные действия"]');
+      if ((await menuBtn.count()) > 0) {
+        await menuBtn.click();
+        await expect(page.locator('text=Скрыть вакансию')).toBeVisible();
+      }
     }
+
+    // 5. Переход на страницу «Источники»
+    await page.click('a[href="/sources"]');
+    await expect(page).toHaveURL(/.*\/sources/);
+    await expect(page.locator('h1:has-text("Источники")')).toBeVisible();
+
+    // 6. Проверка кнопки «Оставить только с лидами за 14 дней»
+    const keepActiveBtn = page.locator('button:has-text("Оставить только с лидами за 14 дней")');
+    await expect(keepActiveBtn).toBeVisible();
   });
 });

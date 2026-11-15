@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar';
 import { Topbar } from './components/Topbar';
 import { ToastContainer } from './components/ToastContainer';
@@ -157,6 +157,7 @@ const AppContent: React.FC = () => {
               <Route path="/finder" element={<Finder />} />
               <Route path="/vacancies" element={<Vacancies />} />
               <Route path="/sources" element={<Sources />} />
+              <Route path="/catalog" element={<Navigate to="/sources" replace />} />
               <Route path="/leads" element={<Leads />} />
               <Route path="/templates" element={<Templates />} />
               <Route path="/settings" element={<Settings />} />
