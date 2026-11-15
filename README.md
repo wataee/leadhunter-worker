@@ -8,69 +8,17 @@
 
 ```mermaid
 flowchart LR
-    TG["Telegram Чаты и Каналы"] -->|MTProto Events| Worker["24/7 Worker (Render)\nserver.js"]
+    TG["Telegram Чаты и Каналы"] -->|MTProto 24/7| Worker["Worker (Render)\nserver.js"]
     Worker -->|POST /api/tg-notify\nX-Webhook-Secret| NetlifyNotify["Netlify Function\ntg-notify"]
-    Worker -.->|Disk Queue / Recents| DataDisk[("data/recent.json\nfailed-queue.json")]
+    Worker -->|Redis REST / LRANGE| Redis[("Upstash Redis\n(Leads & Deduplication)")]
     
     WebBrowser["Браузер (Клиент)\nReact 18 + Zustand"] -->|POST /api/tg-feed| NetlifyFeed["Netlify Function\ntg-feed"]
-    NetlifyFeed -->|GET /recent\nX-Webhook-Secret| Worker
-    NetlifyFeed -.->|Резерв| TGScrape["Web Preview t.me/s/..."]
+    NetlifyFeed -->|GET /recent| Worker
+    NetlifyFeed -.->|Fallback| TGScrape["Web Preview t.me/s/..."]
     
-    WebBrowser -->|POST /api/ai-score| AIScore["Netlify Function\nai-score"]
-    AIScore -->|Fallback Chain| AICall["Gemini → Groq →\nOpenRouter → Anthropic"]
-```
-
-```
-[ Telegram Channels & Chats ] 
-             │
-      (MTProto 24/7)
-             ▼
-[ Render Worker: server.js ] ──(POST /api/tg-notify with X-Webhook-Secret)──► [ Netlify: tg-notify ]
-       │            │
- (data/recent.json) │
-       │            │
-       ▲            ▼
-[ Netlify: tg-feed ] ◄──(GET /recent with X-Webhook-Secret)
-       ▲
-       │
-[ Frontend React: /vacancies ]
-```
-
----
-
-## 📁 Структура проекта
-
-```
-├── server.js               # 24/7 MTProto Telegram-слушатель (Render Web Service)
-├── auth.js                 # Интерактивная генерация SESSION_STRING
-├── test/
-│   └── worker.test.js      # Юнит-тесты фильтра, парсера бюджета, URL
-├── data/                   # Локальное хранилище недавних лидов и очереди повторов
-│   ├── recent.json
-│   └── failed-queue.json
-├── package.json            # Корневой манифест (скрипты lint, test, typecheck, build:all)
-├── .env.example            # Шаблон переменных окружения
-├── .github/workflows/
-│   └── ci.yml              # CI/CD проверка (Node 18/20, lint, typecheck, tests, build)
-└── web/                    # Фронтенд и Serverless Functions
-    ├── netlify.toml        # Конфигурация Netlify и Security Headers (CSP, HSTS)
-    ├── netlify/functions/  # Serverless функции Netlify
-    │   ├── _shared/
-    │   │   ├── ai.ts       # Мульти-провайдерная AI-цепочка (Gemini → Groq → OpenRouter → Claude)
-    │   │   └── response.ts # CORS, IP rate-limiter, 32KB валидатор
-    │   ├── tg-feed.ts      # Параллельный опрос воркера и резервный скрейпинг
-    │   ├── tg-notify.ts    # Защищённый вебхук приема лидов от воркера
-    │   ├── ai-score.ts     # Квалификация YouTube-каналов
-    │   ├── ai-rewrite.ts   # Рерайт питчей
-    │   ├── youtube-search.ts
-    │   └── health.ts       # Проверка статуса провайдеров
-    └── src/
-        ├── shared/         # Общие модули воркера и фронтенда
-        │   ├── keywords.js # Единая база ключевых слов и стоп-фраз
-        │   ├── filter.js   # Регулярные выражения с Unicode границами
-        │   └── budget.js   # Универсальный парсер бюджета (₽, $, €, ₸)
-        ├── pages/          # Страницы (Vacancies, Finder, Leads, Dashboard, NotFound)
-        └── store/          # Zustand хранилища с безопасным localStorage
+    BotUser["Telegram Бот"] -->|POST /api/tg-callback| NetlifyCallback["Netlify Function\ntg-callback"]
+    NetlifyCallback -->|HSET leadhunter:inbox| Redis
+    WebBrowser -->|GET /api/inbox| NetlifyInbox["Netlify Function\ninbox"]
 ```
 
 ---
@@ -79,95 +27,104 @@ flowchart LR
 
 ### 1. Telegram Worker (Render.com)
 
-| Переменная | Обязательна | Пример / Описание |
+| Переменная | Обязательна | Назначение / Описание |
 |---|:---:|---|
-| `API_ID` | **Да** | `1234567` (Число из my.telegram.org) |
-| `API_HASH` | **Да** | `abcdef1234567890abcdef1234567890` (32 hex-символа) |
-| `SESSION_STRING` | **Да** | `1BJWap8...` (Строка сессии, генерируется через `npm run auth`) |
-| `WEBHOOK_URL` | Нет | `https://fleurleads-work.netlify.app/api/tg-notify` |
-| `WEBHOOK_SECRET` | Рекомендуется | `super-secret-random-token` (Защита эндпоинтов `/recent` и вебхука) |
-| `ALLOWED_CHATS` | Нет | `work_videoedit,kinovideojob,1234567890` (Белый список каналов/id через запятую) |
-| `ALLOWED_CHATS_FILE` | Нет | `/data/allowed-chats.txt` (Путь к файлу со списком чатов, перечитывается каждые 10 минут) |
-| `RATE_LIMIT_PER_MINUTE` | Нет | `5` (Макс. количество мгновенных уведомлений в минуту, далее дайджест) |
-| `JOIN_DAILY_LIMIT` | Нет | `15` (Суточный лимит вступлений в чаты для `scripts/join-sources.js`) |
-| `PORT` | Нет | `8080` (Порт встроенного HTTP сервера) |
-| `RENDER_EXTERNAL_URL` | Нет | `https://leadhunter-worker.onrender.com` (Включает самопинг каждые 10 минут) |
+| `API_ID` | **Да** | Цифровой ID Telegram приложения из [my.telegram.org](https://my.telegram.org) |
+| `API_HASH` | **Да** | 32-значный hex хэш приложения из [my.telegram.org](https://my.telegram.org) |
+| `SESSION_STRING` | **Да** | Строка сессии GramJS, генерируется локально командой `npm run auth` |
+| `WEBHOOK_SECRET` | **Да** | Секретный токен для защиты эндпоинтов `/recent`, `/metrics` (мин. 16 символов) |
+| `WEBHOOK_URL` | Нет | URL эндпоинта отправки уведомлений (`https://<site>/api/tg-notify`). Если не задан, сбор идёт в память/recent.json |
+| `ALLOWED_ORIGIN` | Нет | Домен сайта (например `https://fleurleads-work.netlify.app`) для проверки совпадения с WEBHOOK_URL |
+| `ALLOW_ANY_WEBHOOK_HOST`| Нет | Флаг `1` отключает проверку совпадения домена WEBHOOK_URL с ALLOWED_ORIGIN |
+| `ALLOWED_CHATS` | Нет | Белый список каналов через запятую (например `work_videoedit,kinovideojob`) |
+| `ALLOWED_CHATS_FILE` | Нет | Путь к файлу белого списка (перечитывается каждые 10 минут) |
+| `UPSTASH_REDIS_REST_URL`| Нет | URL базы данных Upstash Redis для дедупликации и кэша |
+| `UPSTASH_REDIS_REST_TOKEN`| Нет| Токен авторизации Upstash Redis REST |
+| `PORT` | Нет | Порт HTTP-сервера проверки здоровья (по умолчанию `8080`) |
+| `RATE_LIMIT_PER_MINUTE` | Нет | Лимит мгновенных уведомлений в минуту (по умолчанию `5`, затем объединяются в дайджест) |
+| `RENDER_EXTERNAL_URL` | Нет | Внешний URL сервиса на Render для фонового самопинга раз в 10 минут |
 
-> ⚠️ **Внимание об эфемеральном диске Render Free Tier**:
-> На бесплатном тарифе Render файловая система контейнера сбрасывается при перезапуске инстанса (файл `data/recent.json` очищается). Для персистентного хранения данных между перезапусками подключите [Render Persistent Disk](https://render.com/docs/disks) к пути `/data` либо внешнюю базу данных.
+> 💡 **Рекомендация по бесплатному тарифу Render**:
+> Бесплатные Web Services на Render засыпают при отсутствии входящих запросов через 15 минут. В `server.js` встроен автоматический самопинг (при указании `RENDER_EXTERNAL_URL`). Для 100% гарантии бодрствования рекомендуется подключить внешний пингер (например, [UptimeRobot](https://uptimerobot.com) или [cron-job.org](https://cron-job.org)) с интервалом проверки каждые 10 минут по адресу `https://<worker-host>/`.
 
 ---
 
 ### 2. Веб-приложение (Netlify)
 
-| Переменная | Обязательна | Пример / Описание |
+| Переменная | Обязательна | Назначение / Описание |
 |---|:---:|---|
-| `ALLOWED_ORIGIN` | Нет | `https://fleurleads-work.netlify.app` (Ограничение CORS, по умолчанию URL сайта) |
-| `WEBHOOK_SECRET` | Рекомендуется | `super-secret-random-token` (Совпадает с секретом воркера) |
-| `TG_WORKER_URL` | Нет | `https://leadhunter-worker-uokh.onrender.com` (URL воркера на Render) |
-| `GEMINI_API_KEY` | Для AI | Google AI Studio API Key |
-| `GEMINI_MODEL` | Нет | `gemini-2.5-flash` (по умолчанию) |
-| `GROQ_API_KEY` | Для AI (резерв) | Groq Cloud API Key |
-| `GROQ_MODEL` | Нет | `llama-3.3-70b-versatile` (по умолчанию) |
-| `OPENROUTER_API_KEY` | Для AI (резерв) | OpenRouter API Key |
-| `OPENROUTER_MODEL` | Нет | `meta-llama/llama-3.3-70b-instruct:free` (по умолчанию) |
-| `ANTHROPIC_API_KEY` | Для AI (резерв) | Anthropic Claude API Key |
-| `ANTHROPIC_MODEL` | Нет | `claude-3-5-haiku-20241022` (по умолчанию) |
-| `YOUTUBE_API_KEY` | Для поиска | Google Cloud YouTube Data API v3 |
-| `TELEGRAM_BOT_TOKEN` | Для бот-уведомлений | Токен бота из @BotFather |
-| `TELEGRAM_CHAT_ID` | Для бот-уведомлений | ID чата для личных уведомлений |
+| `APP_PASSWORD` | **Да (в prod)** | Пароль администратора для входа в веб-приложение |
+| `APP_SESSION_SECRET` | Рекомендуется | Секрет подписи сессионных cookie (мин. 32 символа). Если не задан, вычисляется из `APP_PASSWORD` |
+| `WEBHOOK_SECRET` | **Да** | Секретный токен для приёма лидов от воркера и callback-запросов от Telegram-бота |
+| `TELEGRAM_BOT_TOKEN` | Для бота | Токен бота от [@BotFather](https://t.me/BotFather) для отправки уведомлений и обработки кнопок |
+| `TELEGRAM_CHAT_ID` | Для бота | Ваш личный Telegram Chat ID для приёма лидов и кнопок отклика |
+| `UPSTASH_REDIS_REST_URL`| Для воронки | URL Upstash Redis для синхронизации кнопок «В воронку» и скрытия каналов |
+| `UPSTASH_REDIS_REST_TOKEN`| Для воронки| Токен доступа Upstash Redis REST |
+| `TG_WORKER_URL` | Для статуса | URL воркера на Render (например `https://leadhunter-worker.onrender.com`) для индикатора статуса |
+| `YOUTUBE_API_KEY` | Опционально | Ключ Google Cloud YouTube Data API v3 для поиска каналов в Lead Finder |
+| `GEMINI_API_KEY` | Опционально | Ключ Google AI Studio (Gemini 2.5 Flash) для генерации питчей |
+| `GROQ_API_KEY` | Опционально | Резервный AI-ключ Groq Cloud |
+| `OPENROUTER_API_KEY` | Опционально | Резервный AI-ключ OpenRouter |
+| `ANTHROPIC_API_KEY` | Опционально | Резервный AI-ключ Anthropic Claude |
 
 ---
 
-## 🔑 Инструкция по перевыпуску Telegram Session String
+## 🔍 Диагностика: почему нет вакансий
 
-1. Перейдите на [my.telegram.org](https://my.telegram.org) в раздел **API development tools**.
-2. Создайте приложение или скопируйте существующие `api_id` и `api_hash`.
-3. В корне репозитория запустите:
+Если в ленте пусто или перестали приходить уведомления в Telegram, выполните следующие 5 шагов:
+
+1. **Проверьте статус воркера**:
+   Откройте в браузере или выполните:
    ```bash
-   npm run auth
+   curl https://<worker-host>/
    ```
-4. Скрипт запросит номер телефона (в формате `+7...`), код из Telegram и пароль двухфакторной аутентификации (2FA), если он включён.
-5. Полученную длинную строку сессии `SESSION_STRING` скопируйте в панель управления **Render.com** (в Environment Variables вашего сервиса).
+   Ответ должен быть HTTP 200:
+   `{"status": "online", "telegram": {"connected": true, ...}}`.
+   Если `connected: false` — проверьте логи воркера на Render на наличие `AUTH_KEY_UNREGISTERED` или `FLOOD_WAIT`. При необходимости перевыпустите сессию: `npm run auth`.
+
+2. **Проверьте привязку Telegram Webhook**:
+   В корне проекта выполните:
+   ```bash
+   npm run tg:webhook
+   ```
+   Скрипт выведет текущий статус вебхука бота. Убедитесь, что `pending_update_count` не завис и поле `last_error_message` пустое.
+
+3. **Проверьте метрики и лог фильтрации воркера**:
+   ```bash
+   curl -H "X-Webhook-Secret: <ВАШ_СЕКРЕТ>" https://<worker-host>/metrics
+   ```
+   В ответе просмотрите секцию `privacyStats` и `skippedByFilter`, чтобы убедиться, что каналы опрашиваются, а вакансии не отсекаются стоп-словами.
+
+4. **Проверьте системное здоровье в веб-приложении**:
+   Откройте `https://<site>/api/health` в браузере или нажмите значок статуса в интерфейсе (SystemHealthModal). Убедитесь, что все компоненты (telegramBot, redis, worker) в статусе `ok`.
+
+5. **Проверьте список активных каналов**:
+   Запросите:
+   ```bash
+   curl -H "Authorization: Bearer <WEBHOOK_SECRET>" https://<site>/api/sources-enabled
+   ```
+   Убедитесь, что `count` больше 0 (базовый каталог содержит 152 проверенных источника).
 
 ---
 
-## 🛠 Разработка и тестирование
+## 🚀 Команды разработки
 
 ```bash
-# Установка зависимостей в корне и во фронтенде
-npm install
-npm --prefix web install
-
-# Запуск юнит-тестов (фильтрация, парсинг бюджета, ссылки)
+# Запуск полного набора тестов (воркер, фильтрация, аутентификация, хранилище, веб)
 npm test
-
-# Проверка типов TypeScript
-npm run typecheck
 
 # Линтинг кода
 npm run lint
 
-# Сборка продакшн-бандла фронтенда
-npm run build:all
+# Проверка типов TypeScript
+npm run typecheck
+
+# Сборка веб-приложения
+npm run build
+
+# Интерактивная авторизация в Telegram (генерация SESSION_STRING)
+npm run auth
+
+# Установка Telegram Webhook для кнопок бота
+npm run tg:webhook
 ```
-
----
-
-## 📡 Каталог Telegram-источников (150+ каналов и чатов)
-
-Раздел **/sources** предоставляет проверенную базу Telegram-каналов и сообществ:
-
-- **152 проверенных источника** в 5 категориях:
-  - `jobs_video` (42): вакансии и проектные заказы для монтажёров, рилсмейкеров, моушн-дизайнеров;
-  - `jobs_remote_freelance` (44): агрегаторы удалённой работы и биржи фриланса;
-  - `editors_community` (26): чаты монтажёров (Premiere Pro, DaVinci, After Effects, Blender);
-  - `clients_entrepreneurs` (27): сообщества предпринимателей, экспертов, YouTube и маркетплейсов;
-  - `international_en` (13): международные англоязычные каналы с вакансиями.
-- **Очистка неактивных**: кнопка «Оставить только с лидами за 14 дней» отключает каналы без вакансий, экономя квоты.
-- **Минималистичный UI**: без горячих клавиш, пресетов и визуального шума. Соответствует правилам в [DESIGN_RULES.md](file:///C:/Users/timur/.gemini/antigravity/scratch/leadhunter-worker/DESIGN_RULES.md).
-- **Скрипты автоматизации**:
-  - `node scripts/verify-sources.mjs` — валидация источников, веб-превью и расчёт скоринга (запускается еженедельно по понедельникам в 03:00 UTC через `.github/workflows/verify-sources.yml`).
-  - `node scripts/discover-sources.js` — поиск публичных каналов через MTProto API.
-  - `node scripts/join-sources.js` — безопасное вступление в чаты с суточным лимитом (до 15/сутки) и задержкой 45–120 с (по умолчанию `--dry-run`).
-  - Подробный отчёт и правила безопасности аккаунта см. в [CATALOG_REPORT.md](file:///C:/Users/timur/.gemini/antigravity/scratch/leadhunter/tg-worker/CATALOG_REPORT.md).

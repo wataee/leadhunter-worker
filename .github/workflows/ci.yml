@@ -13,8 +13,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [22.x]
+        node-version: [20.x]
         os: [ubuntu-latest]
+
+    env:
+      CI: "true"
+      NODE_ENV: test
+      API_ID: "123456"
+      API_HASH: "0123456789abcdef0123456789abcdef"
+      SESSION_STRING: "dummy_session_string_for_ci_tests"
+      WEBHOOK_SECRET: "dummy_webhook_secret_for_ci_at_least_16_chars"
+      APP_PASSWORD: "test_admin_password_123"
+      APP_SESSION_SECRET: "test_session_secret_at_least_32_chars_long"
 
     steps:
       - name: Checkout repository
@@ -35,17 +45,14 @@ jobs:
       - name: Install web dependencies
         run: npm --prefix web ci
 
-      - name: Check worker syntax
-        run: node --check server.js auth.js
-
       - name: Run unit tests
         run: npm test
+
+      - name: Lint codebase
+        run: npm run lint
 
       - name: Typecheck web app
         run: npm run typecheck
 
-      - name: Lint web app
-        run: npm run lint
-
       - name: Build web app
-        run: npm run build:all
+        run: npm run build

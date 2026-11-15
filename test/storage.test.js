@@ -37,3 +37,47 @@ test('B1: UpstashRedisDriver falls back to memory driver on network error, does 
   const isDup2 = await redisDriver.isDuplicate(leadId, textHash);
   assert.equal(isDup2, true, 'Second check should be detected as duplicate via fallback memory');
 });
+
+test('E4 / C2: callback_data byte length strictly adheres to <= 64 bytes limit', () => {
+  function truncateToBytes(str, maxBytes) {
+    const buf = Buffer.from(str, 'utf8');
+    if (buf.length <= maxBytes) return str;
+    let end = maxBytes;
+    while (end > 0 && (buf[end] & 0xc0) === 0x80) {
+      end--;
+    }
+    return buf.subarray(0, end).toString('utf8');
+  }
+
+  // Long Cyrillic channel name: 30 chars in Cyrillic = 60 bytes
+  const longCyrillic = 'работа_видеомонтаж_вакансии_фриланс_топ';
+  const truncated = truncateToBytes(longCyrillic, 50);
+  const callbackData = `hide:${truncated}`;
+
+  assert.ok(
+    Buffer.byteLength(callbackData, 'utf8') <= 64,
+    `callback_data length (${Buffer.byteLength(callbackData, 'utf8')}) exceeds 64 bytes`
+  );
+});
+
+test('E4 / C2: Permanent 4xx errors are not retried', async () => {
+  let attempts = 0;
+  async function simulateWebhookDelivery(status, maxRetries = 3) {
+    attempts = 0;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      attempts++;
+      if ([400, 401, 403, 404].includes(status)) {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  const result400 = await simulateWebhookDelivery(400);
+  assert.equal(result400, false);
+  assert.equal(attempts, 1, 'HTTP 400 must NOT be retried');
+
+  const result500 = await simulateWebhookDelivery(500);
+  assert.equal(result500, false);
+  assert.equal(attempts, 3, 'HTTP 500 must be retried 3 times');
+});

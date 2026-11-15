@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: leadhunter-worker
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20.x
+      - key: PORT
+        value: "8080"
+      - key: API_ID
+        sync: false
+      - key: API_HASH
+        sync: false
+      - key: SESSION_STRING
+        sync: false
+      - key: WEBHOOK_SECRET
+        sync: false
+      - key: WEBHOOK_URL
+        sync: false
+      - key: ALLOWED_ORIGIN
+        sync: false
+      - key: ALLOW_ANY_WEBHOOK_HOST
+        value: "0"
+      - key: ALLOWED_CHATS
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "5"
