@@ -477,16 +477,16 @@ export const useVacanciesStore = create<VacanciesState>()(
     }),
     {
       name: 'leadhunter_vacancies',
-      version: 3,
+      version: 4,
       storage: safeLocalStorage as any,
       migrate: (persistedState: any, version: number) => {
-        if (version < 3 && persistedState) {
+        if (version < 4 && persistedState) {
           if (Array.isArray(persistedState.vacancies)) {
             persistedState.vacancies = persistedState.vacancies
               .filter((v: any) => v && typeof v === 'object' && !v.id?.startsWith('demo_'))
               .slice(0, 300);
           }
-          if (!persistedState.sources || persistedState.sources.length < 50) {
+          if (!persistedState.sources || persistedState.sources.length < 100) {
             const existingMap = new Map(
               (persistedState.sources || []).map((s: any) => [s.username?.toLowerCase(), s.enabled])
             );
@@ -516,7 +516,7 @@ export const useVacanciesStore = create<VacanciesState>()(
               )
               .slice(0, 300);
           }
-          if (!state.sources || state.sources.length < 50) {
+          if (!state.sources || state.sources.length < 100) {
             const existingMap = new Map(
               (state.sources || []).map((s) => [s.username?.toLowerCase(), s.enabled])
             );

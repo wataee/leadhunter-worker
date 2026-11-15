@@ -200,6 +200,13 @@ export const Vacancies: React.FC = () => {
     });
   };
 
+  // Auto-sync with full 152 sources catalog if client has fewer than 100 sources in localStorage
+  useEffect(() => {
+    if (sources.length < 100) {
+      syncWithCatalog();
+    }
+  }, [sources.length, syncWithCatalog]);
+
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
   const channelCacheRef = useRef<Map<string, number>>(new Map());
   const [rotationProgress, setRotationProgress] = useState<{ updated: number; total: number; nextInSec: number } | null>(null);
