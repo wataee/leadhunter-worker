@@ -78,7 +78,7 @@ export const DEFAULT_SOURCES: TelegramSource[] = catalogData.map((c) => ({
   username: (c.username || c.id || '').toLowerCase().replace(/^@/, ''),
   title: c.title,
   type: c.type || 'channel',
-  enabled: Boolean(c.recommended),
+  enabled: true,
   addedAt: new Date().toISOString(),
 }));
 
@@ -338,16 +338,20 @@ export const useVacanciesStore = create<VacanciesState>()(
         })),
 
       syncWithCatalog: () => {
+        const currentSources = get().sources || [];
         const existingMap = new Map(
-          get().sources.map((s) => [s.username.toLowerCase(), s.enabled])
+          currentSources.map((s) => [s.username.toLowerCase(), s.enabled])
         );
         const synced = catalogData.map((c) => {
           const uname = (c.username || c.id || '').toLowerCase().replace(/^@/, '');
+          const isEnabled = currentSources.length < 150
+            ? true
+            : (existingMap.has(uname) ? existingMap.get(uname)! : true);
           return {
             username: uname,
             title: c.title,
             type: c.type || 'channel',
-            enabled: existingMap.has(uname) ? existingMap.get(uname)! : Boolean(c.recommended),
+            enabled: isEnabled,
             addedAt: new Date().toISOString(),
           };
         });
@@ -477,26 +481,30 @@ export const useVacanciesStore = create<VacanciesState>()(
     }),
     {
       name: 'leadhunter_vacancies',
-      version: 4,
+      version: 5,
       storage: safeLocalStorage as any,
       migrate: (persistedState: any, version: number) => {
-        if (version < 4 && persistedState) {
+        if (persistedState) {
           if (Array.isArray(persistedState.vacancies)) {
             persistedState.vacancies = persistedState.vacancies
               .filter((v: any) => v && typeof v === 'object' && !v.id?.startsWith('demo_'))
               .slice(0, 300);
           }
-          if (!persistedState.sources || persistedState.sources.length < 100) {
+          if (version < 5 || !persistedState.sources || persistedState.sources.length < 150) {
             const existingMap = new Map(
               (persistedState.sources || []).map((s: any) => [s.username?.toLowerCase(), s.enabled])
             );
+            const isSmallLegacyList = (persistedState.sources || []).length <= 15;
             persistedState.sources = catalogData.map((c) => {
               const uname = (c.username || c.id || '').toLowerCase().replace(/^@/, '');
+              const isEnabled = isSmallLegacyList
+                ? true
+                : (existingMap.has(uname) ? existingMap.get(uname) : true);
               return {
                 username: uname,
                 title: c.title,
                 type: c.type || 'channel',
-                enabled: existingMap.has(uname) ? existingMap.get(uname) : Boolean(c.recommended),
+                enabled: isEnabled,
                 addedAt: new Date().toISOString(),
               };
             });
@@ -516,20 +524,10 @@ export const useVacanciesStore = create<VacanciesState>()(
               )
               .slice(0, 300);
           }
-          if (!state.sources || state.sources.length < 100) {
-            const existingMap = new Map(
-              (state.sources || []).map((s) => [s.username?.toLowerCase(), s.enabled])
-            );
-            state.sources = catalogData.map((c) => {
-              const uname = (c.username || c.id || '').toLowerCase().replace(/^@/, '');
-              return {
-                username: uname,
-                title: c.title,
-                type: c.type || 'channel',
-                enabled: existingMap.has(uname) ? existingMap.get(uname)! : Boolean(c.recommended),
-                addedAt: new Date().toISOString(),
-              };
-            });
+          if (!state.sources || state.sources.length < 150) {
+            setTimeout(() => {
+              useVacanciesStore.getState().syncWithCatalog();
+            }, 0);
           }
         }
       },

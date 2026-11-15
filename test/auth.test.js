@@ -87,17 +87,34 @@ test('1.3 Cookie parsing and requireAuth middleware', () => {
   const prevEnv = process.env.NODE_ENV;
   const prevNetlifyDev = process.env.NETLIFY_DEV;
   const prevAppPass = process.env.APP_PASSWORD;
+  const prevSecret = process.env.APP_SESSION_SECRET;
 
   try {
-    // Without APP_PASSWORD -> allowed
+    // 1. In dev mode without APP_PASSWORD -> allowed
+    process.env.NETLIFY_DEV = 'true';
     delete process.env.APP_PASSWORD;
     let res = requireAuth({ headers: {} });
     assert.equal(res.authenticated, true);
 
-    // Production with APP_PASSWORD
-    process.env.NODE_ENV = 'production';
+    // 2. In prod without APP_PASSWORD -> 503 «APP_PASSWORD не настроен»
     delete process.env.NETLIFY_DEV;
+    process.env.NODE_ENV = 'production';
+    res = requireAuth({ headers: {} });
+    assert.equal(res.authenticated, false);
+    assert.equal(res.statusCode, 503);
+    assert.match(res.error, /APP_PASSWORD/);
+
+    // 3. In prod with APP_PASSWORD but without valid APP_SESSION_SECRET (>= 32 chars) -> 503
     process.env.APP_PASSWORD = 'strong_test_password_123';
+    process.env.APP_SESSION_SECRET = 'short';
+    res = requireAuth({ headers: {} });
+    assert.equal(res.authenticated, false);
+    assert.equal(res.statusCode, 503);
+    assert.match(res.error, /APP_SESSION_SECRET/);
+
+    // 4. In prod with APP_PASSWORD and valid APP_SESSION_SECRET
+    const validSecret = 'valid-test-session-secret-at-least-32-chars-long';
+    process.env.APP_SESSION_SECRET = validSecret;
 
     // No credentials -> 401
     res = requireAuth({ headers: {} });
@@ -105,7 +122,7 @@ test('1.3 Cookie parsing and requireAuth middleware', () => {
     assert.equal(res.statusCode, 401);
 
     // Valid cookie -> 200
-    const { token } = signSessionToken();
+    const { token } = signSessionToken(validSecret);
     res = requireAuth({ headers: { cookie: `lh_session=${token}` } });
     assert.equal(res.authenticated, true);
 
@@ -114,9 +131,8 @@ test('1.3 Cookie parsing and requireAuth middleware', () => {
     assert.equal(res.authenticated, true);
   } finally {
     process.env.NODE_ENV = prevEnv;
-    if (prevNetlifyDev !== undefined) process.env.NETLIFY_DEV = prevNetlifyDev;
-    else delete process.env.NETLIFY_DEV;
-    if (prevAppPass !== undefined) process.env.APP_PASSWORD = prevAppPass;
-    else delete process.env.APP_PASSWORD;
+    process.env.NETLIFY_DEV = prevNetlifyDev;
+    process.env.APP_PASSWORD = prevAppPass;
+    process.env.APP_SESSION_SECRET = prevSecret;
   }
 });

@@ -303,3 +303,38 @@ export async function checkSource(username: string): Promise<SourceCheckResult> 
 
   return handleApiResponse<SourceCheckResult>(res);
 }
+
+export interface InboxItem {
+  id: string;
+  text: string;
+  url: string;
+  channel?: string;
+  budget?: string | null;
+  postedAt: string;
+}
+
+export async function fetchInbox(): Promise<{ items: InboxItem[]; redisConfigured?: boolean }> {
+  try {
+    const res = await fetch('/api/inbox', {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) return { items: [] };
+    return await res.json();
+  } catch {
+    return { items: [] };
+  }
+}
+
+export async function ackInbox(ids: string[]): Promise<boolean> {
+  try {
+    const res = await fetch('/api/inbox/ack', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+

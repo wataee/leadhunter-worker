@@ -22,7 +22,7 @@ const rawApiId = process.env.API_ID?.trim();
 const API_HASH = process.env.API_HASH?.trim();
 const SESSION_STRING = process.env.SESSION_STRING?.trim() || '';
 const PORT = parseInt(process.env.PORT || '8080', 10);
-const WEBHOOK_URL = process.env.WEBHOOK_URL?.trim() || 'https://e4bbedad-51c2-4c6e-b0bb-39285239177a.netlify.app/api/tg-notify';
+const rawWebhookUrl = process.env.WEBHOOK_URL?.trim();
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET?.trim() || '';
 const ALLOWED_CHATS_RAW = process.env.ALLOWED_CHATS?.trim() || '';
 const RATE_LIMIT_PER_MINUTE = parseInt(process.env.RATE_LIMIT_PER_MINUTE || '5', 10);
@@ -49,6 +49,58 @@ if (!WEBHOOK_SECRET || WEBHOOK_SECRET.length < 16) {
   console.error('Сгенерируйте надёжный секрет (например: openssl rand -hex 32) и укажите в .env');
   process.exit(1);
 }
+
+// 1.4 Валидация WEBHOOK_URL: обязателен, https, совпадение с ALLOWED_ORIGIN или ALLOW_ANY_WEBHOOK_HOST=1
+if (!rawWebhookUrl) {
+  console.error('[КРИТИЧЕСКАЯ ОШИБКА] Переменная WEBHOOK_URL обязательна!');
+  console.error('Укажите URL эндпоинта tg-notify (например: https://fleurleads-work.netlify.app/api/tg-notify)');
+  process.exit(1);
+}
+
+let parsedWebhook;
+try {
+  parsedWebhook = new URL(rawWebhookUrl);
+} catch {
+  console.error('[КРИТИЧЕСКАЯ ОШИБКА] WEBHOOK_URL имеет невалидный формат URL.');
+  process.exit(1);
+}
+
+if (
+  parsedWebhook.protocol !== 'https:' &&
+  parsedWebhook.hostname !== 'localhost' &&
+  parsedWebhook.hostname !== '127.0.0.1'
+) {
+  console.error('[КРИТИЧЕСКАЯ ОШИБКА] WEBHOOK_URL должен использовать протокол HTTPS!');
+  process.exit(1);
+}
+
+const allowAnyHost =
+  process.env.ALLOW_ANY_WEBHOOK_HOST === '1' ||
+  process.env.ALLOW_ANY_WEBHOOK_HOST === 'true';
+const allowedOriginRaw = process.env.ALLOWED_ORIGIN?.trim() || '';
+
+if (!allowAnyHost && allowedOriginRaw) {
+  const allowedHosts = allowedOriginRaw
+    .split(',')
+    .map((o) => {
+      try {
+        return new URL(o.trim()).hostname;
+      } catch {
+        return o.trim().replace(/^https?:\/\//, '').split('/')[0];
+      }
+    })
+    .filter(Boolean);
+
+  if (allowedHosts.length > 0 && !allowedHosts.includes(parsedWebhook.hostname)) {
+    console.error(
+      `[КРИТИЧЕСКАЯ ОШИБКА] Домен WEBHOOK_URL (${parsedWebhook.hostname}) не совпадает с ALLOWED_ORIGIN (${allowedHosts.join(', ')}).`
+    );
+    console.error('Задайте ALLOW_ANY_WEBHOOK_HOST=1 для отключения этой проверки.');
+    process.exit(1);
+  }
+}
+
+const WEBHOOK_URL = rawWebhookUrl;
 
 const ALLOWED_CHATS_FILE = process.env.ALLOWED_CHATS_FILE?.trim() || '';
 
@@ -209,8 +261,48 @@ async function processFailedQueue() {
   }
 }
 
+// 1.5 Кэш скрытых источников из Redis (обновляется раз в минуту)
+let cachedHiddenChannels = new Set();
+let lastHiddenChannelsFetch = 0;
+
+async function getHiddenChannels() {
+  const now = Date.now();
+  if (now - lastHiddenChannelsFetch < 60000) {
+    return cachedHiddenChannels;
+  }
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+  if (!redisUrl || !redisToken) return cachedHiddenChannels;
+
+  try {
+    const res = await fetch(`${redisUrl}/smembers/leadhunter:hidden_channels`, {
+      headers: { Authorization: `Bearer ${redisToken}` },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data?.result)) {
+        cachedHiddenChannels = new Set(
+          data.result.map((s) => String(s).toLowerCase().replace(/^@/, ''))
+        );
+        lastHiddenChannelsFetch = now;
+      }
+    }
+  } catch (err) {
+    // При ошибке сети сохраняем предыдущий кэш
+  }
+  return cachedHiddenChannels;
+}
+
 async function dispatchLeadNotification(leadItem) {
   if (!WEBHOOK_URL) return;
+
+  const hidden = await getHiddenChannels();
+  const chan = (leadItem.channel || '').toLowerCase().replace(/^@/, '');
+  if (chan && hidden.has(chan)) {
+    console.log(`[Notification] Пропуск лида из скрытого канала: @${chan}`);
+    return;
+  }
 
   if (checkRateLimit()) {
     notificationTimestamps.push(Date.now());

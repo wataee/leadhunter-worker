@@ -12,18 +12,25 @@ export const LOGIN_WINDOW_MS = 15 * 60 * 1000; // 15 минут
 export const SESSION_MAX_AGE_SEC = 30 * 24 * 60 * 60; // 30 дней
 
 export function getSessionSecret(): string {
-  return (
-    process.env.APP_SESSION_SECRET?.trim() ||
-    process.env.APP_PASSWORD?.trim() ||
-    'insecure-dev-session-secret-change-me'
-  );
+  const secret = process.env.APP_SESSION_SECRET?.trim();
+  if (!secret) {
+    throw new Error('APP_SESSION_SECRET не настроен');
+  }
+  if (secret.length < 32) {
+    throw new Error('APP_SESSION_SECRET должен содержать минимум 32 символа');
+  }
+  return secret;
 }
 
 export function isDevEnvironment(): boolean {
-  return Boolean(
-    process.env.NETLIFY_DEV ||
-      (process.env.NODE_ENV && process.env.NODE_ENV !== 'production')
-  );
+  if (process.env.NETLIFY_DEV) return true;
+  if (process.env.NETLIFY || process.env.CONTEXT) {
+    return process.env.CONTEXT === 'dev';
+  }
+  if (process.env.NODE_ENV) {
+    return process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+  }
+  return false;
 }
 
 export function signSessionToken(
@@ -111,6 +118,101 @@ export function resetLoginAttempts(ip: string): void {
   loginAttempts.delete(clientIp);
 }
 
+// 1.2 Защита от перебора с использованием Upstash Redis REST (если настроен)
+export async function checkLoginRateLimitAsync(
+  ip: string
+): Promise<{ allowed: boolean; remaining: number; resetInSec: number }> {
+  const clientIp = (ip || 'unknown').replace(/[^a-zA-Z0-9:._-]/g, '');
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+
+  if (redisUrl && redisToken) {
+    try {
+      const key = `leadhunter:ratelimit:login:${clientIp}`;
+      const res = await fetch(`${redisUrl.replace(/\/$/, '')}/pipeline`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${redisToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([
+          ['GET', key],
+          ['TTL', key],
+        ]),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const count = parseInt(data?.[0]?.result || '0', 10);
+        let ttl = parseInt(data?.[1]?.result || '-1', 10);
+        if (ttl <= 0) ttl = Math.ceil(LOGIN_WINDOW_MS / 1000);
+
+        if (count >= LOGIN_MAX_ATTEMPTS) {
+          return { allowed: false, remaining: 0, resetInSec: ttl };
+        }
+        return {
+          allowed: true,
+          remaining: Math.max(0, LOGIN_MAX_ATTEMPTS - count),
+          resetInSec: ttl,
+        };
+      }
+    } catch {
+      // Фоллбек на in-memory при ошибке Redis
+    }
+  }
+
+  return checkLoginRateLimit(ip);
+}
+
+export async function recordLoginFailureAsync(ip: string): Promise<void> {
+  const clientIp = (ip || 'unknown').replace(/[^a-zA-Z0-9:._-]/g, '');
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+
+  if (redisUrl && redisToken) {
+    try {
+      const key = `leadhunter:ratelimit:login:${clientIp}`;
+      const ttlSec = Math.ceil(LOGIN_WINDOW_MS / 1000);
+      await fetch(`${redisUrl.replace(/\/$/, '')}/pipeline`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${redisToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([
+          ['INCR', key],
+          ['EXPIRE', key, String(ttlSec)],
+        ]),
+      });
+      return;
+    } catch {
+      // Фоллбек на in-memory
+    }
+  }
+
+  recordLoginFailure(ip);
+}
+
+export async function resetLoginAttemptsAsync(ip: string): Promise<void> {
+  const clientIp = (ip || 'unknown').replace(/[^a-zA-Z0-9:._-]/g, '');
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+
+  if (redisUrl && redisToken) {
+    try {
+      const key = `leadhunter:ratelimit:login:${clientIp}`;
+      await fetch(`${redisUrl.replace(/\/$/, '')}/del/${encodeURIComponent(key)}`, {
+        headers: { Authorization: `Bearer ${redisToken}` },
+      });
+      return;
+    } catch {
+      // Фоллбек на in-memory
+    }
+  }
+
+  resetLoginAttempts(ip);
+}
+
 export function parseSessionCookie(cookieHeader?: string): string | null {
   if (!cookieHeader) return null;
   const match = cookieHeader.match(/(?:^|;\s*)lh_session=([^;]+)/);
@@ -129,9 +231,29 @@ export function requireAuth(event: {
   const isDev = isDevEnvironment();
   const appPassword = process.env.APP_PASSWORD?.trim();
 
-  // Если пароль приложения не задан: доступ открыт без пароля
+  // 1.1 Если APP_PASSWORD не задан и это НЕ dev: 503 «APP_PASSWORD не настроен»
   if (!appPassword) {
+    if (!isDev) {
+      return {
+        authenticated: false,
+        statusCode: 503,
+        error: 'APP_PASSWORD не настроен',
+      };
+    }
     return { authenticated: true };
+  }
+
+  // Требуем APP_SESSION_SECRET >= 32 символов (без fallback на пароль)
+  let secret: string;
+  try {
+    secret = getSessionSecret();
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'APP_SESSION_SECRET не настроен';
+    return {
+      authenticated: false,
+      statusCode: 503,
+      error: msg,
+    };
   }
 
   const cookieHeader = event.headers?.cookie || event.headers?.Cookie;
@@ -149,7 +271,7 @@ export function requireAuth(event: {
     };
   }
 
-  if (!verifySessionToken(token)) {
+  if (!verifySessionToken(token, secret)) {
     return {
       authenticated: false,
       statusCode: 401,

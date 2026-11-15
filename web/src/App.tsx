@@ -5,6 +5,10 @@ import { Topbar } from './components/Topbar';
 import { ToastContainer } from './components/ToastContainer';
 import { ShortcutsModal } from './components/ShortcutsModal';
 import { CardSkeleton } from './components/Skeleton';
+import { fetchInbox, ackInbox } from './lib/api';
+import { useLeadsStore } from './store/leadsStore';
+import { useToastStore } from './store/toastStore';
+import { RefreshCw } from 'lucide-react';
 
 // Lazy loaded pages for high performance & Lighthouse 90+
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
@@ -36,6 +40,84 @@ const AppContent: React.FC = () => {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [lastKeyPressed, setLastKeyPressed] = useState<{ key: string; time: number } | null>(null);
+  const [hasChunkError, setHasChunkError] = useState(false);
+
+  const addLead = useLeadsStore((s) => s.addLead);
+  const addToast = useToastStore((s) => s.addToast);
+
+  // 1.6 Обработка ошибок загрузки чанков и Service Worker
+  useEffect(() => {
+    const handleChunkError = (e: ErrorEvent | PromiseRejectionEvent) => {
+      const msg = 'message' in e ? e.message : String((e as any).reason || '');
+      if (/Failed to fetch dynamically imported module/i.test(msg) || /Loading chunk/i.test(msg)) {
+        setHasChunkError(true);
+      }
+    };
+
+    window.addEventListener('error', handleChunkError);
+    window.addEventListener('unhandledrejection', handleChunkError);
+
+    // Регистрация Service Worker
+    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+
+    return () => {
+      window.removeEventListener('error', handleChunkError);
+      window.removeEventListener('unhandledrejection', handleChunkError);
+    };
+  }, []);
+
+  // 1.5 Опрос /api/inbox при открытии и по таймеру (раз в 60 с)
+  useEffect(() => {
+    let active = true;
+
+    const checkInbox = async () => {
+      try {
+        const data = await fetchInbox();
+        if (!active || !data || !Array.isArray(data.items) || data.items.length === 0) return;
+
+        const incoming = data.items;
+        const currentLeads = useLeadsStore.getState().leads;
+        const existingIds = new Set(currentLeads.map((l) => l.id));
+
+        let addedCount = 0;
+        for (const item of incoming) {
+          if (!existingIds.has(item.id)) {
+            addLead({
+              id: item.id,
+              name: item.channel ? `@${item.channel.replace(/^@/, '')}` : 'Лид из Telegram',
+              channelUrl: item.url,
+              notes: item.text,
+              status: 'new',
+            });
+            existingIds.add(item.id);
+            addedCount++;
+          }
+        }
+
+        // Подтверждаем получение в Redis
+        const idsToAck = incoming.map((i) => i.id);
+        await ackInbox(idsToAck);
+
+        if (addedCount > 0) {
+          addToast({
+            type: 'success',
+            message: `${addedCount} ${addedCount === 1 ? 'новый лид' : 'новых лидов'} из Telegram добавлен в воронку!`,
+          });
+        }
+      } catch {
+        // Ошибка сети или отсутствие сессии
+      }
+    };
+
+    checkInbox();
+    const interval = setInterval(checkInbox, 60_000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [addLead, addToast]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -135,6 +217,19 @@ const AppContent: React.FC = () => {
           onToggleMobile={() => setMobileSidebarOpen(true)}
           onOpenShortcuts={() => setShortcutsOpen(true)}
         />
+
+        {hasChunkError && (
+          <div className="bg-accent/20 border-b border-accent/40 text-text px-4 py-2.5 flex items-center justify-between gap-3 text-xs z-50">
+            <span>Доступна новая версия приложения. Обновите страницу, чтобы загрузить обновления.</span>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-3 py-1 bg-accent text-white rounded font-medium flex items-center gap-1.5 hover:bg-accent-hover transition-colors shrink-0"
+            >
+              <RefreshCw size={13} />
+              Обновить
+            </button>
+          </div>
+        )}
 
         <main className="flex-1 pb-16">
           <Suspense fallback={<PageLoadingFallback />}>

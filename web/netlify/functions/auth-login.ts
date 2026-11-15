@@ -8,9 +8,10 @@ import {
   requireAuth,
   verifyPassword,
   signSessionToken,
-  checkLoginRateLimit,
-  recordLoginFailure,
-  resetLoginAttempts,
+  checkLoginRateLimitAsync,
+  recordLoginFailureAsync,
+  resetLoginAttemptsAsync,
+  getSessionSecret,
   SESSION_MAX_AGE_SEC,
   isDevEnvironment,
 } from './_shared/auth';
@@ -28,11 +29,9 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return handleOptions(origin);
   }
 
-  const clientIp =
-    event.headers['x-nf-client-connection-ip'] ||
-    event.headers['client-ip'] ||
-    event.headers['x-forwarded-for'] ||
-    '127.0.0.1';
+  const isDev = isDevEnvironment();
+  // 1.2 IP строго из x-nf-client-connection-ip
+  const clientIp = event.headers['x-nf-client-connection-ip'] || (isDev ? '127.0.0.1' : 'unknown');
 
   // GET: Проверка текущей сессии
   if (event.httpMethod === 'GET') {
@@ -67,18 +66,30 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     }
 
     const appPassword = process.env.APP_PASSWORD?.trim();
-    const isDev = isDevEnvironment();
 
-    // Если пароль приложения не настроен: открытый доступ
+    // 1.1 Если APP_PASSWORD не задан и это НЕ dev: 503 «APP_PASSWORD не настроен» и не выдавать cookie
     if (!appPassword) {
-      const { token } = signSessionToken();
-      const response = jsonResponse(200, { ok: true, authenticated: true }, origin);
-      response.headers['Set-Cookie'] = `lh_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_MAX_AGE_SEC}`;
-      return response;
+      if (!isDev) {
+        return errorResponse(503, 'APP_PASSWORD не настроен на сервере', null, origin);
+      }
+      return jsonResponse(
+        200,
+        { ok: true, authenticated: true, devMode: true, message: 'Dev-режим: доступ без пароля' },
+        origin
+      );
     }
 
-    // Rate Limiting попыток входа (5 попыток на 15 минут)
-    const rate = checkLoginRateLimit(clientIp);
+    // 1.1 Требовать APP_SESSION_SECRET >= 32 символов
+    let sessionSecret: string;
+    try {
+      sessionSecret = getSessionSecret();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'APP_SESSION_SECRET не настроен';
+      return errorResponse(503, msg, null, origin);
+    }
+
+    // 1.2 Rate Limiting попыток входа (Upstash Redis или in-memory)
+    const rate = await checkLoginRateLimitAsync(clientIp);
     if (!rate.allowed) {
       return errorResponse(
         429,
@@ -97,8 +108,8 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
     const isValid = verifyPassword(providedPassword, appPassword);
     if (!isValid) {
-      recordLoginFailure(clientIp);
-      const remainingAttempts = checkLoginRateLimit(clientIp).remaining;
+      await recordLoginFailureAsync(clientIp);
+      const remainingAttempts = (await checkLoginRateLimitAsync(clientIp)).remaining;
       return errorResponse(
         401,
         `Неверный пароль. Осталось попыток: ${remainingAttempts}`,
@@ -108,8 +119,8 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     }
 
     // Успешный вход: сбрасываем счётчик неудач и ставим куку
-    resetLoginAttempts(clientIp);
-    const { token, expiresAt } = signSessionToken();
+    await resetLoginAttemptsAsync(clientIp);
+    const { token, expiresAt } = signSessionToken(sessionSecret);
 
     const response = jsonResponse(
       200,

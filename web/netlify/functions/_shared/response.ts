@@ -11,9 +11,7 @@ export function getCorsHeaders(incomingOrigin?: string): Record<string, string> 
     .map((o) => o.trim().replace(/\/$/, ''))
     .filter(Boolean);
 
-  const isDev = Boolean(
-    process.env.NETLIFY_DEV || process.env.NODE_ENV !== 'production'
-  );
+  const isDev = Boolean(process.env.NETLIFY_DEV);
 
   let matchedOrigin: string | null = null;
   if (incomingOrigin) {

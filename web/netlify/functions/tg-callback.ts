@@ -87,33 +87,101 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return jsonResponse(200, { ok: true, handled: 'non_callback' }, origin);
   }
 
+  // 1.5 Принимаем callback только от доверенного TELEGRAM_CHAT_ID
+  const expectedChatId = process.env.TELEGRAM_CHAT_ID?.trim();
+  if (expectedChatId) {
+    const rawChatId = cbQuery.message?.chat?.id != null ? String(cbQuery.message.chat.id).trim() : '';
+    const rawFromId = cbQuery.from?.id != null ? String(cbQuery.from.id).trim() : '';
+    const cleanExpected = expectedChatId.replace(/^-100/, '');
+    const cleanChat = rawChatId.replace(/^-100/, '');
+
+    const chatMatches = rawChatId === expectedChatId || cleanChat === cleanExpected;
+    const fromMatches = rawFromId === expectedChatId || rawFromId === cleanExpected;
+
+    if (!chatMatches && !fromMatches) {
+      console.warn(`[tg-callback] Отклонен запрос от неавторизованного чата ${rawChatId} / пользователя ${rawFromId}`);
+      return jsonResponse(200, { ok: true, ignored: 'unauthorized_sender' }, origin);
+    }
+  }
+
   const queryId = cbQuery.id;
   const data = cbQuery.data || '';
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+
+  // Если Redis не настроен — отвечаем «Нужен Upstash Redis для этой кнопки» без ложного «сохранено»
+  if (!redisUrl || !redisToken) {
+    await fetchWithTimeout(
+      `https://api.telegram.org/bot${token}/answerCallbackQuery`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          callback_query_id: queryId,
+          text: 'Нужен Upstash Redis для этой кнопки',
+          show_alert: true,
+        }),
+      },
+      5000
+    ).catch(() => {});
+
+    return jsonResponse(200, { ok: false, error: 'Redis не настроен' }, origin);
+  }
+
   let responseText = 'Действие выполнено';
+  let showAlert = false;
 
   try {
     if (data.startsWith('hide:')) {
-      const channel = data.slice(5).trim();
-      responseText = `Канал @${channel} скрыт из уведомлений`;
-
-      // Если подключен Upstash Redis, сохраняем в множество скрытых каналов
-      const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
-      const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
-      if (redisUrl && redisToken && channel) {
-        await fetchWithTimeout(`${redisUrl}/sadd/leadhunter:hidden_channels/${encodeURIComponent(channel)}`, {
-          headers: { Authorization: `Bearer ${redisToken}` },
-        }, 3000).catch(() => {});
+      const channel = data.slice(5).trim().toLowerCase().replace(/^@/, '');
+      if (channel) {
+        await fetchWithTimeout(
+          `${redisUrl}/sadd/leadhunter:hidden_channels/${encodeURIComponent(channel)}`,
+          { headers: { Authorization: `Bearer ${redisToken}` } },
+          3000
+        ).catch(() => {});
+        responseText = `Канал @${channel} скрыт из уведомлений`;
       }
     } else if (data.startsWith('lead:')) {
       const leadId = data.slice(5).trim();
-      responseText = 'Вакансия сохранена в воронку!';
+      if (leadId) {
+        // Пытаемся забрать полный снимок лида, если он был сохранён при отправке
+        let snapshotJson = '';
+        try {
+          const snapRes = await fetchWithTimeout(
+            `${redisUrl}/get/leadhunter:lead_snapshots:${encodeURIComponent(leadId)}`,
+            { headers: { Authorization: `Bearer ${redisToken}` } },
+            2500
+          );
+          if (snapRes.ok) {
+            const snapData = await snapRes.json();
+            if (snapData?.result) {
+              snapshotJson = typeof snapData.result === 'string' ? snapData.result : JSON.stringify(snapData.result);
+            }
+          }
+        } catch {
+          // fallback ниже
+        }
 
-      const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
-      const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
-      if (redisUrl && redisToken && leadId) {
-        await fetchWithTimeout(`${redisUrl}/sadd/leadhunter:saved_leads/${encodeURIComponent(leadId)}`, {
-          headers: { Authorization: `Bearer ${redisToken}` },
-        }, 3000).catch(() => {});
+        if (!snapshotJson) {
+          const fallbackSnapshot = {
+            id: leadId,
+            text: 'Вакансия сохранена из Telegram-бота',
+            url: `https://t.me/${leadId}`,
+            channel: '',
+            postedAt: new Date().toISOString(),
+          };
+          snapshotJson = JSON.stringify(fallbackSnapshot);
+        }
+
+        // Сохраняем в hash leadhunter:inbox
+        await fetchWithTimeout(
+          `${redisUrl}/hset/leadhunter:inbox/${encodeURIComponent(leadId)}/${encodeURIComponent(snapshotJson)}`,
+          { headers: { Authorization: `Bearer ${redisToken}` } },
+          3000
+        ).catch(() => {});
+
+        responseText = 'Лид сохранён в воронку!';
       }
     }
 
@@ -126,7 +194,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
         body: JSON.stringify({
           callback_query_id: queryId,
           text: responseText,
-          show_alert: false,
+          show_alert: showAlert,
         }),
       },
       5000

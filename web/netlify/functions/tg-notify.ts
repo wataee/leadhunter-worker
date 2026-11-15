@@ -21,6 +21,7 @@ interface NotifyBody {
   text: string;
   url: string;
   channel?: string;
+  budget?: string | null;
 }
 
 function escapeHtml(str: string): string {
@@ -135,6 +136,26 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   try {
     const channelSlug = (body.channel || '').replace(/^@/, '').slice(0, 40);
     const leadSlug = (body.id || channelSlug || 'lead').slice(0, 40);
+
+    // Сохраняем снимок лида в Redis на 7 дней для возможности добавления в воронку по кнопке
+    const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
+    const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+    if (redisUrl && redisToken) {
+      const snapshot = {
+        id: body.id || leadSlug,
+        text: body.text,
+        url: cleanUrl,
+        channel: body.channel || channelSlug,
+        budget: body.budget || null,
+        postedAt: new Date().toISOString(),
+      };
+      // POST into Redis via REST endpoint
+      fetchWithTimeout(
+        `${redisUrl}/set/leadhunter:lead_snapshots:${encodeURIComponent(leadSlug)}/${encodeURIComponent(JSON.stringify(snapshot))}/ex/604800`,
+        { headers: { Authorization: `Bearer ${redisToken}` } },
+        2500
+      ).catch(() => {});
+    }
 
     const res = await fetchWithTimeout(
       `https://api.telegram.org/bot${token}/sendMessage`,
