@@ -9,15 +9,12 @@ import {
 } from '../lib/templates';
 import { rewritePitchWithAi } from '../lib/api';
 import {
-  FileText,
   Plus,
   Copy,
   Trash2,
   Sparkles,
   RotateCcw,
   Eye,
-  Check,
-  AlertTriangle,
 } from 'lucide-react';
 
 export const Templates: React.FC = () => {
@@ -108,15 +105,11 @@ export const Templates: React.FC = () => {
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-text flex items-center gap-2">
-            <FileText size={22} className="text-accent" />
-            <span>Шаблоны первых сообщений</span>
+          <h1 className="text-xl md:text-2xl font-bold text-text">
+            Шаблоны сообщений
           </h1>
-          <p className="text-xs md:text-sm text-text-muted mt-0.5">
-            Конструктор сообщений: отклики на вакансии, разборы роликов и напоминания.
-          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -335,69 +328,6 @@ export const Templates: React.FC = () => {
               {/* Telegram Preview Bubble */}
               <div className="p-4 bg-surface-2/80 rounded-card border border-border text-sm text-text leading-relaxed whitespace-pre-wrap font-sans select-text">
                 {previewText}
-              </div>
-
-              {/* Quality checks breakdown */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
-                <div
-                  className={`flex items-center gap-2 p-2 rounded border ${
-                    quality.missingSpecifics
-                      ? 'bg-warning-soft/40 border-warning/30 text-warning'
-                      : 'bg-success-soft/30 border-success/30 text-success'
-                  }`}
-                >
-                  {quality.missingSpecifics ? <AlertTriangle size={14} /> : <Check size={14} />}
-                  <span>
-                    {quality.missingSpecifics
-                      ? 'Нет таймкода / конкретики'
-                      : 'Конкретика и таймкод на месте'}
-                  </span>
-                </div>
-
-                <div
-                  className={`flex items-center gap-2 p-2 rounded border ${
-                    quality.missingQuestion
-                      ? 'bg-warning-soft/40 border-warning/30 text-warning'
-                      : 'bg-success-soft/30 border-success/30 text-success'
-                  }`}
-                >
-                  {quality.missingQuestion ? <AlertTriangle size={14} /> : <Check size={14} />}
-                  <span>
-                    {quality.missingQuestion
-                      ? 'В конце нет вопроса'
-                      : 'Вопрос с нулевым трением в конце'}
-                  </span>
-                </div>
-
-                <div
-                  className={`flex items-center gap-2 p-2 rounded border ${
-                    quality.hasBannedPhrases
-                      ? 'bg-danger-soft/40 border-danger/30 text-danger'
-                      : 'bg-success-soft/30 border-success/30 text-success'
-                  }`}
-                >
-                  {quality.hasBannedPhrases ? <AlertTriangle size={14} /> : <Check size={14} />}
-                  <span>
-                    {quality.hasBannedPhrases
-                      ? "Содержит 'услуги монтажа' (клише)"
-                      : 'Без шаблонных фраз'}
-                  </span>
-                </div>
-
-                <div
-                  className={`flex items-center gap-2 p-2 rounded border ${
-                    quality.isTooLong
-                      ? 'bg-danger-soft/40 border-danger/30 text-danger'
-                      : 'bg-success-soft/30 border-success/30 text-success'
-                  }`}
-                >
-                  {quality.isTooLong ? <AlertTriangle size={14} /> : <Check size={14} />}
-                  <span>
-                    {quality.isTooLong
-                      ? 'Превышен лимит длины (>450 симв)'
-                      : 'Лаконичный размер'}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
