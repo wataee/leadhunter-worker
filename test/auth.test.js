@@ -104,15 +104,23 @@ test('1.3 Cookie parsing and requireAuth middleware', () => {
     assert.equal(res.statusCode, 503);
     assert.match(res.error, /APP_PASSWORD/);
 
-    // 3. In prod with APP_PASSWORD but without valid APP_SESSION_SECRET (>= 32 chars) -> 503
+    // 3. In prod with APP_PASSWORD but without valid APP_SESSION_SECRET -> derives from APP_PASSWORD
     process.env.APP_PASSWORD = 'strong_test_password_123';
     process.env.APP_SESSION_SECRET = 'short';
     res = requireAuth({ headers: {} });
     assert.equal(res.authenticated, false);
+    assert.equal(res.statusCode, 401, 'Should derive secret and fail with 401 (unauthorized) rather than 503');
+
+    // 3b. When both APP_PASSWORD and APP_SESSION_SECRET are missing in prod -> 503
+    delete process.env.APP_PASSWORD;
+    delete process.env.APP_SESSION_SECRET;
+    res = requireAuth({ headers: {} });
+    assert.equal(res.authenticated, false);
     assert.equal(res.statusCode, 503);
-    assert.match(res.error, /APP_SESSION_SECRET/);
+    assert.match(res.error, /APP_PASSWORD/);
 
     // 4. In prod with APP_PASSWORD and valid APP_SESSION_SECRET
+    process.env.APP_PASSWORD = 'strong_test_password_123';
     const validSecret = 'valid-test-session-secret-at-least-32-chars-long';
     process.env.APP_SESSION_SECRET = validSecret;
 

@@ -13,13 +13,20 @@ export const SESSION_MAX_AGE_SEC = 30 * 24 * 60 * 60; // 30 дней
 
 export function getSessionSecret(): string {
   const secret = process.env.APP_SESSION_SECRET?.trim();
+  if (secret && secret.length >= 32) {
+    return secret;
+  }
+  const appPassword = process.env.APP_PASSWORD?.trim();
+  if (appPassword) {
+    console.warn(
+      '[Auth] APP_SESSION_SECRET деривирован из APP_PASSWORD. Рекомендуется задать отдельный секрет в Netlify env.'
+    );
+    return crypto.scryptSync(appPassword, 'leadhunter-salt', 32).toString('hex');
+  }
   if (!secret) {
     throw new Error('APP_SESSION_SECRET не настроен');
   }
-  if (secret.length < 32) {
-    throw new Error('APP_SESSION_SECRET должен содержать минимум 32 символа');
-  }
-  return secret;
+  throw new Error('APP_SESSION_SECRET должен содержать минимум 32 символа');
 }
 
 export function isDevEnvironment(): boolean {

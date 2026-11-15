@@ -1,5 +1,4 @@
-import { jsonResponse, handleOptions, type NetlifyResponse } from './_shared/response';
-import { requireAuth } from './_shared/auth';
+import { jsonResponse, handleOptions, fetchWithTimeout, type NetlifyResponse } from './_shared/response';
 
 interface HandlerEvent {
   httpMethod: string;
@@ -13,49 +12,186 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return handleOptions(origin);
   }
 
-  // 1.4 Публичный минимальный статус (не раскрывает провайдеры и настройки неавторизованным)
-  const auth = requireAuth(event);
-  if (!auth.authenticated) {
-    return jsonResponse(
-      200,
-      {
-        ok: true,
-        ts: new Date().toISOString(),
-      },
-      origin
-    );
+  const token = process.env.TELEGRAM_BOT_TOKEN?.trim() || '';
+  const chatId = process.env.TELEGRAM_CHAT_ID?.trim() || '';
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim() || '';
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim() || '';
+  const workerUrl = (
+    process.env.TG_WORKER_URL ||
+    process.env.VITE_TG_WORKER_URL ||
+    ''
+  ).trim();
+
+  // 1. Telegram Bot (getMe)
+  let telegramBot: { status: 'ok' | 'error' | 'not_configured'; username?: string; message?: string } = {
+    status: 'not_configured',
+    message: 'TELEGRAM_BOT_TOKEN не задан',
+  };
+
+  if (token) {
+    try {
+      const res = await fetchWithTimeout(`https://api.telegram.org/bot${token}/getMe`, {}, 3000);
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok && data.result) {
+        telegramBot = {
+          status: 'ok',
+          username: data.result.username ? `@${data.result.username}` : data.result.first_name,
+        };
+      } else {
+        telegramBot = {
+          status: 'error',
+          message: data?.description || `HTTP ${res.status}`,
+        };
+      }
+    } catch (err: unknown) {
+      telegramBot = {
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Timeout 3s',
+      };
+    }
   }
 
-  // Подробный статус — только после успешной авторизации
-  const hasYoutube = Boolean(process.env.YOUTUBE_API_KEY && process.env.YOUTUBE_API_KEY.trim().length > 0);
-  const hasTelegram = Boolean(
-    process.env.TELEGRAM_BOT_TOKEN &&
-    process.env.TELEGRAM_BOT_TOKEN.trim().length > 0 &&
-    process.env.TELEGRAM_CHAT_ID &&
-    process.env.TELEGRAM_CHAT_ID.trim().length > 0
-  );
+  // 2. Telegram Webhook (getWebhookInfo)
+  let telegramWebhook: {
+    status: 'ok' | 'not_set' | 'error' | 'not_configured';
+    url?: string | null;
+    pendingUpdates?: number;
+    lastError?: string | null;
+    message?: string;
+  } = {
+    status: 'not_configured',
+  };
 
-  const hasGemini = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 0);
-  const hasGroq = Boolean(process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim().length > 0);
-  const hasOpenRouter = Boolean(process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY.trim().length > 0);
-  const hasAnthropic = Boolean(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY.trim().length > 0);
+  if (token) {
+    try {
+      const res = await fetchWithTimeout(`https://api.telegram.org/bot${token}/getWebhookInfo`, {}, 3000);
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok && data.result) {
+        const info = data.result;
+        telegramWebhook = {
+          status: info.url ? 'ok' : 'not_set',
+          url: info.url || null,
+          pendingUpdates: info.pending_update_count || 0,
+          lastError: info.last_error_message || null,
+        };
+      } else {
+        telegramWebhook = {
+          status: 'error',
+          message: data?.description || `HTTP ${res.status}`,
+        };
+      }
+    } catch (err: unknown) {
+      telegramWebhook = {
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Timeout 3s',
+      };
+    }
+  }
 
-  const hasAi = hasGemini || hasGroq || hasOpenRouter || hasAnthropic;
+  // 3. Upstash Redis (PING)
+  let redis: { status: 'ok' | 'error' | 'not_configured'; latencyMs?: number; message?: string } = {
+    status: 'not_configured',
+    message: 'UPSTASH_REDIS_REST_URL/TOKEN не настроены',
+  };
+
+  if (redisUrl && redisToken) {
+    const t0 = Date.now();
+    try {
+      const res = await fetchWithTimeout(
+        redisUrl.replace(/\/$/, ''),
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${redisToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(['PING']),
+        },
+        3000
+      );
+      if (res.ok) {
+        redis = {
+          status: 'ok',
+          latencyMs: Date.now() - t0,
+        };
+      } else {
+        redis = {
+          status: 'error',
+          message: `HTTP ${res.status}`,
+        };
+      }
+    } catch (err: unknown) {
+      redis = {
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Timeout 3s',
+      };
+    }
+  }
+
+  // 4. Worker (health check ping)
+  let worker: { status: 'ok' | 'error' | 'not_configured'; message?: string; uptimeSeconds?: number } = {
+    status: 'not_configured',
+    message: 'TG_WORKER_URL не настроен',
+  };
+
+  if (workerUrl) {
+    try {
+      const res = await fetchWithTimeout(`${workerUrl.replace(/\/$/, '')}/`, {}, 3000);
+      const data = await res.json().catch(() => null);
+      if (res.ok) {
+        worker = {
+          status: 'ok',
+          uptimeSeconds: data?.uptimeSeconds,
+        };
+      } else {
+        worker = {
+          status: 'error',
+          message: `HTTP ${res.status}`,
+        };
+      }
+    } catch (err: unknown) {
+      worker = {
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Timeout 3s',
+      };
+    }
+  }
+
+  // 5. Конфигурация секретов (только boolean, без утечки значений)
+  const authConfigured = Boolean(process.env.APP_PASSWORD?.trim());
+  const sessionSecretConfigured = Boolean(process.env.APP_SESSION_SECRET?.trim());
+  const webhookSecretConfigured = Boolean(process.env.WEBHOOK_SECRET?.trim());
+  const telegramChatIdConfigured = Boolean(chatId);
+  const youtubeConfigured = Boolean(process.env.YOUTUBE_API_KEY?.trim());
+
+  // Общий статус системы
+  let overallStatus: 'ok' | 'degraded' | 'error' = 'ok';
+  if (telegramBot.status === 'error' || redis.status === 'error' || worker.status === 'error') {
+    overallStatus = 'error';
+  } else if (
+    telegramBot.status === 'not_configured' ||
+    telegramWebhook.status === 'not_set' ||
+    redis.status === 'not_configured' ||
+    worker.status === 'not_configured' ||
+    !authConfigured
+  ) {
+    overallStatus = 'degraded';
+  }
 
   return jsonResponse(
     200,
     {
-      ok: true,
-      authenticated: true,
-      youtube: hasYoutube,
-      telegram: hasTelegram,
-      ai: hasAi,
-      activeProvider: hasGemini ? 'gemini' : hasGroq ? 'groq' : hasOpenRouter ? 'openrouter' : hasAnthropic ? 'anthropic' : null,
-      providers: {
-        gemini: { configured: hasGemini, model: process.env.GEMINI_MODEL || 'gemini-2.5-flash' },
-        groq: { configured: hasGroq, model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile' },
-        openrouter: { configured: hasOpenRouter, model: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free' },
-        anthropic: { configured: hasAnthropic, model: process.env.ANTHROPIC_MODEL || 'claude-3-5-haiku-20241022' },
+      status: overallStatus,
+      telegramBot,
+      telegramWebhook,
+      redis,
+      worker,
+      config: {
+        authConfigured,
+        sessionSecretConfigured,
+        webhookSecretConfigured,
+        telegramChatIdConfigured,
+        youtubeConfigured,
       },
       timestamp: new Date().toISOString(),
     },
