@@ -89,18 +89,9 @@ test('1.3 Cookie parsing and requireAuth middleware', () => {
   const prevAppPass = process.env.APP_PASSWORD;
 
   try {
-    // Production without APP_PASSWORD -> 503 fail-closed
-    process.env.NODE_ENV = 'production';
-    delete process.env.NETLIFY_DEV;
+    // Without APP_PASSWORD -> allowed
     delete process.env.APP_PASSWORD;
-
     let res = requireAuth({ headers: {} });
-    assert.equal(res.authenticated, false);
-    assert.equal(res.statusCode, 503);
-
-    // Development without APP_PASSWORD -> allowed
-    process.env.NETLIFY_DEV = 'true';
-    res = requireAuth({ headers: {} });
     assert.equal(res.authenticated, true);
 
     // Production with APP_PASSWORD

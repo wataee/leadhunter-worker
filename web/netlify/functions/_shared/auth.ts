@@ -129,16 +129,9 @@ export function requireAuth(event: {
   const isDev = isDevEnvironment();
   const appPassword = process.env.APP_PASSWORD?.trim();
 
-  // Если пароль не задан: в dev пропускаем, в проде fail-closed 503
+  // Если пароль приложения не задан: доступ открыт без пароля
   if (!appPassword) {
-    if (isDev) {
-      return { authenticated: true };
-    }
-    return {
-      authenticated: false,
-      statusCode: 503,
-      error: 'Пароль приложения (APP_PASSWORD) не настроен на сервере',
-    };
+    return { authenticated: true };
   }
 
   const cookieHeader = event.headers?.cookie || event.headers?.Cookie;

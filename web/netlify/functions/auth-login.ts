@@ -69,19 +69,10 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     const appPassword = process.env.APP_PASSWORD?.trim();
     const isDev = isDevEnvironment();
 
-    // Если в проде нет APP_PASSWORD — fail-closed 503
+    // Если пароль приложения не настроен: открытый доступ
     if (!appPassword) {
-      if (!isDev) {
-        return errorResponse(
-          503,
-          'Пароль приложения (APP_PASSWORD) не настроен в панели Netlify.',
-          null,
-          origin
-        );
-      }
-      // В dev-режиме без пароля выдаём сессию
       const { token } = signSessionToken();
-      const response = jsonResponse(200, { ok: true, authenticated: true, devMode: true }, origin);
+      const response = jsonResponse(200, { ok: true, authenticated: true }, origin);
       response.headers['Set-Cookie'] = `lh_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_MAX_AGE_SEC}`;
       return response;
     }
