@@ -37,93 +37,72 @@ const OPENROUTER_DEFAULT_MODEL = 'meta-llama/llama-3.3-70b-instruct:free';
 const ANTHROPIC_DEFAULT_MODEL = 'claude-3-5-haiku-20241022';
 
 /**
- * Call Google Gemini API using header-based authentication
+ * Call Google Gemini API using header-based authentication with concurrent fast fallback
  */
 async function callGemini(
   systemPrompt: string,
   userPrompt: string,
   apiKey: string,
-  modelName: string
+  preferredModel?: string
 ): Promise<string> {
   if (!apiKey || !apiKey.trim()) {
     throw new Error('Ключ Gemini API не передан.');
   }
 
   const cleanKey = apiKey.trim();
-  const modelsToTry = [
-    modelName || GEMINI_DEFAULT_MODEL,
-    'gemini-2.5-flash-lite',
+  const models = [
+    preferredModel,
     'gemini-flash-latest',
+    'gemini-3.8-flash',
+    'gemini-2.5-flash-lite',
     'gemini-2.5-flash',
-    'gemini-pro-latest',
-  ].filter((m, idx, arr) => Boolean(m) && arr.indexOf(m) === idx);
+  ].filter((m, idx, arr) => Boolean(m) && arr.indexOf(m) === idx) as string[];
 
-  let lastError: Error | null = null;
-
-  for (const model of modelsToTry) {
+  const callModel = async (model: string): Promise<string> => {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(cleanKey)}`;
-
-    for (const disableThinking of [true, false]) {
-      try {
-        const headers: Record<string, string> = {
+    const res = await fetchWithTimeout(
+      url,
+      {
+        method: 'POST',
+        headers: {
           'Content-Type': 'application/json',
           'x-goog-api-key': cleanKey,
-        };
-
-        const res = await fetchWithTimeout(
-          url,
-          {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({
-              contents: [
-                {
-                  role: 'user',
-                  parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }],
-                },
-              ],
-              generationConfig: {
-                temperature: 0.2,
-                maxOutputTokens: 1024,
-                ...(disableThinking ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
-              },
-            }),
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 1024,
           },
-          25000
-        );
+        }),
+      },
+      18000
+    );
 
-        if (!res.ok) {
-          const errorText = await res.text();
-          if (disableThinking && errorText.includes('thinkingConfig')) {
-            // Model doesn't support thinkingConfig, try next without it
-            continue;
-          }
-          if (res.status === 404 && modelsToTry.length > 1) {
-            lastError = new Error(`Gemini model ${model} (HTTP 404): ${errorText.slice(0, 100)}`);
-            break;
-          }
-          throw new Error(`Gemini API error (HTTP ${res.status}): ${errorText.slice(0, 150)}`);
-        }
-
-        const data = await res.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!text) {
-          throw new Error('Gemini API вернул пустой ответ');
-        }
-
-        return text;
-      } catch (err: any) {
-        lastError = err;
-        if (disableThinking && err.message?.includes('thinkingConfig')) {
-          continue;
-        }
-        if (err.message?.includes('404')) break;
-        throw err;
-      }
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`[${model}] HTTP ${res.status}: ${err.slice(0, 100)}`);
     }
-  }
 
-  throw lastError || new Error('Gemini generation failed');
+    const data = await res.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error(`[${model}] empty response`);
+    return text;
+  };
+
+  try {
+    return await Promise.any(models.map((m) => callModel(m)));
+  } catch (aggErr: any) {
+    const errorDetails = Array.isArray(aggErr?.errors)
+      ? aggErr.errors.map((e: any) => e.message).join(' | ')
+      : aggErr?.message || 'Все модели Gemini вернули ошибку';
+    throw new Error(errorDetails);
+  }
 }
 
 /**
