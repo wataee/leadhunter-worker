@@ -1,122 +1,70 @@
 import React, { useEffect, useState } from 'react';
-import { Menu, Plus, CheckCircle2, AlertCircle, LogOut } from 'lucide-react';
-import { useSettingsStore } from '../store/settingsStore';
-import { useToastStore } from '../store/toastStore';
-import { checkApiHealth, HealthStatus, logout } from '../lib/api';
+import { Link } from 'react-router-dom';
+import { Menu, AlertCircle } from 'lucide-react';
+import { checkApiHealth, HealthStatus } from '../lib/api';
 
 interface TopbarProps {
   onToggleMobile: () => void;
-  onOpenShortcuts: () => void;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({ onToggleMobile }) => {
-  const { todaySentCount, dailyGoal, incrementSentCount, resetDailyIfNewDay } =
-    useSettingsStore();
-  const addToast = useToastStore((s) => s.addToast);
-
-  const [health, setHealth] = useState<HealthStatus>({
-    youtube: false,
-    telegram: false,
-    ai: false,
-  });
+  const [health, setHealth] = useState<HealthStatus | null>(null);
 
   useEffect(() => {
-    resetDailyIfNewDay();
     checkApiHealth()
       .then((h) => setHealth(h))
       .catch(() => {});
-  }, [resetDailyIfNewDay]);
+  }, []);
 
-  const handleQuickAddSent = () => {
-    incrementSentCount();
-    addToast({
-      type: 'success',
-      title: '+1 отправлено!',
-      message: `Сегодня отправлено ${todaySentCount + 1} из ${dailyGoal}`,
-      duration: 2500,
-    });
-  };
-
-  const todayStr = new Date().toLocaleDateString('ru-RU', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'long',
-  });
+  const hasTgIssue = health !== null && !health.telegram;
 
   return (
-    <header className="h-16 bg-surface/80 backdrop-blur-md border-b border-border sticky top-0 z-20 flex items-center justify-between px-4 md:px-6">
-      {/* Left side */}
-      <div className="flex items-center gap-3">
+    <>
+      {/* Mobile Topbar */}
+      <header className="md:hidden h-14 bg-surface/90 backdrop-blur-md border-b border-border sticky top-0 z-20 flex items-center justify-between px-4">
         <button
           onClick={onToggleMobile}
           aria-label="Открыть меню"
-          className="md:hidden text-text-muted hover:text-text p-2 rounded-control hover:bg-surface-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="text-text-muted hover:text-text p-2 rounded-control hover:bg-surface-2 transition-colors focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center"
         >
-          <Menu size={20} />
+          <Menu size={22} />
         </button>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-text-muted capitalize">
-            {todayStr}
-          </span>
-          <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-border-strong" />
-          <span className="hidden sm:inline-block text-xs font-medium text-text">
-            Рабочая сессия
-          </span>
-        </div>
-      </div>
-
-      {/* Right side */}
-      <div className="flex items-center gap-3">
-        {/* API Health indicator pills */}
-        <div className="hidden lg:flex items-center gap-2 text-[11px] text-text-muted bg-surface-2/60 px-2.5 py-1 rounded-full border border-border">
-          <span className="flex items-center gap-1">
-            {health.youtube ? (
-              <CheckCircle2 size={12} className="text-success" />
-            ) : (
-              <AlertCircle size={12} className="text-warning" />
-            )}
-            <span>YouTube API</span>
-          </span>
-          <span className="text-border">|</span>
-          <span className="flex items-center gap-1">
-            {health.telegram ? (
-              <CheckCircle2 size={12} className="text-success" />
-            ) : (
-              <span className="w-1.5 h-1.5 rounded-full bg-muted" />
-            )}
-            <span>TG Bot</span>
+        <div className="font-mono text-base font-bold tracking-tight text-text">
+          <span>.lead</span>
+          <span className="text-accent">•</span>
+          <span className="text-xs uppercase tracking-widest text-muted ml-1 font-sans font-semibold">
+            Hunter
           </span>
         </div>
 
-        {/* Quick +1 Sent Action */}
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-surface-2 rounded-control border border-border text-xs">
-            <span className="text-text-muted">Норма:</span>
-            <span className="font-mono font-semibold text-accent">
-              {todaySentCount}/{dailyGoal}
-            </span>
-          </div>
-
-          <button
-            onClick={handleQuickAddSent}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-accent hover:bg-accent-hover active:scale-[0.98] text-white text-xs font-semibold rounded-control shadow-subtle transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+        {hasTgIssue ? (
+          <Link
+            to="/settings"
+            title="Telegram-бот не отвечает"
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-danger/10 text-danger border border-danger/20 rounded-full text-xs"
           >
-            <Plus size={14} strokeWidth={2.5} />
-            <span>+1 отправлено</span>
-          </button>
+            <span className="w-2 h-2 rounded-full bg-danger animate-pulse" />
+            <AlertCircle size={14} />
+          </Link>
+        ) : (
+          <div className="w-8" />
+        )}
+      </header>
 
-          <button
-            onClick={() => logout()}
-            title="Выйти из системы"
-            aria-label="Выйти из системы"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-text-muted hover:text-text hover:bg-surface-2 rounded-control border border-border text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      {/* Desktop Alert: shown ONLY when there is a Telegram bot issue */}
+      {hasTgIssue && (
+        <div className="hidden md:flex fixed top-3 right-6 z-30">
+          <Link
+            to="/settings"
+            title="Telegram-бот не отвечает"
+            className="flex items-center gap-2 px-3 py-1.5 bg-danger/10 hover:bg-danger/20 text-danger border border-danger/30 rounded-control text-xs transition-colors shadow-sm"
           >
-            <LogOut size={14} />
-            <span className="hidden sm:inline">Выйти</span>
-          </button>
+            <span className="w-2 h-2 rounded-full bg-danger animate-ping" />
+            <span>Telegram-бот не отвечает</span>
+          </Link>
         </div>
-      </div>
-    </header>
+      )}
+    </>
   );
 };

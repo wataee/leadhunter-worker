@@ -561,17 +561,15 @@ export const Finder: React.FC = () => {
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-text flex items-center gap-2">
             <Search size={22} className="text-accent" />
-            <span>Поиск каналов (YouTube)</span>
+            <span>Поиск каналов</span>
           </h1>
-          <p className="text-xs md:text-sm text-text-muted mt-0.5">
-            Парсинг и скоринг YouTube-каналов с продуктом и платежеспособной аудиторией.
-          </p>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono bg-surface-2 px-3 py-1.5 rounded-control border border-border">
-          <span className="text-text-muted">Квота сессии:</span>
-          <span className="font-bold text-accent">{sessionQuotaUsed} / 10 000</span>
-        </div>
+        {sessionQuotaUsed > 7000 && (
+          <div className="flex items-center gap-2 text-xs font-mono text-warning bg-warning/10 border border-warning/30 px-3 py-1.5 rounded-control">
+            <span>Квота YouTube: {sessionQuotaUsed} / 10 000</span>
+          </div>
+        )}
       </div>
 
       {/* Main Search Panel */}

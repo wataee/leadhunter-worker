@@ -7,29 +7,22 @@ import {
   Kanban,
   FileText,
   Settings,
-  HelpCircle,
   Database,
+  LogOut,
 } from 'lucide-react';
-import { useLeadsStore } from '../store/leadsStore';
 import { useVacanciesStore } from '../store/vacanciesStore';
-import { useSettingsStore } from '../store/settingsStore';
+import { logout } from '../lib/api';
 
 interface SidebarProps {
-  onOpenShortcuts: () => void;
   mobileOpen: boolean;
   onCloseMobile: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
-  onOpenShortcuts,
   mobileOpen,
   onCloseMobile,
 }) => {
-  const leads = useLeadsStore((s) => s.leads);
   const vacancies = useVacanciesStore((s) => s.vacancies);
-  const sessionQuotaUsed = useSettingsStore((s) => s.sessionQuotaUsed);
-
-  const activeLeadsCount = leads.filter((l) => l.status !== 'rejected').length;
   const unseenVacanciesCount = vacancies.filter((v) => !v.seen && !v.hidden).length;
 
   const navItems = [
@@ -37,46 +30,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
       to: '/',
       label: 'Дашборд',
       icon: LayoutDashboard,
-      shortcut: 'g d',
     },
     {
       to: '/finder',
       label: 'Поиск каналов',
       icon: Search,
-      shortcut: 'g f',
     },
     {
       to: '/vacancies',
-      label: 'Монитор вакансий',
+      label: 'Вакансии',
       icon: Radio,
       badge: unseenVacanciesCount > 0 ? unseenVacanciesCount : undefined,
-      badgeVariant: 'danger' as const,
-      shortcut: 'g v',
     },
     {
       to: '/sources',
-      label: 'Каталог источников',
+      label: 'Источники',
       icon: Database,
-      shortcut: 'g c',
     },
     {
       to: '/leads',
-      label: 'Воронка клиентов',
+      label: 'Воронка',
       icon: Kanban,
-      badge: activeLeadsCount > 0 ? activeLeadsCount : undefined,
-      shortcut: 'g l',
     },
     {
       to: '/templates',
-      label: 'Шаблоны сообщений',
+      label: 'Шаблоны',
       icon: FileText,
-      shortcut: 'g t',
     },
     {
       to: '/settings',
       label: 'Настройки',
       icon: Settings,
-      shortcut: 'g s',
     },
   ];
 
@@ -99,16 +83,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </span>
           </div>
         </NavLink>
-        <span className="text-[10px] font-mono text-muted bg-surface-2 px-1.5 py-0.5 rounded border border-border">
-          v1.0
-        </span>
       </div>
 
       {/* Nav List */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <div className="text-[11px] font-medium text-text-muted/60 uppercase tracking-wider px-3 mb-2">
-          Навигация
-        </div>
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -129,58 +107,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <Icon size={16} />
                 <span>{item.label}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                {item.badge !== undefined && (
-                  <span
-                    className={`font-mono text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
-                      item.badgeVariant === 'danger'
-                        ? 'bg-danger text-white animate-pulse'
-                        : 'bg-surface-2 text-text-muted border border-border'
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
-              </div>
+              {item.badge !== undefined && (
+                <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-danger text-white">
+                  {item.badge}
+                </span>
+              )}
             </NavLink>
           );
         })}
       </nav>
 
-      {/* Bottom Actions & Quota */}
-      <div className="p-3 border-t border-border space-y-2 bg-surface">
-        {/* Quota widget */}
-        <div className="px-3 py-2 bg-surface-2/60 rounded-control border border-border/60 text-[11px]">
-          <div className="flex items-center justify-between text-text-muted mb-1">
-            <span className="flex items-center gap-1">
-              <Database size={11} /> Квота сессии
-            </span>
-            <span className="font-mono text-text">
-              {sessionQuotaUsed} / 10 000
-            </span>
-          </div>
-          <div className="w-full h-1 bg-surface-3 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-accent rounded-full transition-all duration-300"
-              style={{
-                width: `${Math.min(100, (sessionQuotaUsed / 10000) * 100)}%`,
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Shortcuts button */}
+      {/* Bottom Action: Logout */}
+      <div className="p-3 border-t border-border bg-surface">
         <button
-          onClick={onOpenShortcuts}
-          className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-text-muted hover:text-text hover:bg-surface-2 rounded-control transition-colors"
+          onClick={() => logout()}
+          className="w-full flex items-center gap-2 px-3 py-2 text-xs text-text-muted hover:text-danger hover:bg-danger/10 rounded-control transition-colors"
+          title="Выйти из системы"
         >
-          <span className="flex items-center gap-1.5">
-            <HelpCircle size={13} />
-            <span>Горячие клавиши</span>
-          </span>
-          <kbd className="font-mono text-[10px] bg-surface-2 px-1.5 py-0.5 rounded border border-border text-muted">
-            ?
-          </kbd>
+          <LogOut size={15} />
+          <span>Выйти</span>
         </button>
       </div>
     </div>
