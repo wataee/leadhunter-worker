@@ -9,6 +9,8 @@ export interface TelegramSource {
   username: string;
   enabled: boolean;
   addedAt: string;
+  title?: string;
+  type?: 'channel' | 'group';
 }
 
 interface VacanciesState {
@@ -28,6 +30,11 @@ interface VacanciesState {
   addSource: (rawInput: string) => void;
   removeSource: (username: string) => void;
   toggleSource: (username: string) => void;
+  enableAllSources: () => void;
+  enableChannelsOnly: () => void;
+  enableRecommendedOnly: () => void;
+  disableAllSources: () => void;
+  syncWithCatalog: () => void;
 
   setVacancies: (vacancies: Vacancy[]) => void;
   mergeNewVacancies: (incoming: Vacancy[]) => { newCount: number; hotCount: number };
@@ -55,18 +62,25 @@ interface VacanciesState {
 export const DEFAULT_INCLUDE_KEYWORDS = KEYWORDS.coreRoles;
 export const DEFAULT_EXCLUDE_KEYWORDS = KEYWORDS.stopPhrases;
 
-const DEFAULT_SOURCES: TelegramSource[] = [
-  { username: 'work_videoedit', enabled: true, addedAt: new Date().toISOString() },
-  { username: 'normrabota', enabled: true, addedAt: new Date().toISOString() },
-  { username: 'vdhl_good', enabled: true, addedAt: new Date().toISOString() },
-  { username: 'distantsiya', enabled: true, addedAt: new Date().toISOString() },
-  { username: 'kinovideojob', enabled: true, addedAt: new Date().toISOString() },
-  { username: 'finder_vc', enabled: true, addedAt: new Date().toISOString() },
-  { username: 'youtube_jobs', enabled: true, addedAt: new Date().toISOString() },
-  { username: 'reels_jobs', enabled: true, addedAt: new Date().toISOString() },
-  { username: 'freelancetaverna', enabled: true, addedAt: new Date().toISOString() },
-  { username: 'mediajobs', enabled: true, addedAt: new Date().toISOString() },
-];
+import rawCatalog from '../shared/sources.catalog.json';
+
+interface RawCatalogItem {
+  id?: string;
+  username?: string;
+  title?: string;
+  type?: 'channel' | 'group';
+  recommended?: boolean;
+}
+
+const catalogData = rawCatalog as unknown as RawCatalogItem[];
+
+export const DEFAULT_SOURCES: TelegramSource[] = catalogData.map((c) => ({
+  username: (c.username || c.id || '').toLowerCase().replace(/^@/, ''),
+  title: c.title,
+  type: c.type || 'channel',
+  enabled: Boolean(c.recommended),
+  addedAt: new Date().toISOString(),
+}));
 
 export function computeVacancyRelevance(
   text: string,
@@ -285,6 +299,61 @@ export const useVacanciesStore = create<VacanciesState>()(
           ),
         })),
 
+      enableAllSources: () =>
+        set((state) => ({
+          sources: state.sources.map((s) => ({ ...s, enabled: true })),
+        })),
+
+      enableChannelsOnly: () => {
+        const channelUsernames = new Set(
+          catalogData
+            .filter((c) => c.type === 'channel')
+            .map((c) => (c.username || c.id || '').toLowerCase().replace(/^@/, ''))
+        );
+        set((state) => ({
+          sources: state.sources.map((s) => ({
+            ...s,
+            enabled: channelUsernames.has(s.username.toLowerCase()),
+          })),
+        }));
+      },
+
+      enableRecommendedOnly: () => {
+        const recUsernames = new Set(
+          catalogData
+            .filter((c) => c.recommended)
+            .map((c) => (c.username || c.id || '').toLowerCase().replace(/^@/, ''))
+        );
+        set((state) => ({
+          sources: state.sources.map((s) => ({
+            ...s,
+            enabled: recUsernames.has(s.username.toLowerCase()),
+          })),
+        }));
+      },
+
+      disableAllSources: () =>
+        set((state) => ({
+          sources: state.sources.map((s) => ({ ...s, enabled: false })),
+        })),
+
+      syncWithCatalog: () => {
+        const existingMap = new Map(
+          get().sources.map((s) => [s.username.toLowerCase(), s.enabled])
+        );
+        const synced = catalogData.map((c) => {
+          const uname = (c.username || c.id || '').toLowerCase().replace(/^@/, '');
+          return {
+            username: uname,
+            title: c.title,
+            type: c.type || 'channel',
+            enabled: existingMap.has(uname) ? existingMap.get(uname)! : Boolean(c.recommended),
+            addedAt: new Date().toISOString(),
+          };
+        });
+        set({ sources: synced });
+      },
+
       setVacancies: (vacancies) =>
         set({
           vacancies: vacancies
@@ -408,29 +477,60 @@ export const useVacanciesStore = create<VacanciesState>()(
     }),
     {
       name: 'leadhunter_vacancies',
-      version: 2,
+      version: 3,
       storage: safeLocalStorage as any,
       migrate: (persistedState: any, version: number) => {
-        if (version < 2 && persistedState) {
-          // Миграция со старой версии: чистим устаревшие поля
+        if (version < 3 && persistedState) {
           if (Array.isArray(persistedState.vacancies)) {
             persistedState.vacancies = persistedState.vacancies
               .filter((v: any) => v && typeof v === 'object' && !v.id?.startsWith('demo_'))
               .slice(0, 300);
           }
+          if (!persistedState.sources || persistedState.sources.length < 50) {
+            const existingMap = new Map(
+              (persistedState.sources || []).map((s: any) => [s.username?.toLowerCase(), s.enabled])
+            );
+            persistedState.sources = catalogData.map((c) => {
+              const uname = (c.username || c.id || '').toLowerCase().replace(/^@/, '');
+              return {
+                username: uname,
+                title: c.title,
+                type: c.type || 'channel',
+                enabled: existingMap.has(uname) ? existingMap.get(uname) : Boolean(c.recommended),
+                addedAt: new Date().toISOString(),
+              };
+            });
+          }
         }
         return persistedState;
       },
       onRehydrateStorage: () => (state) => {
-        if (state && Array.isArray(state.vacancies)) {
-          const now = Date.now();
-          state.vacancies = state.vacancies
-            .filter(
-              (v) =>
-                !v.id?.startsWith('demo_') &&
-                now - new Date(v.postedAt).getTime() <= FOURTEEN_DAYS_MS
-            )
-            .slice(0, 300);
+        if (state) {
+          if (Array.isArray(state.vacancies)) {
+            const now = Date.now();
+            state.vacancies = state.vacancies
+              .filter(
+                (v) =>
+                  !v.id?.startsWith('demo_') &&
+                  now - new Date(v.postedAt).getTime() <= FOURTEEN_DAYS_MS
+              )
+              .slice(0, 300);
+          }
+          if (!state.sources || state.sources.length < 50) {
+            const existingMap = new Map(
+              (state.sources || []).map((s) => [s.username?.toLowerCase(), s.enabled])
+            );
+            state.sources = catalogData.map((c) => {
+              const uname = (c.username || c.id || '').toLowerCase().replace(/^@/, '');
+              return {
+                username: uname,
+                title: c.title,
+                type: c.type || 'channel',
+                enabled: existingMap.has(uname) ? existingMap.get(uname)! : Boolean(c.recommended),
+                addedAt: new Date().toISOString(),
+              };
+            });
+          }
         }
       },
     }

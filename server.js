@@ -77,6 +77,25 @@ function loadAllowedChats() {
     }
   }
 
+  // 3. Fallback: load verified catalog (152 sources) if neither env nor file is provided
+  if (chats.size === 0) {
+    try {
+      const catalogPath = './web/src/shared/sources.catalog.json';
+      if (fs.existsSync(catalogPath)) {
+        const catalogData = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+        if (Array.isArray(catalogData)) {
+          catalogData.forEach((item) => {
+            if (item.username) {
+              chats.add(item.username.toLowerCase().replace(/^@/, ''));
+            }
+          });
+        }
+      }
+    } catch (err) {
+      console.error('[AllowedChats] Ошибка чтения каталога:', err.message);
+    }
+  }
+
   if (chats.size > 0) {
     allowedChatsSet = chats;
     console.log(`[AllowedChats] Белый список активен (${chats.size} чатов/каналов)`);

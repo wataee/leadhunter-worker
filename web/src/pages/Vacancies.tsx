@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useVacanciesStore, computeVacancyRelevance, TelegramSource } from '../store/vacanciesStore';
 import { useLeadsStore } from '../store/leadsStore';
 import { useSettingsStore } from '../store/settingsStore';
@@ -61,6 +61,11 @@ export const Vacancies: React.FC = () => {
     addSource,
     removeSource,
     toggleSource,
+    enableAllSources,
+    enableChannelsOnly,
+    enableRecommendedOnly,
+    disableAllSources,
+    syncWithCatalog,
     mergeNewVacancies,
     markSeen,
     hideVacancy,
@@ -124,6 +129,7 @@ export const Vacancies: React.FC = () => {
   const [presetDigestHours, setPresetDigestHours] = useState(4);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showDisableInactiveModal, setShowDisableInactiveModal] = useState(false);
+  const [channelSearchFilter, setChannelSearchFilter] = useState('');
 
   // 5.6 Channel Health Monitor
   const channelHealth: ChannelHealthItem[] = useMemo(() => {
@@ -171,6 +177,16 @@ export const Vacancies: React.FC = () => {
   const inactiveEnabledSources = useMemo(() => {
     return channelHealth.filter((s: ChannelHealthItem) => s.enabled && s.status === 'inactive');
   }, [channelHealth]);
+
+  const filteredChannelHealth = useMemo(() => {
+    if (!channelSearchFilter.trim()) return channelHealth;
+    const q = channelSearchFilter.trim().toLowerCase().replace(/^@/, '');
+    return channelHealth.filter(
+      (s) =>
+        s.username.toLowerCase().includes(q) ||
+        (s.title && s.title.toLowerCase().includes(q))
+    );
+  }, [channelHealth, channelSearchFilter]);
 
   const handleConfirmDisableInactive = () => {
     for (const s of inactiveEnabledSources) {
@@ -539,13 +555,73 @@ export const Vacancies: React.FC = () => {
       {/* Sources Box */}
       <div className="bg-surface rounded-card p-4 border border-border space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-text">
-            Каналы для мониторинга
-          </h2>
-          <span className="font-mono text-[11px] text-muted">
-            {sources.filter((s) => s.enabled).length}/{sources.length} вкл
-          </span>
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-text">
+              Каналы для мониторинга
+            </h2>
+            <div className="text-[10px] text-emerald-400 font-medium">
+              Каталог: {sources.length} проверенных источников
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/sources"
+              className="text-[11px] text-accent hover:underline flex items-center gap-0.5 font-medium"
+              title="Открыть каталог всех 152 источников"
+            >
+              Каталог (152) →
+            </Link>
+            <span className="font-mono text-[11px] text-muted">
+              {sources.filter((s) => s.enabled).length}/{sources.length} вкл
+            </span>
+          </div>
         </div>
+
+        {/* Quick presets */}
+        <div className="flex flex-wrap gap-1 text-[10px]">
+          <button
+            type="button"
+            onClick={() => enableRecommendedOnly()}
+            className="px-2 py-1 bg-surface-2 hover:bg-surface-3 text-text-muted hover:text-accent rounded border border-border transition-colors font-medium"
+            title="Включить топ-15 рекомендованных каналов с лучшим качеством"
+          >
+            ⭐ Топ-15
+          </button>
+          <button
+            type="button"
+            onClick={() => enableChannelsOnly()}
+            className="px-2 py-1 bg-surface-2 hover:bg-surface-3 text-text-muted hover:text-accent rounded border border-border transition-colors font-medium"
+            title="Включить все каналы вакансий"
+          >
+            📺 Каналы ({sources.filter((s) => s.type !== 'group').length})
+          </button>
+          <button
+            type="button"
+            onClick={() => enableAllSources()}
+            className="px-2 py-1 bg-surface-2 hover:bg-surface-3 text-text-muted hover:text-accent rounded border border-border transition-colors font-medium"
+            title="Включить все 152 источника"
+          >
+            Все {sources.length}
+          </button>
+          <button
+            type="button"
+            onClick={() => disableAllSources()}
+            className="px-2 py-1 bg-surface-2 hover:bg-surface-3 text-text-muted hover:text-danger rounded border border-border transition-colors font-medium"
+            title="Выключить все"
+          >
+            Выкл
+          </button>
+        </div>
+
+        {/* Search inside channels */}
+        <input
+          type="text"
+          placeholder={`Поиск по ${sources.length} источникам...`}
+          value={channelSearchFilter}
+          onChange={(e) => setChannelSearchFilter(e.target.value)}
+          className="w-full bg-surface-2 text-text text-xs rounded-control border border-border px-3 py-1.5 focus:outline-none focus:border-accent min-h-[36px]"
+          aria-label="Фильтр по источникам"
+        />
 
         {/* Add Channel Form */}
         <form onSubmit={handleAddSourceSubmit} className="flex gap-2">
@@ -567,13 +643,13 @@ export const Vacancies: React.FC = () => {
         </form>
 
         {/* Sources List */}
-        <div className="space-y-1.5 max-h-56 overflow-y-auto">
-          {channelHealth.length === 0 ? (
+        <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+          {filteredChannelHealth.length === 0 ? (
             <div className="text-[11px] text-muted italic p-3 bg-surface-2/30 rounded-control border border-border/50">
-              <p>Добавьте каналы или группы для мониторинга.</p>
+              <p>Ничего не найдено по запросу "{channelSearchFilter}".</p>
             </div>
           ) : (
-            channelHealth.map((s: ChannelHealthItem) => (
+            filteredChannelHealth.map((s: ChannelHealthItem) => (
               <div
                 key={s.username}
                 className="p-2 bg-surface-2/50 rounded-control border border-border text-xs min-h-[44px] space-y-1"
@@ -587,8 +663,19 @@ export const Vacancies: React.FC = () => {
                       className="rounded bg-surface-2 border-border text-accent focus:ring-accent w-4 h-4"
                       aria-label={`Включить канал @${s.username}`}
                     />
-                    <span className="font-semibold text-text truncate">@{s.username}</span>
+                    <div className="min-w-0 truncate">
+                      <span className="font-semibold text-text truncate block">@{s.username}</span>
+                      {s.title && s.title !== s.username && (
+                        <span className="text-[10px] text-muted truncate block">{s.title}</span>
+                      )}
+                    </div>
                   </label>
+
+                  {s.type === 'group' && (
+                    <span className="text-[9px] px-1 py-0.5 rounded bg-surface-3 text-muted shrink-0 font-mono">
+                      чат
+                    </span>
+                  )}
 
                   <button
                     onClick={() => removeSource(s.username)}
@@ -618,6 +705,14 @@ export const Vacancies: React.FC = () => {
             ))
           )}
         </div>
+
+        {/* Link to full catalog */}
+        <Link
+          to="/sources"
+          className="block w-full py-2 px-3 bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent text-center text-xs font-semibold rounded-control transition-colors"
+        >
+          🌐 Открыть полный Каталог (152 источника) →
+        </Link>
 
         {/* 5.6 Auto-disable inactive channels button */}
         {inactiveEnabledSources.length > 0 && (
@@ -866,6 +961,26 @@ export const Vacancies: React.FC = () => {
             <span>{isLoading ? 'Проверяю...' : 'Обновить'}</span>
           </button>
         </div>
+      </div>
+
+      {/* 6.6 Tabs: Vacancies Monitor vs Full Sources Catalog */}
+      <div className="flex items-center gap-2 border-b border-border pb-2">
+        <span className="px-4 py-2 bg-accent text-white text-xs font-semibold rounded-control shadow-sm flex items-center gap-2">
+          <Radio size={14} />
+          <span>Лента вакансий</span>
+          <span className="px-1.5 py-0.5 bg-white/20 text-white rounded-full font-mono text-[10px]">
+            {displayedVacancies.length}
+          </span>
+        </span>
+        <Link
+          to="/sources"
+          className="px-4 py-2 bg-surface hover:bg-surface-2 text-text-muted hover:text-text border border-border text-xs font-semibold rounded-control transition-colors flex items-center gap-2"
+        >
+          <span>🌐 Каталог источников (152)</span>
+          <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-mono font-medium">
+            {sources.length} в базе
+          </span>
+        </Link>
       </div>
 
       {/* Cloud Worker Status Badge */}
