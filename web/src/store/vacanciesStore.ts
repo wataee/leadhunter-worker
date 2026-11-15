@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Vacancy, SavedSearchPreset } from '../types';
+import { Vacancy } from '../types';
+import { useLeadsStore } from './leadsStore';
 import KEYWORDS from '../shared/keywords.js';
 import { parseBudget, BudgetResult } from '../shared/budget.js';
 import { matchesVacancy, detectVacancyRisks } from '../shared/filter.js';
@@ -21,9 +22,7 @@ interface VacanciesState {
   lastRefreshedAt: string | null;
   isLoading: boolean;
   selectedVacancyForPitch: Vacancy | null;
-  savedPresets: SavedSearchPreset[];
   hiddenChannels: string[];
-  filterFavoritesOnly: boolean;
 
   // Actions
   setSelectedVacancyForPitch: (vacancy: Vacancy | null) => void;
@@ -40,13 +39,8 @@ interface VacanciesState {
   mergeNewVacancies: (incoming: Vacancy[]) => { newCount: number; hotCount: number };
   markSeen: (id: string) => void;
   hideVacancy: (id: string) => void;
-  toggleFavorite: (id: string) => void;
   hideChannel: (channel: string) => void;
   unhideChannel: (channel: string) => void;
-  setFilterFavoritesOnly: (val: boolean) => void;
-
-  addSavedPreset: (preset: Omit<SavedSearchPreset, 'id' | 'createdAt'>) => void;
-  removeSavedPreset: (id: string) => void;
 
   addIncludeKeyword: (kw: string) => void;
   removeIncludeKeyword: (kw: string) => void;
@@ -256,9 +250,7 @@ export const useVacanciesStore = create<VacanciesState>()(
       lastRefreshedAt: null,
       isLoading: false,
       selectedVacancyForPitch: null,
-      savedPresets: [],
       hiddenChannels: [],
-      filterFavoritesOnly: false,
 
       setSelectedVacancyForPitch: (vacancy) => set({ selectedVacancyForPitch: vacancy }),
 
@@ -407,13 +399,6 @@ export const useVacanciesStore = create<VacanciesState>()(
           vacancies: state.vacancies.map((v) => (v.id === id ? { ...v, hidden: true } : v)),
         })),
 
-      toggleFavorite: (id) =>
-        set((state) => ({
-          vacancies: state.vacancies.map((v) =>
-            v.id === id ? { ...v, isFavorite: !v.isFavorite } : v
-          ),
-        })),
-
       hideChannel: (channel) => {
         const clean = channel.toLowerCase().replace(/^@/, '').trim();
         if (!clean) return;
@@ -428,25 +413,6 @@ export const useVacanciesStore = create<VacanciesState>()(
           hiddenChannels: state.hiddenChannels.filter((c) => c !== clean),
         }));
       },
-
-      setFilterFavoritesOnly: (val) => set({ filterFavoritesOnly: val }),
-
-      addSavedPreset: (preset) =>
-        set((state) => ({
-          savedPresets: [
-            ...state.savedPresets,
-            {
-              ...preset,
-              id: `preset_${Date.now()}`,
-              createdAt: new Date().toISOString(),
-            },
-          ],
-        })),
-
-      removeSavedPreset: (id) =>
-        set((state) => ({
-          savedPresets: state.savedPresets.filter((p) => p.id !== id),
-        })),
 
       addIncludeKeyword: (kw) => {
         const clean = kw.trim();
@@ -481,15 +447,39 @@ export const useVacanciesStore = create<VacanciesState>()(
     }),
     {
       name: 'leadhunter_vacancies',
-      version: 5,
+      version: 6,
       storage: safeLocalStorage as any,
       migrate: (persistedState: any, version: number) => {
         if (persistedState) {
+          // 2.6 Migrate any old favorites directly to leads
           if (Array.isArray(persistedState.vacancies)) {
+            const favorites = persistedState.vacancies.filter((v: any) => v && v.isFavorite);
+            if (favorites.length > 0) {
+              const currentLeads = useLeadsStore.getState().leads;
+              const existingUrls = new Set(currentLeads.map((l) => l.channelUrl));
+              for (const fav of favorites) {
+                if (fav.url && !existingUrls.has(fav.url)) {
+                  useLeadsStore.getState().addLead({
+                    name: `@${fav.channel?.replace(/^@/, '') || 'telegram'}`,
+                    channelUrl: fav.url,
+                    notes: fav.text || '',
+                    status: 'new',
+                  });
+                  existingUrls.add(fav.url);
+                }
+              }
+            }
             persistedState.vacancies = persistedState.vacancies
               .filter((v: any) => v && typeof v === 'object' && !v.id?.startsWith('demo_'))
+              .map((v: any) => {
+                const { isFavorite: _fav, ...rest } = v;
+                return rest;
+              })
               .slice(0, 300);
           }
+          delete persistedState.savedPresets;
+          delete persistedState.filterFavoritesOnly;
+
           if (version < 5 || !persistedState.sources || persistedState.sources.length < 150) {
             const existingMap = new Map(
               (persistedState.sources || []).map((s: any) => [s.username?.toLowerCase(), s.enabled])

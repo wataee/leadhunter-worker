@@ -90,7 +90,6 @@ export interface Vacancy {
   formatTag?: 'short' | 'long' | 'both';
   qualityTier?: 'great' | 'fair' | 'shady';
   statusBadge?: 'new' | 'hot' | 'shady';
-  isFavorite?: boolean;
   seen: boolean;
   hidden: boolean;
   budget?: {
@@ -103,16 +102,6 @@ export interface Vacancy {
   crossPostChannels?: string[];
 }
 
-export interface SavedSearchPreset {
-  id: string;
-  name: string;
-  filterHotOnly: boolean;
-  filterFormat: string;
-  filterQuality: string;
-  createdAt: string;
-  sendTelegramDigest?: boolean;
-  digestIntervalHours?: number;
-}
 
 export type TemplateType =
   | 'shotgun'

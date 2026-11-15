@@ -2,31 +2,25 @@ import React, { useState, useMemo } from 'react';
 import { Vacancy } from '../types';
 import { formatRelativeTime } from '../lib/time';
 import { BudgetBadge } from './BudgetBadge';
-import { computeProfileFit } from '../lib/profileFit';
+import { getProfileFitLevel } from '../lib/profileFit';
 import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
 import { rewritePitchWithAi } from '../lib/api';
 import { parseStructuredVacancy } from '../shared/vacancyParser';
 import { RateCalculatorModal } from './RateCalculatorModal';
 import { ClientBriefModal } from './ClientBriefModal';
+import { VacancyActionMenu } from './vacancies/VacancyActionMenu';
 import {
   ExternalLink,
   Send,
   UserPlus,
-  EyeOff,
   Flame,
-  Eye,
   Sparkles,
   AlertTriangle,
-  Star,
-  Ban,
   Copy,
   Check,
   ChevronDown,
   ChevronUp,
-  Calculator,
-  FileQuestion,
-  MessageSquare,
 } from 'lucide-react';
 
 interface VacancyCardProps {
@@ -34,7 +28,6 @@ interface VacancyCardProps {
   onApply: () => void;
   onConvertToLead: () => void;
   onHide: () => void;
-  onToggleFavorite?: () => void;
   onHideChannel?: (channel: string) => void;
   highlightWords?: string[];
 }
@@ -44,32 +37,25 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   onApply,
   onConvertToLead,
   onHide,
-  onToggleFavorite,
   onHideChannel,
-  highlightWords = [],
 }) => {
   const profile = useSettingsStore((s) => s.profile);
   const addToast = useToastStore((s) => s.addToast);
   const [showRateCalculator, setShowRateCalculator] = useState(false);
   const [showClientBrief, setShowClientBrief] = useState(false);
+  const [isExpandedText, setIsExpandedText] = useState(false);
 
-  // 3.3 & 3.7 Структурированный парсинг вакансии (софт, дедлайн, хронометраж, закрытость)
+  // Структурированный парсинг вакансии (софт, дедлайн, хронометраж)
   const structured = useMemo(() => parseStructuredVacancy(vacancy.text), [vacancy.text]);
 
-  const fitScore = vacancy.profileFit ?? computeProfileFit(vacancy, profile);
-  const isHot =
-    !structured.isClosed &&
-    (vacancy.statusBadge === 'hot' || Date.now() - new Date(vacancy.postedAt).getTime() < 15 * 60 * 1000);
+  // Расчёт понятного уровня соответствия (Подходит / Возможно / Мимо)
+  const fit = useMemo(() => getProfileFitLevel(vacancy, profile), [vacancy, profile]);
 
-  // 3.4 Поиск прямого контакта в тексте для кнопки «Написать»
-  const directTgContact = useMemo(() => {
-    const match = vacancy.text.match(/@([a-zA-Z0-9_]{4,})/);
-    if (match && match[1].toLowerCase() !== vacancy.channel.toLowerCase().replace(/^@/, '')) {
-      return match[1];
-    }
-    return null;
-  }, [vacancy.text, vacancy.channel]);
+  const diffMs = Date.now() - new Date(vacancy.postedAt).getTime();
+  const isHot = !structured.isClosed && diffMs < 20 * 60 * 1000;
+  const isNew = !isHot && diffMs < 2 * 60 * 60 * 1000;
 
+  // Черновик отклика
   const [copied, setCopied] = useState(false);
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [customDraft, setCustomDraft] = useState<string | null>(null);
@@ -79,7 +65,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
     const ch = vacancy.channel.startsWith('@') ? vacancy.channel : `@${vacancy.channel}`;
     const skillsPart = profile.skills?.length ? `Работаю в ${profile.skills.slice(0, 2).join(', ')}.` : '';
     const portfolio = profile.portfolioUrl || 'https://fleur-editor.netlify.app';
-    return `Здравствуйте! Увидел вакансию в ${ch}. Занимаюсь ${profile.specialization || 'видеомонтажом'}. ${skillsPart} Моё портфолио: ${portfolio}. Готов оперативно обсудить задачу!`;
+    return `Здравствуйте! Увидел вакансию в ${ch}. Занимаюсь ${profile.specialization || 'видеомонтажом'}. ${skillsPart} Моё портфолио: ${portfolio}. Готов обсудить детали!`;
   }, [vacancy.channel, profile]);
 
   const activeDraft = customDraft ?? initialDraft;
@@ -89,7 +75,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
     try {
       await navigator.clipboard.writeText(activeDraft);
       setCopied(true);
-      addToast({ type: 'success', message: 'Черновик скопирован в буфер обмена' });
+      addToast({ type: 'success', message: 'Черновик скопирован' });
       setTimeout(() => setCopied(false), 2000);
     } catch {
       addToast({ type: 'error', message: 'Не удалось скопировать' });
@@ -116,59 +102,25 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
       });
       if (res.rewritten) {
         setCustomDraft(res.rewritten);
-        addToast({ type: 'success', message: 'AI подготовил персонализированный отклик!' });
+        addToast({ type: 'success', message: 'AI подготовил персонализированный отклик' });
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Ошибка генерации AI. Проверьте настройки ключей в Настройках.';
-      addToast({
-        type: 'error',
-        message: msg.length > 120 ? `${msg.slice(0, 120)}...` : msg,
-      });
+      const msg = err instanceof Error ? err.message : 'Ошибка генерации AI. Проверьте API ключ.';
+      addToast({ type: 'error', message: msg });
     } finally {
       setIsGeneratingAi(false);
     }
   };
 
-  // Render text with highlighted keywords
-  const renderHighlightedText = (text: string) => {
-    if (!highlightWords || highlightWords.length === 0) {
-      return text;
-    }
-
-    const pattern = new RegExp(
-      `(${highlightWords
-        .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-        .join('|')})`,
-      'gi'
-    );
-
-    const parts = text.split(pattern);
-
-    return parts.map((part, i) =>
-      highlightWords.some((w) => w.toLowerCase() === part.toLowerCase()) ? (
-        <mark
-          key={i}
-          className="bg-accent/20 text-accent font-semibold px-0.5 rounded"
-        >
-          {part}
-        </mark>
-      ) : (
-        part
-      )
-    );
-  };
+  const cleanChannel = vacancy.channel.replace(/^@/, '');
 
   return (
     <div
-      className={`group bg-surface hover:bg-surface-2/60 border ${
-        vacancy.statusBadge === 'hot' || isHot
-          ? 'border-danger/40 shadow-[0_0_15px_rgba(248,113,113,0.08)]'
-          : vacancy.isFavorite
-          ? 'border-amber-400/40 bg-amber-400/5'
-          : 'border-border'
+      className={`group bg-surface hover:bg-surface-2/40 border ${
+        isHot ? 'border-danger/30' : 'border-border'
       } rounded-card p-4 space-y-3 transition-all duration-150`}
     >
-      {/* Top Header */}
+      {/* Top Header Row */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2 min-w-0">
           <a
@@ -177,152 +129,121 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
             rel="noopener noreferrer"
             className="text-xs font-bold text-accent hover:underline flex items-center gap-1 truncate"
           >
-            <span>{vacancy.channel.startsWith('@') ? vacancy.channel : `@${vacancy.channel}`}</span>
+            <span>@{cleanChannel}</span>
             <ExternalLink size={11} />
           </a>
           <span className="text-border">|</span>
           <span className="text-[11px] text-muted font-mono">
             {formatRelativeTime(vacancy.postedAt)}
           </span>
-          {vacancy.views && (
-            <span className="hidden sm:flex items-center gap-1 text-[11px] text-muted font-mono">
-              <Eye size={11} />
-              <span>{vacancy.views}</span>
-            </span>
-          )}
           <BudgetBadge budget={vacancy.budget} />
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {/* Status Badges: Hot / New / Shady */}
-          {vacancy.statusBadge === 'hot' && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-danger bg-danger/15 px-2 py-0.5 rounded border border-danger/30 animate-pulse">
+          {/* Single status badge: Hot OR New */}
+          {isHot ? (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-danger bg-danger/15 px-2 py-0.5 rounded border border-danger/30">
               <Flame size={12} />
               <span>Горячее</span>
             </span>
-          )}
-          {vacancy.statusBadge === 'new' && (
+          ) : isNew ? (
             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-accent bg-accent/15 px-2 py-0.5 rounded border border-accent/30">
               <Sparkles size={12} />
               <span>Новое</span>
             </span>
-          )}
-          {(vacancy.statusBadge === 'shady' || (vacancy.risks && vacancy.risks.length > 0)) && (
+          ) : null}
+
+          {/* 3-level fit badge: Подходит / Возможно */}
+          {fit.level === 'great' ? (
             <span
-              className="inline-flex items-center gap-1 text-[11px] font-bold text-warning bg-warning/15 px-2 py-0.5 rounded border border-warning/30 cursor-help"
-              title={`⚠️ Риск-факторы:\n${(vacancy.risks || ['Сомнительные условия сотрудничества']).map((r) => `• ${r}`).join('\n')}`}
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/25 cursor-help"
+              title={fit.reason}
             >
-              <AlertTriangle size={12} />
-              <span>Сомнительно</span>
+              <span>Подходит</span>
             </span>
-          )}
-
-          {/* Fit score badge */}
-          <span
-            className={`inline-flex items-center gap-1 text-[11px] font-mono font-medium px-2 py-0.5 rounded border ${
-              fitScore >= 75
-                ? 'text-emerald-400 bg-emerald-400/10 border-emerald-400/30'
-                : fitScore >= 50
-                ? 'text-amber-400 bg-amber-400/10 border-amber-400/30'
-                : 'text-muted bg-surface-2 border-border'
-            }`}
-            title={`Совпадение с вашим профилем: ${fitScore}%`}
-          >
-            <span>🎯 {fitScore}%</span>
-            <span className="hidden sm:inline">совпадение</span>
-          </span>
-
-          {/* Favorite toggle button */}
-          {onToggleFavorite && (
-            <button
-              onClick={onToggleFavorite}
-              className={`p-1.5 rounded transition-colors ${
-                vacancy.isFavorite
-                  ? 'text-amber-400 hover:text-amber-300'
-                  : 'text-muted hover:text-text'
-              }`}
-              title={vacancy.isFavorite ? 'В избранном' : 'Добавить в избранное'}
-              aria-label="Переключить избранное"
+          ) : fit.level === 'fair' ? (
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-text-muted bg-surface-2 px-2 py-0.5 rounded border border-border cursor-help"
+              title={fit.reason}
             >
-              <Star size={14} className={vacancy.isFavorite ? 'fill-amber-400' : ''} />
-            </button>
-          )}
+              <span>Возможно</span>
+            </span>
+          ) : null}
         </div>
       </div>
 
-      {/* 3.3 & 3.7 Структурированные бейджи: Закрытость, Дедлайн, Хронометраж, Исходники */}
-      {(structured.isClosed || structured.deadline || structured.duration || structured.footageText) && (
-        <div className="flex flex-wrap items-center gap-1.5">
+      {/* Structured info chips (if present) */}
+      {(structured.isClosed || structured.deadline || structured.duration) && (
+        <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
           {structured.isClosed && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-danger bg-danger/15 px-2 py-0.5 rounded border border-danger/30">
+            <span className="inline-flex items-center gap-1 font-bold text-danger bg-danger/15 px-2 py-0.5 rounded border border-danger/30">
               <AlertTriangle size={12} />
-              <span>Похоже, уже закрыта</span>
+              <span>Похоже, закрыта</span>
             </span>
           )}
           {structured.deadline && (
-            <span className="text-[11px] font-medium text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/25">
+            <span className="font-medium text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/25">
               {structured.deadline}
             </span>
           )}
           {structured.duration && (
-            <span className="text-[11px] font-medium text-blue-300 bg-blue-400/10 px-2 py-0.5 rounded border border-blue-400/25">
+            <span className="font-medium text-blue-300 bg-blue-400/10 px-2 py-0.5 rounded border border-blue-400/25">
               ⏱️ {structured.duration}
             </span>
           )}
-          {structured.footageText && (
-            <span className="text-[11px] font-medium text-emerald-300 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/25">
-              📁 {structured.footageText}
-            </span>
-          )}
         </div>
       )}
 
-      {/* 3.4 Кнопка быстрого перехода к контакту @username */}
-      {directTgContact && (
-        <div className="flex items-center justify-between p-2 bg-accent/10 border border-accent/25 rounded-control text-xs">
-          <div className="flex items-center gap-1.5 text-accent font-medium truncate">
-            <MessageSquare size={14} className="shrink-0" />
-            <span className="truncate">Контакт заказчика: @{directTgContact}</span>
-          </div>
-          <a
-            href={`https://t.me/${directTgContact}?text=${encodeURIComponent(activeDraft)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-2.5 py-1 bg-accent hover:bg-accent-hover text-white text-[11px] font-semibold rounded flex items-center gap-1 transition-colors shrink-0"
+      {/* Post Text: 6 lines clamp with toggle */}
+      <div className="space-y-1">
+        <div
+          className={`text-xs text-text leading-relaxed whitespace-pre-wrap select-text font-sans ${
+            !isExpandedText ? 'line-clamp-6' : ''
+          }`}
+        >
+          {vacancy.text}
+        </div>
+        {vacancy.text.length > 250 && (
+          <button
+            type="button"
+            onClick={() => setIsExpandedText(!isExpandedText)}
+            className="text-[11px] text-accent hover:underline font-medium pt-0.5"
           >
-            <span>Написать</span>
-            <ExternalLink size={11} />
-          </a>
-        </div>
-      )}
-
-      {/* Post Text */}
-      <div className="text-xs text-text leading-relaxed whitespace-pre-wrap line-clamp-5 select-text font-sans">
-        {renderHighlightedText(vacancy.text)}
+            {isExpandedText ? 'Свернуть' : 'Показать полностью'}
+          </button>
+        )}
       </div>
 
-      {/* 5.4 Risk Warning Callout */}
-      {vacancy.risks && vacancy.risks.length > 0 && (
-        <div className="flex items-start gap-2 p-2.5 bg-warning-soft/30 border border-warning/30 rounded-control text-[11px] text-text">
-          <AlertTriangle size={14} className="shrink-0 mt-0.5 text-warning" />
-          <div className="space-y-0.5">
-            <span className="font-semibold text-warning">Подозрительные условия:</span>
-            <ul className="list-disc list-inside space-y-0.5 text-text-muted text-[11px]">
-              {vacancy.risks.map((r, i) => (
-                <li key={i}>{r}</li>
-              ))}
-            </ul>
-          </div>
+      {/* Useful Chips: Soft/Skills and Format only */}
+      {(vacancy.skills && vacancy.skills.length > 0) || vacancy.formatTag ? (
+        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+          {vacancy.formatTag && (
+            <span className="text-[10px] font-medium text-text-muted bg-surface-2 px-2 py-0.5 rounded border border-border">
+              {vacancy.formatTag === 'short'
+                ? 'Shorts / Reels'
+                : vacancy.formatTag === 'long'
+                ? 'YouTube'
+                : 'Любой формат'}
+            </span>
+          )}
+          {vacancy.skills?.map((skill, idx) => (
+            <span
+              key={idx}
+              className="text-[10px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20"
+            >
+              {skill}
+            </span>
+          ))}
         </div>
-      )}
+      ) : null}
 
-      {/* 5.3 Quick Pitch Draft for Hot Vacancies (<15 min) */}
+      {/* Quick Pitch Draft for Hot Vacancies (<20 min) */}
       {isHot && (
         <div className="bg-surface-2/70 border border-danger/30 rounded-control p-3 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <span className="flex items-center gap-1.5 text-xs font-bold text-danger">
               <Flame size={14} className="animate-pulse" />
-              <span>Черновик быстрого отклика (&lt;15 мин)</span>
+              <span>Быстрый отклик</span>
             </span>
             <div className="flex items-center gap-1">
               <button
@@ -330,16 +251,16 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
                 onClick={handleGenerateAiDraft}
                 disabled={isGeneratingAi}
                 className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover px-2 py-0.5 rounded hover:bg-accent/10 transition-colors disabled:opacity-50"
-                title="Улучшить черновик через AI под контекст вакансии"
+                title="Улучшить текст через AI"
               >
                 <Sparkles size={12} className={isGeneratingAi ? 'animate-spin' : ''} />
-                <span>{isGeneratingAi ? 'Генерирую...' : 'AI-версия'}</span>
+                <span>{isGeneratingAi ? '...' : 'AI-версия'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => setIsDraftCollapsed(!isDraftCollapsed)}
                 className="text-muted hover:text-text p-1"
-                aria-label={isDraftCollapsed ? 'Развернуть черновик' : 'Свернуть черновик'}
+                aria-label={isDraftCollapsed ? 'Развернуть' : 'Свернуть'}
               >
                 {isDraftCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
               </button>
@@ -351,116 +272,43 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
               <p className="text-xs text-text bg-surface/80 p-2.5 rounded border border-border/60 leading-relaxed font-sans select-text">
                 {activeDraft}
               </p>
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px]">
-                <span className="text-[10px] text-text-muted italic">
-                  *Сообщения не отправляются автоматически. Скопируйте и отправьте вручную.
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleCopyDraft}
-                    className="flex items-center gap-1 px-2.5 py-1 bg-surface hover:bg-surface-3 text-text rounded border border-border transition-colors font-medium min-h-[30px]"
-                  >
-                    {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
-                    <span>{copied ? 'Скопировано!' : 'Копировать'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCopyAndOpen}
-                    className="flex items-center gap-1 px-3 py-1 bg-accent hover:bg-accent-hover text-white rounded font-semibold transition-colors min-h-[30px]"
-                  >
-                    <span>Скопировать и в чат</span>
-                    <ExternalLink size={12} />
-                  </button>
-                </div>
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleCopyDraft}
+                  className="flex items-center gap-1 px-2.5 py-1 bg-surface hover:bg-surface-3 text-text rounded border border-border transition-colors text-xs font-medium min-h-[30px]"
+                >
+                  {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                  <span>{copied ? 'Скопировано' : 'Копировать'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyAndOpen}
+                  className="flex items-center gap-1 px-3 py-1 bg-accent hover:bg-accent-hover text-white rounded text-xs font-semibold transition-colors min-h-[30px]"
+                >
+                  <span>Скопировать и в чат</span>
+                  <ExternalLink size={12} />
+                </button>
               </div>
             </>
           )}
         </div>
       )}
 
-      {/* Skills & Software Tags */}
-      {vacancy.skills && vacancy.skills.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 pt-1">
-          <span className="text-[10px] text-muted uppercase font-semibold">Софт:</span>
-          {vacancy.skills.map((skill, idx) => (
-            <span
-              key={idx}
-              className="text-[10px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20"
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Matched Keywords Tags */}
-      {vacancy.matchedKeywords && vacancy.matchedKeywords.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {vacancy.matchedKeywords.map((kw, idx) => (
-            <span
-              key={idx}
-              className="text-[10px] text-text-muted bg-surface-2 px-2 py-0.5 rounded-full border border-border"
-            >
-              #{kw}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Action Footer */}
+      {/* Action Footer: 1 Primary + 1 Secondary + ⋯ Menu */}
       <div className="flex items-center justify-between pt-2 border-t border-border/60">
+        <VacancyActionMenu
+          channel={vacancy.channel}
+          onHide={onHide}
+          onHideChannel={onHideChannel ? () => onHideChannel(vacancy.channel) : undefined}
+          onOpenCalculator={() => setShowRateCalculator(true)}
+          onOpenBrief={() => setShowClientBrief(true)}
+        />
+
         <div className="flex items-center gap-2">
           <button
-            onClick={onHide}
-            title="Скрыть вакансию"
-            className="text-muted hover:text-text p-1.5 rounded-control hover:bg-surface-2 transition-colors text-xs flex items-center gap-1 min-h-[36px]"
-            aria-label="Скрыть вакансию"
-          >
-            <EyeOff size={13} />
-            <span className="hidden sm:inline">Скрыть</span>
-          </button>
-
-          {onHideChannel && (
-            <button
-              onClick={() => onHideChannel(vacancy.channel)}
-              title={`Скрыть все вакансии из @${vacancy.channel}`}
-              className="text-muted hover:text-danger p-1.5 rounded-control hover:bg-surface-2 transition-colors text-xs flex items-center gap-1 min-h-[36px]"
-              aria-label={`Скрыть все вакансии из @${vacancy.channel}`}
-            >
-              <Ban size={13} />
-              <span className="hidden sm:inline">Скрыть канал</span>
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setShowRateCalculator(true)}
-            title="Рассчитать рентабельность ставки под хронометраж и моушн"
-            className="text-muted hover:text-accent p-1.5 rounded-control hover:bg-surface-2 transition-colors text-xs flex items-center gap-1 min-h-[36px]"
-            aria-label="Калькулятор ставки"
-          >
-            <Calculator size={13} />
-            <span className="hidden md:inline">Ставка</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowClientBrief(true)}
-            title="Сгенерировать готовые вопросы для брифа клиента"
-            className="text-muted hover:text-accent p-1.5 rounded-control hover:bg-surface-2 transition-colors text-xs flex items-center gap-1 min-h-[36px]"
-            aria-label="Бриф клиента"
-          >
-            <FileQuestion size={13} />
-            <span className="hidden md:inline">Бриф</span>
-          </button>
-
-          <button
             onClick={onConvertToLead}
-            title="Создать лида в воронке"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text bg-surface-2 hover:bg-surface-3 rounded-control border border-border transition-colors min-h-[36px] focus-visible:ring-2 focus-visible:ring-accent"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text bg-surface-2 hover:bg-surface-3 rounded-control border border-border transition-colors min-h-[36px]"
           >
             <UserPlus size={13} />
             <span>В лиды</span>
@@ -468,7 +316,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
 
           <button
             onClick={onApply}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-accent hover:bg-accent-hover rounded-control shadow-subtle transition-colors min-h-[36px] focus-visible:ring-2 focus-visible:ring-accent"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-accent hover:bg-accent-hover rounded-control shadow-subtle transition-colors min-h-[36px]"
           >
             <Send size={13} />
             <span>Откликнуться</span>
@@ -476,7 +324,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         </div>
       </div>
 
-      {/* 3.9 & 3.10 Modals */}
+      {/* Auxiliary Modals */}
       <RateCalculatorModal
         isOpen={showRateCalculator}
         onClose={() => setShowRateCalculator(false)}
@@ -487,7 +335,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
       <ClientBriefModal
         isOpen={showClientBrief}
         onClose={() => setShowClientBrief(false)}
-        leadTitle={`@${vacancy.channel}`}
+        leadTitle={`@${cleanChannel}`}
         videoType={structured.duration || 'YouTube'}
       />
     </div>

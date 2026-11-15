@@ -45,7 +45,7 @@ describe('Vacancies Relevance and Filters', () => {
     expect(result.relevance).toBe(0);
   });
 
-  it('filters vacancies by search and format parameters', () => {
+  it('filters vacancies by format and hot status', () => {
     const mockVacancies: Vacancy[] = [
       {
         id: '1',
@@ -61,7 +61,6 @@ describe('Vacancies Relevance and Filters', () => {
         qualityTier: 'great',
         formatTag: 'short',
         statusBadge: 'hot',
-        isFavorite: false,
       },
       {
         id: '2',
@@ -77,7 +76,6 @@ describe('Vacancies Relevance and Filters', () => {
         qualityTier: 'fair',
         formatTag: 'long',
         statusBadge: 'new',
-        isFavorite: true,
       },
     ];
 
@@ -90,10 +88,5 @@ describe('Vacancies Relevance and Filters', () => {
     const hotList = mockVacancies.filter(v => v.statusBadge === 'hot');
     expect(hotList.length).toBe(1);
     expect(hotList[0].id).toBe('1');
-
-    // Filter by favorite only
-    const favList = mockVacancies.filter(v => v.isFavorite);
-    expect(favList.length).toBe(1);
-    expect(favList[0].id).toBe('2');
   });
 });

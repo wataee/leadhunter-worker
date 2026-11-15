@@ -1,5 +1,88 @@
 import { Vacancy, UserProfile } from '../types';
 
+export type FitLevel = 'great' | 'fair' | 'poor';
+
+export interface ProfileFitResult {
+  level: FitLevel;
+  label: 'Подходит' | 'Возможно' | 'Мимо';
+  reason: string;
+}
+
+export function getProfileFitLevel(vacancy: Vacancy, profile?: UserProfile): ProfileFitResult {
+  if (vacancy.qualityTier === 'shady' || (vacancy.risks && vacancy.risks.length > 0)) {
+    return { level: 'poor', label: 'Мимо', reason: 'Подозрительные условия' };
+  }
+
+  const textLower = (vacancy.text || '').toLowerCase();
+  const userSkills = profile?.skills || [];
+  const userFormats = profile?.formats || [];
+
+  const matchedSkills: string[] = [];
+  for (const s of userSkills) {
+    const sl = s.toLowerCase();
+    if (
+      (sl.includes('premiere') && (textLower.includes('premiere') || textLower.includes('премьер'))) ||
+      ((sl.includes('after') || sl.includes('ae')) && (textLower.includes('after effects') || /\bae\b/i.test(textLower) || textLower.includes('афтер'))) ||
+      (sl.includes('davinci') && (textLower.includes('davinci') || textLower.includes('давинчи') || textLower.includes('resolve'))) ||
+      (sl.includes('capcut') && (textLower.includes('capcut') || textLower.includes('капкат')))
+    ) {
+      matchedSkills.push(s);
+    }
+  }
+
+  let matchedFormat = false;
+  let formatLabel = '';
+  if (userFormats.includes('Shorts/Reels') && (vacancy.formatTag === 'short' || /shorts|reels|тикто|вертикал|клип/i.test(textLower))) {
+    matchedFormat = true;
+    formatLabel = 'Reels / Shorts';
+  } else if (userFormats.includes('YouTube') && (vacancy.formatTag === 'long' || /youtube|ютуб|длинн|горизонтал|выпуск/i.test(textLower))) {
+    matchedFormat = true;
+    formatLabel = 'YouTube';
+  } else if (userFormats.includes('Подкасты') && /подкаст|интервью|podcast/i.test(textLower)) {
+    matchedFormat = true;
+    formatLabel = 'Подкасты';
+  }
+
+  if (matchedSkills.length > 0 && matchedFormat) {
+    return {
+      level: 'great',
+      label: 'Подходит',
+      reason: `Совпадает софт (${matchedSkills.slice(0, 2).join(', ')}) и формат (${formatLabel})`,
+    };
+  }
+
+  if (matchedSkills.length > 0) {
+    return {
+      level: 'great',
+      label: 'Подходит',
+      reason: `Требуется ваш стек: ${matchedSkills.slice(0, 2).join(', ')}`,
+    };
+  }
+
+  if (matchedFormat) {
+    return {
+      level: 'great',
+      label: 'Подходит',
+      reason: `Ваш формат: ${formatLabel}`,
+    };
+  }
+
+  const foreign3d = /blender|cinema\s*4d|maya|houdini|unreal/i.test(textLower);
+  if (foreign3d && !userSkills.some((s) => /blender|3d|maya/i.test(s))) {
+    return {
+      level: 'poor',
+      label: 'Мимо',
+      reason: 'Требуется 3D-графика вне вашего профиля',
+    };
+  }
+
+  return {
+    level: 'fair',
+    label: 'Возможно',
+    reason: 'Общий монтаж видео',
+  };
+}
+
 export function computeProfileFit(vacancy: Vacancy, profile?: UserProfile): number {
   if (!profile) return vacancy.relevance || 50;
 
