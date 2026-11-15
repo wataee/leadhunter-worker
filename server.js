@@ -164,6 +164,39 @@ if (ALLOWED_CHATS_FILE) {
   setInterval(loadAllowedChats, 10 * 60 * 1000);
 }
 
+// 2.5 Периодическая синхронизация активных источников через API /api/sources/enabled раз в 5 минут
+async function syncEnabledSourcesFromApi() {
+  if (!WEBHOOK_URL || !WEBHOOK_SECRET) return;
+
+  try {
+    const originUrl = new URL(WEBHOOK_URL).origin;
+    const apiUrl = `${originUrl}/api/sources/enabled`;
+
+    const res = await fetch(apiUrl, {
+      headers: {
+        Authorization: `Bearer ${WEBHOOK_SECRET}`,
+        'Content-Type': 'application/json',
+      },
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data?.sources) && data.sources.length > 0) {
+        const chats = new Set(data.sources.map((s) => String(s).toLowerCase().replace(/^@/, '')));
+        allowedChatsSet = chats;
+        console.log(`[AllowedChats] Белый список обновлён из API (${chats.size} каналов)`);
+      }
+    }
+  } catch (err) {
+    // Не крашим процесс при сетевых ошибках
+  }
+}
+
+// Запускаем синхронизацию через 15 секунд после старта и затем каждые 5 минут
+setTimeout(syncEnabledSourcesFromApi, 15000);
+setInterval(syncEnabledSourcesFromApi, 5 * 60 * 1000);
+
 // Backward compatibility alias for diagnostics
 const ALLOWED_CHATS = allowedChatsSet ? Array.from(allowedChatsSet) : null;
 

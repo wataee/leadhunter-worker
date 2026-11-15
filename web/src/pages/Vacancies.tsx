@@ -721,7 +721,7 @@ export const Vacancies: React.FC = () => {
           🌐 Открыть полный Каталог (152 источника) →
         </Link>
 
-        {/* 5.6 Auto-disable inactive channels button */}
+        {/* 5.6 Auto-disable inactive/ineffective channels button */}
         {inactiveEnabledSources.length > 0 && (
           <button
             type="button"
@@ -729,7 +729,7 @@ export const Vacancies: React.FC = () => {
             className="w-full py-1.5 px-2 bg-surface-2 hover:bg-surface-3 text-text-muted hover:text-warning text-[11px] font-medium rounded border border-border/80 flex items-center justify-center gap-1.5 transition-colors"
           >
             <AlertTriangle size={12} className="text-warning" />
-            <span>Отключить неактивные ({inactiveEnabledSources.length})</span>
+            <span>Отключить неэффективные ({inactiveEnabledSources.length})</span>
           </button>
         )}
       </div>

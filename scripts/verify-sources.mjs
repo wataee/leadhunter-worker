@@ -230,28 +230,34 @@ export async function verifySource(candidate, force = false) {
     ? cleanHtmlText(ogDescMatch[1]).slice(0, 150)
     : `Telegram источник @${username}`;
 
-  // Detect subscribers / members
-  const extraMatch = directHtml.match(/<div class="tgme_page_extra">([^<]+)<\/div>/);
+  // 2.1 Detect subscribers / members with full support for K, M, spaces, \u00A0 and &nbsp;
   let subscribers = 1500;
   let isGroup = false;
 
+  const extraMatch =
+    directHtml.match(/<div class="tgme_page_extra">([^<]+)<\/div>/i) ||
+    previewHtml.match(/<div class="tgme_page_extra">([^<]+)<\/div>/i);
+
   if (extraMatch) {
-    const extraText = extraMatch[1].toLowerCase().replace(/\s/g, '');
-    const numMatch = extraText.match(/([\d\.]+)([kmкм]?)/);
-    if (numMatch) {
-      let val = parseFloat(numMatch[1]);
-      const unit = numMatch[2];
-      if (unit === 'k' || unit === 'к') val *= 1000;
-      if (unit === 'm' || unit === 'м') val *= 1000000;
-      subscribers = Math.round(val);
-    }
+    const rawExtra = extraMatch[1].replace(/&nbsp;|\u00A0/g, ' ').trim();
     if (
-      extraText.includes('member') ||
-      extraText.includes('участник') ||
-      extraText.includes('online') ||
-      extraText.includes('онлайн')
+      /member|участник|online|онлайн/i.test(rawExtra) ||
+      directHtml.includes('Join Group') ||
+      directHtml.includes('t.me/joinchat')
     ) {
       isGroup = true;
+    }
+
+    const numMatch = rawExtra.match(/([\d\s.,]+)\s*([kmкм])?/i);
+    if (numMatch) {
+      const cleanDigits = numMatch[1].replace(/\s/g, '').replace(',', '.');
+      let val = parseFloat(cleanDigits);
+      if (!isNaN(val)) {
+        const unit = (numMatch[2] || '').toLowerCase();
+        if (unit === 'k' || unit === 'к') val *= 1000;
+        if (unit === 'm' || unit === 'м') val *= 1000000;
+        subscribers = Math.round(val);
+      }
     }
   }
 
@@ -264,7 +270,7 @@ export async function verifySource(candidate, force = false) {
   // If no preview messages, check if valid group or public channel
   if (!hasPreview) {
     if (isGroup) {
-      // Verified public group/chat without preview
+      // 2.1 Verified public group/chat without preview
       return {
         success: true,
         item: {
@@ -278,8 +284,9 @@ export async function verifySource(candidate, force = false) {
           description,
           subscribers: subscribers || 1200,
           qualityScore: subscribers > 10000 ? 75 : 65,
-          status: 'group',
+          status: 'group_unverified',
           tags: candidate.tags || ['chat', 'community'],
+          warnings: [],
           recommended: false,
           discoveredFrom: candidate.discoveredFrom,
           verifiedAt: new Date().toISOString(),
@@ -365,65 +372,53 @@ export async function verifySource(candidate, force = false) {
     seenHashes.add(hash);
   }
 
-  const vacancyRate = totalMsgs > 0 ? parseFloat((vacancyCount / totalMsgs).toFixed(2)) : 0;
-  const resumeRate = totalMsgs > 0 ? parseFloat((resumeCount / totalMsgs).toFixed(2)) : 0;
-  const adRate = totalMsgs > 0 ? parseFloat((adCount / totalMsgs).toFixed(2)) : 0;
-  const duplicateRate = totalMsgs > 0 ? parseFloat((duplicateCount / totalMsgs).toFixed(2)) : 0;
-  const clientRequestRate = totalMsgs > 0 ? parseFloat((clientRequestCount / totalMsgs).toFixed(2)) : 0;
+  // 2.2 Проверка релевантности по контенту среди последних 20 постов
+  const recentTexts = texts.slice(-20);
+  const totalRecent = recentTexts.length;
+  let recentRelevantCount = 0;
+  let recentContactCount = 0;
 
-  // Calculate qualityScore (0..100)
-  let qualityScore = 0;
+  for (const text of recentTexts) {
+    if (matchesVacancy(text).isMatch) {
+      recentRelevantCount++;
+    }
+    if (/@[\w_]{4,}|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|t\.me\/[\w_]+/i.test(text)) {
+      recentContactCount++;
+    }
+  }
+
+  const relevanceRatio = totalRecent > 0 ? recentRelevantCount / totalRecent : 0;
+  const responseRate = totalRecent > 0 ? recentContactCount / totalRecent : 0;
+
+  const warnings = [];
+  if (totalRecent >= 5 && relevanceRatio < 0.10) {
+    warnings.push('low_relevance');
+  }
+  if (adRate > 0.35) {
+    warnings.push('spam');
+  }
+
+  // 2.3 Формула качества источника:
+  // quality_score = 0.3 * activity (постов в неделю) + 0.3 * relevance (доля целевых) +
+  // 0.2 * response_rate (наличие прямых контактов @/email) + 0.2 * log(subscribers+1)
+  const activityScore = Math.min(postsPerWeek / 20, 1) * 100;
+  const relevanceScore = relevanceRatio * 100;
+  const responseScore = responseRate * 100;
+  const audienceScore = Math.min(Math.log10(subscribers + 1) / 5, 1) * 100;
+
+  let rawQuality = 0.3 * activityScore + 0.3 * relevanceScore + 0.2 * responseScore + 0.2 * audienceScore;
+
+  // Если релевантных <10% — quality_score снижаем вдвое
+  if (warnings.includes('low_relevance')) {
+    rawQuality *= 0.5;
+  }
+
+  let qualityScore = Math.round(Math.max(10, Math.min(100, rawQuality)));
+
   const now = Date.now();
   const lastPostTime = lastPostAt ? new Date(lastPostAt).getTime() : 0;
   const hoursSinceLastPost = lastPostTime ? (now - lastPostTime) / (1000 * 60 * 60) : 9999;
   const daysSinceLastPost = hoursSinceLastPost / 24;
-
-  // 1. Freshness (+30 for post in last 48h)
-  if (hoursSinceLastPost <= 48) {
-    qualityScore += 30;
-  } else if (hoursSinceLastPost <= 168) {
-    qualityScore += 15;
-  }
-
-  // 2. High relevance (+30 for vacancyRate > 30% or clientRequestRate > 15% for community)
-  const isCommunity = candidate.category === 'editors_community' || candidate.category === 'clients_entrepreneurs';
-  if (!isCommunity && vacancyRate > 0.3) {
-    qualityScore += 30;
-  } else if (isCommunity && (clientRequestRate > 0.15 || vacancyRate > 0.2)) {
-    qualityScore += 30;
-  } else if (vacancyRate > 0.15 || clientRequestRate > 0.08) {
-    qualityScore += 15;
-  }
-
-  // 3. Regularity (+20 for 5-50 posts/week)
-  if (postsPerWeek >= 5 && postsPerWeek <= 50) {
-    qualityScore += 20;
-  } else if (postsPerWeek >= 2) {
-    qualityScore += 10;
-  }
-
-  // 4. Audience size (+10 for > 1000 subscribers)
-  if (subscribers && subscribers > 1000) {
-    qualityScore += 10;
-  }
-
-  // 5. Low adRate (+10 for < 15%)
-  if (adRate < 0.15) {
-    qualityScore += 10;
-  }
-
-  // Penalties
-  if (daysSinceLastPost > 60) {
-    qualityScore -= 40;
-  } else if (daysSinceLastPost > 30) {
-    qualityScore -= 30;
-  }
-
-  if (resumeRate > 0.5) {
-    qualityScore -= 20;
-  }
-
-  qualityScore = Math.max(0, Math.min(100, qualityScore));
 
   // Determine status
   let status = 'ok';
@@ -461,9 +456,10 @@ export async function verifySource(candidate, force = false) {
       subscribers: subscribers || 1500,
       postsPerWeek,
       lastPostAt,
-      vacancyRate,
-      qualityScore: Math.max(45, qualityScore), // Base ok score
+      vacancyRate: relevanceRatio,
+      qualityScore,
       status: itemStatus,
+      warnings,
       tags: candidate.tags || ['video', 'editing'],
       recommended: false, // will be assigned to top 15 later
       discoveredFrom: candidate.discoveredFrom,
@@ -534,17 +530,29 @@ async function main() {
   // Sort by qualityScore descending
   verifiedItems.sort((a, b) => b.qualityScore - a.qualityScore);
 
-  // Mark top 15 sources (qualityScore >= 70) as recommended
+  // 2.4 Mark top 15 sources (qualityScore >= 65, last post <= 3 days, no spam/low_relevance) as recommended
   let recommendedCount = 0;
   for (const item of verifiedItems) {
-    if (item.qualityScore >= 70 && recommendedCount < 15) {
+    const hoursSinceLastPost = item.lastPostAt
+      ? (Date.now() - new Date(item.lastPostAt).getTime()) / (1000 * 3600)
+      : 999;
+    const daysSinceLast = hoursSinceLastPost / 24;
+    const itemWarnings = item.warnings || [];
+
+    const isEligible =
+      item.qualityScore >= 65 &&
+      daysSinceLast <= 3 &&
+      !itemWarnings.includes('spam') &&
+      !itemWarnings.includes('low_relevance');
+
+    if (isEligible && recommendedCount < 15) {
       item.recommended = true;
       recommendedCount++;
     } else {
       item.recommended = false;
     }
   }
-  console.log(`  Marked ${recommendedCount} sources as recommended.`);
+  console.log(`  Marked ${recommendedCount} sources as recommended (top-15).`);
 
   if (!flagDryRun) {
     fs.writeFileSync(OUTPUT_CATALOG_FILE, JSON.stringify(verifiedItems, null, 2), 'utf8');
