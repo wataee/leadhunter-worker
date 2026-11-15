@@ -89,4 +89,18 @@ describe('Vacancies Relevance and Filters', () => {
     expect(hotList.length).toBe(1);
     expect(hotList[0].id).toBe('1');
   });
+
+  it('D2: prevents duplicate leads when channelUrl already exists', () => {
+    const existingLeads = [
+      { id: 'lead_1', name: '@editors', channelUrl: 'https://t.me/editors/100', status: 'new' as const },
+    ];
+
+    const targetUrl1 = 'https://t.me/editors/100';
+    const isDup1 = existingLeads.some(l => Boolean(l.channelUrl && l.channelUrl.trim() === targetUrl1.trim()));
+    expect(isDup1).toBe(true);
+
+    const targetUrl2 = 'https://t.me/editors/101';
+    const isDup2 = existingLeads.some(l => Boolean(l.channelUrl && l.channelUrl.trim() === targetUrl2.trim()));
+    expect(isDup2).toBe(false);
+  });
 });

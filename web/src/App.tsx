@@ -73,7 +73,7 @@ const AppContent: React.FC = () => {
         const currentLeads = useLeadsStore.getState().leads;
         const existingIds = new Set(currentLeads.map((l) => l.id));
 
-        let addedCount = 0;
+        const addedIds: string[] = [];
         for (const item of incoming) {
           if (!existingIds.has(item.id)) {
             addLead({
@@ -84,17 +84,16 @@ const AppContent: React.FC = () => {
               status: 'new',
             });
             existingIds.add(item.id);
-            addedCount++;
+            addedIds.push(item.id);
           }
         }
 
-        const idsToAck = incoming.map((i) => i.id);
-        await ackInbox(idsToAck);
-
-        if (addedCount > 0) {
+        // D1: ackInbox called only for IDs actually added; no toast if 0 added
+        if (addedIds.length > 0) {
+          await ackInbox(addedIds);
           addToast({
             type: 'success',
-            message: `${addedCount} ${addedCount === 1 ? 'новый лид' : 'новых лидов'} из Telegram добавлен в воронку!`,
+            message: `${addedIds.length} ${addedIds.length === 1 ? 'новый лид' : 'новых лидов'} из Telegram добавлен в воронку!`,
           });
         }
       } catch {

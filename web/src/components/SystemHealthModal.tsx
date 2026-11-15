@@ -22,16 +22,14 @@ interface WorkerDiagnostics {
   running: boolean;
   uptimeSec?: number;
   lastPingMs?: number;
-  leadsFound?: number;
-  messagesProcessed?: number;
-  tgSessionValid?: boolean;
+  message?: string;
 }
 
 export const SystemHealthModal: React.FC<SystemHealthModalProps> = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [workerInfo, setWorkerInfo] = useState<WorkerDiagnostics | null>(null);
-  const [webhookLatencyMs, setWebhookLatencyMs] = useState<number | null>(null);
+  const [apiLatencyMs, setApiLatencyMs] = useState<number | null>(null);
 
   const checkAll = async () => {
     setLoading(true);
@@ -41,34 +39,31 @@ export const SystemHealthModal: React.FC<SystemHealthModalProps> = ({ isOpen, on
       const h = await fetchHealth();
       setHealth(h);
       const latency = Math.round(performance.now() - start);
-      setWebhookLatencyMs(latency);
+      setApiLatencyMs(latency);
 
-      // Check worker health endpoint if accessible
-      const workerRes = await fetch('/api/tg-feed', {
+      // D3: Check real worker health via /api/tg-feed ping
+      const feedRes = await fetch('/api/tg-feed', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'ping' }),
       }).catch(() => null);
 
-      if (workerRes && workerRes.ok) {
-        setWorkerInfo({
-          running: true,
-          uptimeSec: 3600,
-          lastPingMs: Date.now(),
-          tgSessionValid: true,
-          leadsFound: 15,
-          messagesProcessed: 120,
-        });
-      } else {
-        setWorkerInfo({
-          running: true,
-          uptimeSec: 1800,
-          lastPingMs: Date.now() - 45000,
-          tgSessionValid: true,
-        });
+      let isWorkerActive = false;
+      if (feedRes && feedRes.ok) {
+        const feedData = await feedRes.json().catch(() => null);
+        isWorkerActive = Boolean(feedData?.workerActive);
       }
+
+      const isOnline = isWorkerActive || h.worker?.status === 'ok';
+
+      setWorkerInfo({
+        running: isOnline,
+        uptimeSec: h.worker?.uptimeSeconds,
+        lastPingMs: Date.now(),
+        message: isOnline ? undefined : (h.worker?.message || 'Воркер не отвечает на пинг'),
+      });
     } catch {
-      setWorkerInfo({ running: false });
+      setWorkerInfo({ running: false, message: 'Ошибка связи с сервером' });
     } finally {
       setLoading(false);
     }
@@ -80,20 +75,18 @@ export const SystemHealthModal: React.FC<SystemHealthModalProps> = ({ isOpen, on
     }
   }, [isOpen]);
 
-  const isWorkerSilent = workerInfo?.lastPingMs
-    ? Date.now() - workerInfo.lastPingMs > 5 * 60 * 1000
-    : false;
+  const isWorkerOffline = workerInfo && !workerInfo.running;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Диагностика: Всё ли работает?">
       <div className="space-y-5 text-text">
-        {/* Worker Alert if silent > 5 min */}
-        {isWorkerSilent && (
+        {/* Worker Alert if offline */}
+        {isWorkerOffline && (
           <div className="p-3 bg-red-950/30 border border-red-500/40 rounded-control flex items-start gap-2.5 text-xs text-red-300">
             <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold block">Воркер не отвечает более 5 минут!</span>
-              <span>Проверьте статус сервиса на Render или валидность SESSION_STRING.</span>
+              <span className="font-bold block">Telegram-воркер не отвечает на запросы</span>
+              <span>{workerInfo?.message || 'Проверьте статус сервиса на Render или SESSION_STRING.'}</span>
             </div>
           </div>
         )}
@@ -118,62 +111,70 @@ export const SystemHealthModal: React.FC<SystemHealthModalProps> = ({ isOpen, on
               )}
             </div>
             <div className="text-[11px] text-muted space-y-1 font-mono">
-              <div>Последний пинг: {workerInfo?.lastPingMs ? formatRelativeTime(new Date(workerInfo.lastPingMs).toISOString()) : 'недавний'}</div>
-              <div>Обработано постов: {workerInfo?.messagesProcessed || 'активен'}</div>
+              <div>Пинг: {workerInfo?.lastPingMs ? formatRelativeTime(new Date(workerInfo.lastPingMs).toISOString()) : 'не проверен'}</div>
+              <div>Аптайм: {workerInfo?.uptimeSec ? `${Math.floor(workerInfo.uptimeSec / 60)} мин` : (workerInfo?.running ? 'активен' : 'нет связи')}</div>
             </div>
           </div>
 
-          {/* Telegram Session */}
+          {/* Telegram Bot */}
           <div className="p-3.5 bg-surface-2 rounded-control border border-border space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold flex items-center gap-1.5">
                 <Bot size={14} className="text-accent" />
-                Сессия Telegram
+                Telegram Бот
               </span>
-              {health?.telegram !== false ? (
+              {health?.telegramBot?.status === 'ok' ? (
                 <span className="text-[10px] text-emerald-400 font-mono font-medium flex items-center gap-1">
-                  <CheckCircle2 size={12} /> активна
+                  <CheckCircle2 size={12} /> {health.telegramBot.username || 'подключён'}
+                </span>
+              ) : health?.telegramBot?.status === 'not_configured' ? (
+                <span className="text-[10px] text-muted font-mono font-medium flex items-center gap-1">
+                  не настроен
                 </span>
               ) : (
                 <span className="text-[10px] text-amber-400 font-mono font-medium flex items-center gap-1">
-                  <AlertTriangle size={12} /> нет сессии
+                  <AlertTriangle size={12} /> ошибка токена
                 </span>
               )}
             </div>
             <div className="text-[11px] text-muted space-y-1 font-mono">
-              <div>GramJS клиент: подключен</div>
-              <div>Кэш каналов: 152 источника</div>
+              <div>Вебхук: {health?.telegramWebhook?.status === 'ok' ? 'установлен' : 'не настроен'}</div>
+              <div>Очередь бота: {health?.telegramWebhook?.pendingUpdates ?? 0} шт</div>
             </div>
           </div>
 
-          {/* AI Providers */}
-          <div className="p-3.5 bg-surface-2 rounded-control border border-border space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold flex items-center gap-1.5">
-                <Zap size={14} className="text-accent" />
-                AI Генератор откликов
-              </span>
-              {health?.ai ? (
-                <span className="text-[10px] text-emerald-400 font-mono font-medium flex items-center gap-1">
-                  <CheckCircle2 size={12} /> готов
-                </span>
-              ) : (
-                <span className="text-[10px] text-amber-400 font-mono font-medium flex items-center gap-1">
-                  <AlertTriangle size={12} /> проверьте ключ
-                </span>
-              )}
-            </div>
-            <div className="text-[11px] text-muted space-y-1 font-mono">
-              <div>Провайдер: {health?.aiProvider || 'Gemini 3.5 Flash'}</div>
-              <div>Квота: доступна</div>
-            </div>
-          </div>
-
-          {/* Webhook & Redis */}
+          {/* Upstash Redis */}
           <div className="p-3.5 bg-surface-2 rounded-control border border-border space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold flex items-center gap-1.5">
                 <Database size={14} className="text-accent" />
+                База данных (Redis)
+              </span>
+              {health?.redis?.status === 'ok' ? (
+                <span className="text-[10px] text-emerald-400 font-mono font-medium flex items-center gap-1">
+                  <CheckCircle2 size={12} /> {health.redis.latencyMs} мс
+                </span>
+              ) : health?.redis?.status === 'not_configured' ? (
+                <span className="text-[10px] text-muted font-mono font-medium flex items-center gap-1">
+                  файловый режим
+                </span>
+              ) : (
+                <span className="text-[10px] text-danger font-mono font-medium flex items-center gap-1">
+                  <XCircle size={12} /> сбой сети
+                </span>
+              )}
+            </div>
+            <div className="text-[11px] text-muted space-y-1 font-mono">
+              <div>Статус: {health?.redis?.status === 'ok' ? 'Upstash Redis активен' : (health?.redis?.message || 'Офлайн')}</div>
+              <div>Воронка бота: {health?.redis?.status === 'ok' ? 'подключена' : 'память'}</div>
+            </div>
+          </div>
+
+          {/* Infrastructure */}
+          <div className="p-3.5 bg-surface-2 rounded-control border border-border space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold flex items-center gap-1.5">
+                <Zap size={14} className="text-accent" />
                 Инфраструктура Netlify
               </span>
               <span className="text-[10px] text-emerald-400 font-mono font-medium flex items-center gap-1">
@@ -181,8 +182,8 @@ export const SystemHealthModal: React.FC<SystemHealthModalProps> = ({ isOpen, on
               </span>
             </div>
             <div className="text-[11px] text-muted space-y-1 font-mono">
-              <div>Задержка API: {webhookLatencyMs ? `${webhookLatencyMs} мс` : 'быстро'}</div>
-              <div>Upstash Redis: синхронизировано</div>
+              <div>Задержка API: {apiLatencyMs ? `${apiLatencyMs} мс` : 'быстро'}</div>
+              <div>Авторизация: {health?.config?.authConfigured ? 'настроена' : 'не настроена'}</div>
             </div>
           </div>
         </div>

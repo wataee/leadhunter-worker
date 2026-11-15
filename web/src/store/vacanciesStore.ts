@@ -5,6 +5,13 @@ import { useLeadsStore } from './leadsStore';
 import KEYWORDS from '../shared/keywords.js';
 import { parseBudget, BudgetResult } from '../shared/budget.js';
 import { matchesVacancy, detectVacancyRisks, buildWordBoundaryRegex } from '../shared/filter.js';
+import { syncDisabledSourcesToApi } from '../lib/api';
+
+function notifyDisabledSync(sources: TelegramSource[]) {
+  if (typeof window === 'undefined') return;
+  const disabled = sources.filter((s) => !s.enabled).map((s) => s.username);
+  syncDisabledSourcesToApi(disabled).catch(() => {});
+}
 
 export interface TelegramSource {
   username: string;
@@ -295,21 +302,27 @@ export const useVacanciesStore = create<VacanciesState>()(
       },
 
       removeSource: (username) =>
-        set((state) => ({
-          sources: state.sources.filter((s) => s.username !== username),
-        })),
+        set((state) => {
+          const nextSources = state.sources.filter((s) => s.username !== username);
+          notifyDisabledSync(nextSources);
+          return { sources: nextSources };
+        }),
 
       toggleSource: (username) =>
-        set((state) => ({
-          sources: state.sources.map((s) =>
+        set((state) => {
+          const nextSources = state.sources.map((s) =>
             s.username === username ? { ...s, enabled: !s.enabled } : s
-          ),
-        })),
+          );
+          notifyDisabledSync(nextSources);
+          return { sources: nextSources };
+        }),
 
       enableAllSources: () =>
-        set((state) => ({
-          sources: state.sources.map((s) => ({ ...s, enabled: true })),
-        })),
+        set((state) => {
+          const nextSources = state.sources.map((s) => ({ ...s, enabled: true }));
+          notifyDisabledSync(nextSources);
+          return { sources: nextSources };
+        }),
 
       enableChannelsOnly: () => {
         const channelUsernames = new Set(
@@ -317,12 +330,14 @@ export const useVacanciesStore = create<VacanciesState>()(
             .filter((c) => c.type === 'channel')
             .map((c) => (c.username || c.id || '').toLowerCase().replace(/^@/, ''))
         );
-        set((state) => ({
-          sources: state.sources.map((s) => ({
+        set((state) => {
+          const nextSources = state.sources.map((s) => ({
             ...s,
             enabled: channelUsernames.has(s.username.toLowerCase()),
-          })),
-        }));
+          }));
+          notifyDisabledSync(nextSources);
+          return { sources: nextSources };
+        });
       },
 
       enableRecommendedOnly: () => {
@@ -331,18 +346,22 @@ export const useVacanciesStore = create<VacanciesState>()(
             .filter((c) => c.recommended)
             .map((c) => (c.username || c.id || '').toLowerCase().replace(/^@/, ''))
         );
-        set((state) => ({
-          sources: state.sources.map((s) => ({
+        set((state) => {
+          const nextSources = state.sources.map((s) => ({
             ...s,
             enabled: recUsernames.has(s.username.toLowerCase()),
-          })),
-        }));
+          }));
+          notifyDisabledSync(nextSources);
+          return { sources: nextSources };
+        });
       },
 
       disableAllSources: () =>
-        set((state) => ({
-          sources: state.sources.map((s) => ({ ...s, enabled: false })),
-        })),
+        set((state) => {
+          const nextSources = state.sources.map((s) => ({ ...s, enabled: false }));
+          notifyDisabledSync(nextSources);
+          return { sources: nextSources };
+        }),
 
       syncWithCatalog: () => {
         const currentSources = get().sources || [];

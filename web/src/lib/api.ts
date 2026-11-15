@@ -4,6 +4,36 @@ export interface HealthStatus {
   youtube: boolean;
   telegram: boolean;
   ai: boolean;
+  status?: 'ok' | 'degraded' | 'error';
+  telegramBot?: {
+    status: 'ok' | 'error' | 'not_configured';
+    username?: string;
+    message?: string;
+  };
+  telegramWebhook?: {
+    status: 'ok' | 'not_set' | 'error' | 'not_configured';
+    url?: string | null;
+    pendingUpdates?: number;
+    lastError?: string | null;
+    message?: string;
+  };
+  redis?: {
+    status: 'ok' | 'error' | 'not_configured';
+    latencyMs?: number;
+    message?: string;
+  };
+  worker?: {
+    status: 'ok' | 'error' | 'not_configured';
+    uptimeSeconds?: number;
+    message?: string;
+  };
+  config?: {
+    authConfigured: boolean;
+    sessionSecretConfigured: boolean;
+    webhookSecretConfigured: boolean;
+    telegramChatIdConfigured: boolean;
+    youtubeConfigured: boolean;
+  };
   aiProvider?: string | null;
   providers?: {
     gemini: boolean;
@@ -143,9 +173,14 @@ export interface TgFeedResponse {
 }
 
 async function handleApiResponse<T>(res: Response): Promise<T> {
+  const text = await res.text();
+  if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+    throw new Error('API вернул HTML: проверьте _redirects/netlify.toml');
+  }
+
   let data: Record<string, unknown> | null;
   try {
-    data = await res.json();
+    data = text ? JSON.parse(text) : null;
   } catch {
     throw new Error(`Ошибка сервера (HTTP ${res.status}): неверный формат ответа`);
   }
@@ -154,16 +189,31 @@ async function handleApiResponse<T>(res: Response): Promise<T> {
     if (res.status === 401 && typeof window !== 'undefined' && window.location.pathname !== '/login') {
       window.location.href = '/login';
     }
-    const errorMsg = (data && typeof data.error === 'string') ? data.error : `Ошибка запроса (HTTP ${res.status})`;
+    const errorMsg =
+      data && typeof data.error === 'string'
+        ? data.error
+        : res.status === 503
+        ? 'Сервер недоступен: задайте APP_PASSWORD в настройках Netlify'
+        : `Ошибка запроса (HTTP ${res.status})`;
     throw new Error(errorMsg);
   }
 
-  return data as unknown as T;
+  return (data || {}) as unknown as T;
 }
 
 export async function fetchHealth(): Promise<HealthStatus> {
   const res = await fetch('/api/health');
-  return handleApiResponse<HealthStatus>(res);
+  const h = await handleApiResponse<HealthStatus>(res);
+  if (h.youtube === undefined && h.config) {
+    h.youtube = Boolean(h.config.youtubeConfigured);
+  }
+  if (h.telegram === undefined) {
+    h.telegram = h.telegramBot?.status === 'ok';
+  }
+  if (h.ai === undefined) {
+    h.ai = true;
+  }
+  return h;
 }
 
 export async function loginWithPassword(password: string): Promise<{ ok: boolean; devMode?: boolean }> {
@@ -336,6 +386,19 @@ export async function ackInbox(ids: string[]): Promise<boolean> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ids }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function syncDisabledSourcesToApi(disabledSources: string[]): Promise<boolean> {
+  try {
+    const res = await fetch('/api/sources-enabled', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ disabledSources }),
     });
     return res.ok;
   } catch {
