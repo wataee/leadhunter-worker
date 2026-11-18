@@ -4,7 +4,7 @@ import { useLeadsStore } from '../store/leadsStore';
 import { useVacanciesStore } from '../store/vacanciesStore';
 import { useTemplatesStore } from '../store/templatesStore';
 import { useToastStore } from '../store/toastStore';
-import { checkApiHealth, HealthStatus, rewritePitchWithAi } from '../lib/api';
+import { checkApiHealth, HealthStatus, rewritePitchWithAi, ingestUpworkEmail } from '../lib/api';
 import { exportLeadsToCsv } from '../lib/csv';
 import { Modal } from '../components/Modal';
 import {
@@ -19,6 +19,10 @@ import {
   CheckCircle2,
   AlertCircle,
   Sparkles,
+  Mail,
+  Copy,
+  Check,
+  ExternalLink,
 } from 'lucide-react';
 
 export const Settings: React.FC = () => {
@@ -69,6 +73,66 @@ export const Settings: React.FC = () => {
   const [isCheckingHealth, setIsCheckingHealth] = useState(false);
   const [clearModalOpen, setClearModalOpen] = useState(false);
   const [isTestingKey, setIsTestingKey] = useState(false);
+  const [emailInputText, setEmailInputText] = useState('');
+  const [isTestingEmail, setIsTestingEmail] = useState(false);
+  const [emailWebhookCopied, setEmailWebhookCopied] = useState(false);
+  const [emailResult, setEmailResult] = useState<{ count: number; titles: string[] } | null>(null);
+
+  const handleCopyWebhookUrl = () => {
+    const url = `${window.location.origin}/api/upwork-email`;
+    navigator.clipboard.writeText(url);
+    setEmailWebhookCopied(true);
+    addToast({ type: 'success', message: 'URL вебхука скопирован' });
+    setTimeout(() => setEmailWebhookCopied(false), 2000);
+  };
+
+  const handleInsertSampleEmail = () => {
+    setEmailInputText(`New job matching your search "video editing" has been posted:
+
+YouTube Video Editor for Fast-Growing Tech Channel
+https://www.upwork.com/jobs/~01a2b3c4d5e6f7g8h9
+
+Hourly: $35.00 - $65.00
+Est. Time: Less than 30 hrs/week, 1 to 3 months
+Category: Video Editing
+Skills: Premiere Pro, After Effects, Sound Design, Motion Graphics
+
+Looking for a skilled editor who understands high-retention editing for YouTube. Must be able to cut dead air, add dynamic zoom transitions, kinetic typography and clean sound effects.
+
+Client: Payment verified, United States, 4.95 Rating, over $25k spent. Requires 16 connects.`);
+  };
+
+  const handleTestEmailIngest = async () => {
+    if (!emailInputText.trim()) return;
+    setIsTestingEmail(true);
+    setEmailResult(null);
+    try {
+      const res = await ingestUpworkEmail({
+        subject: 'Upwork Job Alert: Video Editing',
+        text: emailInputText,
+        from: 'donotreply@upwork.com',
+      });
+      if (res.ok && res.jobsProcessed > 0) {
+        const titles = res.vacancies?.map((v: any) => v.text.split('\n')[0].slice(0, 60)) || [];
+        setEmailResult({ count: res.jobsProcessed, titles });
+        addToast({
+          type: 'success',
+          title: 'Заказ успешно добавлен!',
+          message: `Найдено ${res.jobsProcessed} вакансий. Они появились во вкладке «Вакансии → Upwork».`,
+        });
+      } else {
+        addToast({
+          type: 'info',
+          message: res.message || 'В письме не найдено ссылок на заказы Upwork.',
+        });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Ошибка обработки письма';
+      addToast({ type: 'error', message: msg });
+    } finally {
+      setIsTestingEmail(false);
+    }
+  };
 
   const handleTestCustomAiKey = async () => {
     setIsTestingKey(true);
@@ -818,6 +882,97 @@ export const Settings: React.FC = () => {
                 </span>
               )}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Upwork Email Ingestion Section */}
+      <div className="bg-surface rounded-card p-6 border border-border space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Mail size={18} className="text-text" />
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-text">
+                Автономный импорт Upwork (Email Alerts)
+              </h2>
+              <p className="text-[11px] text-text-muted mt-0.5">
+                Автоматический приём и парсинг писем-оповещений Upwork о новых заказах через вебхук.
+              </p>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-2 text-text-muted border border-border">
+            100% автономно
+          </span>
+        </div>
+
+        {/* Webhook URL bar */}
+        <div className="space-y-1.5 text-xs">
+          <label className="block text-text-muted font-medium">
+            URL вебхука для входящих писем (Cloudflare Email / Zapier / Make / ForwardEmail)
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              readOnly
+              value={`${window.location.origin}/api/upwork-email`}
+              className="flex-1 bg-surface-2 border border-border rounded-control p-2.5 text-text font-mono text-xs focus:outline-none select-all"
+            />
+            <button
+              type="button"
+              onClick={handleCopyWebhookUrl}
+              className="flex items-center gap-1.5 px-3 py-2.5 bg-surface-2 hover:bg-surface-3 text-text rounded-control border border-border text-xs font-medium transition-colors shrink-0"
+            >
+              {emailWebhookCopied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+              <span>{emailWebhookCopied ? 'Скопировано' : 'Копировать'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* How it works info */}
+        <div className="p-3.5 bg-surface-2/40 border border-border rounded-control text-xs space-y-2">
+          <span className="font-semibold text-text block">Как настроить за 2 минуты:</span>
+          <ol className="list-decimal list-inside text-[11px] text-text-muted space-y-1 leading-relaxed">
+            <li>В Upwork введите поиск (например, <em>«video editing»</em>) и нажмите <strong>Save Search</strong>.</li>
+            <li>В настройках уведомлений Upwork (<em>Settings → Notification Settings → Job recommendations</em>) включите отправку на email.</li>
+            <li>В почтовом ящике настройте правило: пересылать письма от <code>donotreply@upwork.com</code> на URL этого вебхука (или через бесплатный Cloudflare Email Routing / Zapier).</li>
+          </ol>
+        </div>
+
+        {/* Interactive Email Test / Manual Ingest */}
+        <div className="space-y-2 text-xs pt-1">
+          <div className="flex items-center justify-between">
+            <label className="text-text font-medium">
+              Проверка парсера (вставьте текст письма от Upwork):
+            </label>
+            <button
+              type="button"
+              onClick={handleInsertSampleEmail}
+              className="text-[11px] text-text-muted hover:text-text underline"
+            >
+              Вставить пример письма
+            </button>
+          </div>
+          <textarea
+            rows={3}
+            value={emailInputText}
+            onChange={(e) => setEmailInputText(e.target.value)}
+            placeholder="Вставьте сюда тему и текст оповещения Upwork или нажмите «Вставить пример письма»..."
+            className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text text-xs focus:outline-none font-mono placeholder-text-muted/50 leading-relaxed"
+          />
+          <div className="flex items-center justify-between pt-1">
+            <button
+              type="button"
+              disabled={isTestingEmail || !emailInputText.trim()}
+              onClick={handleTestEmailIngest}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-text text-bg hover:bg-white rounded-control text-xs font-medium transition-colors disabled:opacity-40"
+            >
+              {isTestingEmail ? 'Обработка...' : 'Протестировать парсинг и добавить в ленту'}
+            </button>
+            {emailResult && (
+              <span className="text-[11px] text-emerald-400 font-mono">
+                ✓ Найдено и добавлено: {emailResult.count} заказ(ов)
+              </span>
+            )}
           </div>
         </div>
       </div>

@@ -583,4 +583,24 @@ export async function ingestUpworkJob(payload: Record<string, unknown>): Promise
   return handleApiResponse(res);
 }
 
+export async function ingestUpworkEmail(payload: {
+  subject?: string;
+  text?: string;
+  html?: string;
+  from?: string;
+}): Promise<{
+  ok: boolean;
+  jobsProcessed: number;
+  vacancies?: any[];
+  message?: string;
+}> {
+  const res = await fetch('/api/upwork-email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return handleApiResponse(res);
+}
+
+
 
