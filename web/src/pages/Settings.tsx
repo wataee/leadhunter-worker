@@ -60,7 +60,7 @@ export const Settings: React.FC = () => {
 
   const { leads, clearAllLeads, importLeads } = useLeadsStore();
   const { templates, setTemplates } = useTemplatesStore();
-  const { clearAllVacancies } = useVacanciesStore();
+  const { clearAllVacancies, mergeNewVacancies } = useVacanciesStore();
   const addToast = useToastStore((s) => s.addToast);
 
   const evaluatedLeadsCount = leads.filter((l) => l.aiScore !== undefined).length;
@@ -113,6 +113,9 @@ Client: Payment verified, United States, 4.95 Rating, over $25k spent. Requires 
         from: 'donotreply@upwork.com',
       });
       if (res.ok && res.jobsProcessed > 0) {
+        if (Array.isArray(res.vacancies) && res.vacancies.length > 0) {
+          mergeNewVacancies(res.vacancies);
+        }
         const titles = res.vacancies?.map((v: any) => v.text.split('\n')[0].slice(0, 60)) || [];
         setEmailResult({ count: res.jobsProcessed, titles });
         addToast({
