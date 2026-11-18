@@ -22,14 +22,14 @@ export const LeadCard: React.FC<LeadCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`group bg-surface hover:bg-surface-2/70 border border-border hover:border-accent/40 rounded-card p-3 space-y-2 cursor-pointer transition-all select-none shadow-subtle ${
-        isDragging ? 'opacity-40 rotate-1 shadow-dropdown border-accent' : ''
+      className={`group bg-surface hover:bg-surface-2 border border-border hover:border-border-strong rounded-card p-3 space-y-2 cursor-pointer transition-colors select-none ${
+        isDragging ? 'opacity-40 rotate-1 border-text' : ''
       }`}
     >
       {/* Name and Niche */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h4 className="text-xs font-semibold text-text truncate group-hover:text-accent transition-colors">
+          <h4 className="text-xs font-semibold text-text truncate">
             {lead.name}
           </h4>
           <div className="text-[11px] text-muted truncate">
@@ -38,7 +38,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         {lead.dealValue ? (
-          <span className="font-mono text-[11px] font-bold text-accent shrink-0">
+          <span className="font-mono text-[11px] font-medium text-text shrink-0">
             {lead.dealValue} {lead.currency}
           </span>
         ) : null}
@@ -51,7 +51,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({
       )}
 
       {/* Bottom Bar: Touch Date + Quick Pitch */}
-      <div className="flex items-center justify-between pt-1 border-t border-border/40 text-[10px]">
+      <div className="flex items-center justify-between pt-1 border-t border-border text-[10px]">
         {lead.nextTouchAt ? (
           <span
             className={`flex items-center gap-1 font-mono ${
@@ -73,7 +73,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({
         <button
           onClick={onOpenPitch}
           title="Составить сообщение"
-          className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold text-accent bg-accent/10 hover:bg-accent/20 rounded transition-colors"
+          className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium text-text bg-surface-2 hover:bg-surface-3 rounded-control border border-border transition-colors"
         >
           <Send size={10} />
           <span>Написать</span>

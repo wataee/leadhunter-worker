@@ -32,8 +32,10 @@ const DEFAULT_PROFILE: UserProfile = {
   email: 'fluere.work@gmail.com',
   sampleUrl: 'https://youtu.be/cZZgi5xn930',
   formats: ['YouTube', 'Shorts/Reels', 'Подкасты'],
-  skills: ['Premiere Pro', 'After Effects', 'DaVinci Resolve', 'CapCut'],
+  skills: ['After Effects', 'Premiere Pro', 'DaVinci Resolve'],
   minRate: 80,
+  minRateShorts: 30,
+  minRateLong: 80,
   minRateCurrency: 'USD',
 };
 
@@ -65,7 +67,12 @@ export const useSettingsStore = create<SettingsState>()(
 
       updateProfile: (updates) =>
         set((state) => ({
-          profile: { ...state.profile, ...updates },
+          profile: {
+            ...state.profile,
+            ...updates,
+            // Программы жестко зафиксированы за тремя ключевыми редакторами
+            skills: ['After Effects', 'Premiere Pro', 'DaVinci Resolve'],
+          },
         })),
 
       setDailyGoal: (dailyGoal) => set({ dailyGoal }),
@@ -123,18 +130,25 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'leadhunter_settings',
-      version: 2,
+      version: 3,
       migrate: (persistedState: any, version: number) => {
-        if (persistedState && version < 2) {
+        if (persistedState) {
           const p = persistedState.profile || {};
-          if (p.telegram === '@editor_timur') p.telegram = DEFAULT_PROFILE.telegram;
-          if (p.email === 'editor.timur@gmail.com') p.email = DEFAULT_PROFILE.email;
-          if (p.sampleUrl === 'https://youtu.be/sample_edit') p.sampleUrl = DEFAULT_PROFILE.sampleUrl;
-          if (p.portfolioUrl === 'https://fleur-editor.netlify.app/ru/') p.portfolioUrl = DEFAULT_PROFILE.portfolioUrl;
-          if (p.name === 'Тимур') p.name = DEFAULT_PROFILE.name;
-          if (p.minRate === 3000 && p.minRateCurrency === 'RUB') {
-            p.minRate = DEFAULT_PROFILE.minRate;
-            p.minRateCurrency = DEFAULT_PROFILE.minRateCurrency;
+          if (version < 2) {
+            if (p.telegram === '@editor_timur') p.telegram = DEFAULT_PROFILE.telegram;
+            if (p.email === 'editor.timur@gmail.com') p.email = DEFAULT_PROFILE.email;
+            if (p.sampleUrl === 'https://youtu.be/sample_edit') p.sampleUrl = DEFAULT_PROFILE.sampleUrl;
+            if (p.portfolioUrl === 'https://fleur-editor.netlify.app/ru/') p.portfolioUrl = DEFAULT_PROFILE.portfolioUrl;
+            if (p.name === 'Тимур') p.name = DEFAULT_PROFILE.name;
+            if (p.minRate === 3000 && p.minRateCurrency === 'RUB') {
+              p.minRate = DEFAULT_PROFILE.minRate;
+              p.minRateCurrency = DEFAULT_PROFILE.minRateCurrency;
+            }
+          }
+          if (version < 3) {
+            p.skills = ['After Effects', 'Premiere Pro', 'DaVinci Resolve'];
+            if (!p.minRateShorts) p.minRateShorts = DEFAULT_PROFILE.minRateShorts || 30;
+            if (!p.minRateLong) p.minRateLong = p.minRate || DEFAULT_PROFILE.minRateLong || 80;
           }
           persistedState.profile = { ...DEFAULT_PROFILE, ...p };
           if (persistedState.autoTranslateVacancies === undefined) {

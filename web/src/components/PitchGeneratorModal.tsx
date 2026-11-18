@@ -98,18 +98,23 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
       const isForeign = region === 'EU' || region === 'US' || (lang !== 'ru' && lang !== 'kk');
       if (isForeign) {
         target =
-          templates.find((t) => t.id === 'tpl_shotgun_en') ||
-          templates.find((t) => t.type === 'shotgun') ||
+          templates.find((t) => t.id === 'tpl_en_youtube') ||
+          templates.find((t) => t.id === 'tpl_en_shorts') ||
+          templates.find((t) => t.type === 'en_youtube' || t.type === 'en_shorts') ||
           target;
       } else {
-        target = templates.find((t) => t.id === 'tpl_shotgun') || templates.find((t) => t.type === 'shotgun') || target;
+        target =
+          templates.find((t) => t.id === 'tpl_tg_direct') ||
+          templates.find((t) => t.id === 'tpl_yt_retention') ||
+          templates.find((t) => t.type === 'direct' || t.type === 'youtube') ||
+          target;
       }
     } else if (initialStrategy) {
       target = templates.find((t) => t.type === initialStrategy) || target;
     } else if (lead?.status === 'followup') {
       target = templates.find((t) => t.type === 'followup_1') || target;
     } else {
-      target = templates.find((t) => t.type === 'sniper') || target;
+      target = templates.find((t) => t.type === 'audit' || t.type === 'direct') || target;
     }
 
     const effectiveLead: Partial<Lead> | null = lead
@@ -268,7 +273,7 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
     if (vacancy?.url) {
       addToast({
         type: 'info',
-        message: 'Текст скопирован — откройте пост и отправьте отклик автору.',
+        message: 'Текст скопирован - откройте пост и отправьте отклик автору.',
       });
       window.open(vacancy.url, '_blank', 'noopener,noreferrer');
     } else {

@@ -9,6 +9,7 @@ import { ScoreBar } from '../components/ScoreBar';
 import { CardSkeleton } from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
 import { PitchGeneratorModal } from '../components/PitchGeneratorModal';
+import { FlagKZ, FlagUS, FlagEU } from '../components/RegionBadge';
 import { Lead } from '../types';
 import {
   Search,
@@ -604,13 +605,14 @@ export const Finder: React.FC = () => {
               setChips(DEFAULT_CHIPS_KZ);
               setQuery(DEFAULT_CHIPS_KZ[0]);
             }}
-            className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 text-xs rounded-control transition-colors flex items-center gap-1.5 border ${
               region === 'KZ'
-                ? 'bg-emerald-600 text-white font-semibold shadow-sm'
-                : 'bg-surface-2 text-text-muted hover:text-text hover:bg-surface-3'
+                ? 'bg-surface text-text font-medium border-border shadow-none'
+                : 'bg-surface-2 text-text-muted hover:text-text border-transparent'
             }`}
           >
-            <span>🇰🇿 Казахстан</span>
+            <FlagKZ />
+            <span>Казахстан</span>
           </button>
           <button
             type="button"
@@ -620,13 +622,14 @@ export const Finder: React.FC = () => {
               setChips(DEFAULT_CHIPS_US);
               setQuery(DEFAULT_CHIPS_US[0]);
             }}
-            className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 text-xs rounded-control transition-colors flex items-center gap-1.5 border ${
               region === 'US'
-                ? 'bg-sky-600 text-white font-semibold shadow-sm'
-                : 'bg-surface-2 text-text-muted hover:text-text hover:bg-surface-3'
+                ? 'bg-surface text-text font-medium border-border shadow-none'
+                : 'bg-surface-2 text-text-muted hover:text-text border-transparent'
             }`}
           >
-            <span>🇺🇸 США / Global</span>
+            <FlagUS />
+            <span>США / Global</span>
           </button>
           <button
             type="button"
@@ -636,13 +639,14 @@ export const Finder: React.FC = () => {
               setChips(DEFAULT_CHIPS_EU);
               setQuery(DEFAULT_CHIPS_EU[0]);
             }}
-            className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 text-xs rounded-control transition-colors flex items-center gap-1.5 border ${
               ['GB', 'DE', 'NL', 'PL', 'FR', 'ES'].includes(region)
-                ? 'bg-indigo-600 text-white font-semibold shadow-sm'
-                : 'bg-surface-2 text-text-muted hover:text-text hover:bg-surface-3'
+                ? 'bg-surface text-text font-medium border-border shadow-none'
+                : 'bg-surface-2 text-text-muted hover:text-text border-transparent'
             }`}
           >
-            <span>🇪🇺 Европа / UK</span>
+            <FlagEU />
+            <span>Европа / UK</span>
           </button>
         </div>
 

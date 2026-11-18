@@ -159,11 +159,16 @@ export function computeProfileFit(vacancy: Vacancy, profile?: UserProfile): numb
   }
 
   // 3. Currency-normalized budget match (up to 25 pts)
-  if (profile.minRate && profile.minRate > 0) {
+  const isShortsFormat = vacancy.formatTag === 'short' || /shorts|reels|tiktok|рилс|шортс/i.test(textLower);
+  const userRate = isShortsFormat
+    ? (profile.minRateShorts ?? profile.minRate ?? 30)
+    : (profile.minRateLong ?? profile.minRate ?? 80);
+
+  if (userRate > 0) {
     if (vacancy.budget && (vacancy.budget.max !== null || vacancy.budget.min !== null)) {
       const val = vacancy.budget.max ?? vacancy.budget.min ?? 0;
       const vacUsd = toApproxUsd(val, vacancy.budget.currency);
-      const minUsd = toApproxUsd(profile.minRate, profile.minRateCurrency || 'USD');
+      const minUsd = toApproxUsd(userRate, profile.minRateCurrency || 'USD');
       if (vacUsd >= minUsd) {
         score += 25;
       } else if (vacUsd >= minUsd * 0.7) {

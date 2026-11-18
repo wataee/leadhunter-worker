@@ -63,8 +63,8 @@ export const Templates: React.FC = () => {
   const handleCreateNew = () => {
     addTemplate({
       title: 'Новый шаблон сообщения',
-      type: 'sniper',
-      body: 'Привет, {имя}! Вопрос по видео про {тема_ролика}: на {таймкод} {проблема}. Могу показать, как это исправить? {ссылка_портфолио}',
+      type: 'direct',
+      body: 'Привет! Увидел вакансию на монтаж. Мое портфолио: {ссылка_портфолио}. Могу сделать тестовый фрагмент на 30 секунд сегодня. Актуально?',
     });
     addToast({ type: 'success', message: 'Новый шаблон создан' });
   };
@@ -137,20 +137,24 @@ export const Templates: React.FC = () => {
           {/* Type filter */}
           <div className="bg-surface rounded-card p-3 border border-border">
             <label className="block text-[11px] text-muted mb-1 font-semibold uppercase tracking-wider">
-              Тип сообщения
+              Категория
             </label>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               className="w-full bg-surface-2 border border-border text-text text-xs rounded-control px-2.5 py-1.5 focus:outline-none"
             >
-              <option value="all">Все типы ({templates.length})</option>
-              <option value="shotgun">Отклик на вакансию</option>
-              <option value="sniper">Точечный разбор ролика</option>
-              <option value="fire_question">Идея по ролику + вопрос</option>
-              <option value="fire_sample">Готовый пример перемонтажа</option>
-              <option value="followup_1">Повторное сообщение 1 (напоминание)</option>
-              <option value="followup_2">Повторное сообщение 2 (финальное)</option>
+              <option value="all">Все шаблоны ({templates.length})</option>
+              <option value="direct">Отклик в Telegram</option>
+              <option value="youtube">YouTube</option>
+              <option value="shorts">Reels / Shorts</option>
+              <option value="podcast">Подкасты</option>
+              <option value="test">Тестовый монтаж</option>
+              <option value="audit">Идея по видео</option>
+              <option value="en_youtube">English: YouTube</option>
+              <option value="en_shorts">English: Shorts</option>
+              <option value="followup_1">Напоминание (Follow-up)</option>
+              <option value="followup_2">Финальное напоминание</option>
             </select>
           </div>
 
@@ -162,26 +166,23 @@ export const Templates: React.FC = () => {
                 onClick={() => setSelectedTemplateId(tpl.id)}
                 className={`p-3.5 rounded-card border cursor-pointer transition-all ${
                   selectedTemplateId === tpl.id
-                    ? 'bg-accent-soft/20 border-accent/40 shadow-subtle'
-                    : 'bg-surface hover:bg-surface-2/60 border-border'
+                    ? 'bg-surface-2 border-text/40 shadow-sm'
+                    : 'bg-surface hover:bg-surface-2 border-border'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <h3 className="text-xs font-bold text-text truncate">
+                    <h3 className="text-xs font-semibold text-text truncate">
                       {tpl.title}
                     </h3>
-                    <span className="text-[10px] text-accent font-mono uppercase tracking-wider block mt-0.5">
-                      {tpl.type.replace('_', ' ')}
-                    </span>
                   </div>
                   {tpl.isCustom && (
                     <span className="text-[9px] bg-surface-2 text-muted px-1.5 py-0.2 rounded border border-border">
-                      Кастом
+                      Свой
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-text-muted/80 line-clamp-2 mt-2 leading-relaxed">
+                <p className="text-[11px] text-text-muted line-clamp-2 mt-1.5 leading-relaxed">
                   {tpl.body}
                 </p>
               </div>
@@ -214,14 +215,18 @@ export const Templates: React.FC = () => {
                         type: e.target.value as TemplateType,
                       })
                     }
-                    className="bg-surface-2 border border-border text-text text-xs rounded-control px-2.5 py-1.5"
+                    className="bg-surface-2 border border-border text-text text-xs rounded-control px-2.5 py-1.5 focus:outline-none"
                   >
-                    <option value="shotgun">Отклик на вакансию</option>
-                    <option value="sniper">Точечный разбор</option>
-                    <option value="fire_question">Идея по ролику</option>
-                    <option value="fire_sample">Пример монтажа</option>
-                    <option value="followup_1">Повторное сообщение 1</option>
-                    <option value="followup_2">Повторное сообщение 2</option>
+                    <option value="direct">Отклик в Telegram</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="shorts">Reels / Shorts</option>
+                    <option value="podcast">Подкасты</option>
+                    <option value="test">Тестовый монтаж</option>
+                    <option value="audit">Идея по видео</option>
+                    <option value="en_youtube">English: YouTube</option>
+                    <option value="en_shorts">English: Shorts</option>
+                    <option value="followup_1">Напоминание (Follow-up)</option>
+                    <option value="followup_2">Финальное напоминание</option>
                   </select>
 
                   <button

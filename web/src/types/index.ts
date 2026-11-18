@@ -129,15 +129,23 @@ export interface Vacancy {
 
 
 export type TemplateType =
+  | 'direct'
+  | 'youtube'
+  | 'shorts'
+  | 'podcast'
+  | 'test'
+  | 'audit'
+  | 'en_youtube'
+  | 'en_shorts'
+  | 'followup_1'
+  | 'followup_2'
   | 'shotgun'
   | 'youtube_dynamic'
   | 'reels_viral'
   | 'podcast_clean'
   | 'sniper'
   | 'fire_question'
-  | 'fire_sample'
-  | 'followup_1'
-  | 'followup_2';
+  | 'fire_sample';
 
 export interface PitchTemplate {
   id: string;
@@ -153,6 +161,8 @@ export interface UserProfile {
   formats?: Array<'YouTube' | 'Shorts/Reels' | 'Подкасты' | 'Реклама'>;
   skills?: string[];
   minRate?: number;
+  minRateShorts?: number;
+  minRateLong?: number;
   minRateCurrency?: 'RUB' | 'USD' | 'EUR' | 'GBP' | 'KZT';
   telegram: string;
   portfolioUrl: string;

@@ -62,9 +62,9 @@ export const useTemplatesStore = create<TemplatesState>()(
     }),
     {
       name: 'leadhunter_templates',
-      version: 2,
+      version: 3,
       migrate: (persistedState: any, version: number) => {
-        if (persistedState && version < 2) {
+        if (persistedState && version < 3) {
           const customOnes = Array.isArray(persistedState.templates)
             ? persistedState.templates.filter((t: PitchTemplate) => t && t.isCustom)
             : [];

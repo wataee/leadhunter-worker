@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Vacancy } from '../types';
 import { formatRelativeTime } from '../lib/time';
 import { BudgetBadge } from './BudgetBadge';
+import { RegionBadge } from './RegionBadge';
 import { getProfileFitLevel } from '../lib/profileFit';
 import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
@@ -172,11 +173,11 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
 
     if (isForeignPost) {
       const skillsPartEn = profile.skills?.length ? ` (${profile.skills.slice(0, 3).join(', ')})` : '';
-      return `Hi! Saw your post in ${ch} for a video editor. I specialize in retention-focused ${profile.specialization || 'YouTube & Shorts editing'}${skillsPartEn}. Portfolio (${portfolioMatch.labelEn}): ${portfolioMatch.url}. Happy to cut a quick 30-sec sample — are you still hiring?`;
+      return `Hi! Saw your post in ${ch} for a video editor. I specialize in retention-focused ${profile.specialization || 'YouTube & Shorts editing'}${skillsPartEn}. Portfolio (${portfolioMatch.labelEn}): ${portfolioMatch.url}. Happy to cut a quick 30-sec sample - are you still hiring?`;
     }
 
     const skillsPart = profile.skills?.length ? `Работаю в ${profile.skills.slice(0, 3).join(', ')}.` : '';
-    return `Привет! Увидел заказ в ${ch}. Специализируюсь на ${profile.specialization || 'динамичном видеомонтаже'}. ${skillsPart} Подборка работ (${portfolioMatch.labelRu}): ${portfolioMatch.url}. Готов сделать тестовый 30-сек фрагмент — ещё актуально?`;
+    return `Привет! Увидел заказ в ${ch}. Специализируюсь на ${profile.specialization || 'динамичном видеомонтаже'}. ${skillsPart} Подборка работ (${portfolioMatch.labelRu}): ${portfolioMatch.url}. Готов сделать тестовый 30-сек фрагмент - еще актуально?`;
   }, [vacancy.channel, profile, region, detectedLang, portfolioMatch]);
 
   const activeDraft = customDraft ?? initialDraft;
@@ -202,7 +203,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
     } else {
       addToast({
         type: 'info',
-        message: 'Текст скопирован — откройте пост и напишите автору в комментарии или ЛС.',
+        message: 'Текст скопирован - откройте пост и напишите автору в комментарии или ЛС.',
       });
       window.open(vacancy.url, '_blank', 'noopener,noreferrer');
     }
@@ -273,28 +274,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
           <BudgetBadge budget={vacancy.budget} />
 
           {/* Region Badge */}
-          {region === 'EU' ? (
-            <span
-              className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-400 bg-indigo-400/10 px-1.5 py-0.2 rounded border border-indigo-400/30"
-              title="Европа / UK"
-            >
-              <span>🇪🇺 EU</span>
-            </span>
-          ) : region === 'KZ' ? (
-            <span
-              className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-400/10 px-1.5 py-0.2 rounded border border-emerald-400/30"
-              title="Казахстан"
-            >
-              <span>🇰🇿 KZ</span>
-            </span>
-          ) : (
-            <span
-              className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400 bg-sky-400/10 px-1.5 py-0.2 rounded border border-sky-400/30"
-              title="США / Международный"
-            >
-              <span>🇺🇸 US</span>
-            </span>
-          )}
+          <RegionBadge region={region} />
 
           {/* Language Pill + Manual Translate Trigger */}
           {shouldOfferTranslation && (
@@ -344,29 +324,31 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
           )}
 
           {isHot ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-danger bg-danger/15 px-2 py-0.5 rounded border border-danger/30">
-              <Flame size={12} />
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-danger bg-danger/10 px-2 py-0.5 rounded-control border border-danger/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-danger inline-block" />
               <span>Горячее</span>
             </span>
           ) : isNew ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-accent bg-accent/15 px-2 py-0.5 rounded border border-accent/30">
-              <Sparkles size={12} />
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-text-muted bg-surface-2 px-2 py-0.5 rounded-control border border-border">
+              <span className="w-1.5 h-1.5 rounded-full bg-text-dim inline-block" />
               <span>Новое</span>
             </span>
           ) : null}
 
           {fit.level === 'great' ? (
             <span
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/25 cursor-help"
+              className="inline-flex items-center gap-1.5 text-[10px] font-medium text-text bg-surface-2 px-2 py-0.5 rounded-control border border-border cursor-help"
               title={fit.reason}
             >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
               <span>Подходит</span>
             </span>
           ) : fit.level === 'fair' ? (
             <span
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-text-muted bg-surface-2 px-2 py-0.5 rounded border border-border cursor-help"
+              className="inline-flex items-center gap-1.5 text-[10px] font-medium text-text-muted bg-surface-2 px-2 py-0.5 rounded-control border border-border cursor-help"
               title={fit.reason}
             >
+              <span className="w-1.5 h-1.5 rounded-full bg-text-dim inline-block" />
               <span>Возможно</span>
             </span>
           ) : null}
@@ -557,7 +539,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
 
           <button
             onClick={onApply}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-accent hover:bg-accent-hover rounded-control shadow-subtle transition-colors min-h-[36px]"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-bg bg-text hover:bg-white rounded-control transition-colors min-h-[36px]"
           >
             <Send size={13} />
             <span>Откликнуться</span>

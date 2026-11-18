@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Search, ExternalLink, Plus, Filter, AlertTriangle } from 'lucide-react';
+import { RegionBadge, FlagEU, FlagUS, FlagKZ } from '../components/RegionBadge';
 import { useCatalogStore } from '../sources/catalogStore';
 import { useVacanciesStore } from '../store/vacanciesStore';
 import { useToastStore } from '../store/toastStore';
@@ -247,50 +248,53 @@ export const Sources: React.FC = () => {
         <button
           type="button"
           onClick={() => setRegionFilter('all')}
-          className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+          className={`px-3 py-1.5 text-xs rounded-control transition-colors flex items-center gap-1.5 font-medium border ${
             regionFilter === 'all'
-              ? 'bg-accent text-white shadow-sm font-semibold'
-              : 'text-text-muted hover:text-text hover:bg-surface'
+              ? 'bg-surface text-text border-border shadow-none'
+              : 'text-text-muted hover:text-text border-transparent'
           }`}
         >
-          <span>🌍 Все (EU + US + KZ)</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20">{regionCounts.total}</span>
+          <span>Все (EU + US + KZ)</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-3 text-text-muted font-mono">{regionCounts.total}</span>
         </button>
         <button
           type="button"
           onClick={() => setRegionFilter('EU')}
-          className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+          className={`px-3 py-1.5 text-xs rounded-control transition-colors flex items-center gap-1.5 font-medium border ${
             regionFilter === 'EU'
-              ? 'bg-indigo-600 text-white shadow-sm font-semibold'
-              : 'text-text-muted hover:text-text hover:bg-surface'
+              ? 'bg-surface text-text border-border shadow-none'
+              : 'text-text-muted hover:text-text border-transparent'
           }`}
         >
-          <span>🇪🇺 Европа / UK</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20">{regionCounts.eu}</span>
+          <FlagEU />
+          <span>Европа / UK</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-3 text-text-muted font-mono">{regionCounts.eu}</span>
         </button>
         <button
           type="button"
           onClick={() => setRegionFilter('US')}
-          className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+          className={`px-3 py-1.5 text-xs rounded-control transition-colors flex items-center gap-1.5 font-medium border ${
             regionFilter === 'US'
-              ? 'bg-sky-600 text-white shadow-sm font-semibold'
-              : 'text-text-muted hover:text-text hover:bg-surface'
+              ? 'bg-surface text-text border-border shadow-none'
+              : 'text-text-muted hover:text-text border-transparent'
           }`}
         >
-          <span>🇺🇸 США / Global</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20">{regionCounts.us}</span>
+          <FlagUS />
+          <span>США / Global</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-3 text-text-muted font-mono">{regionCounts.us}</span>
         </button>
         <button
           type="button"
           onClick={() => setRegionFilter('KZ')}
-          className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+          className={`px-3 py-1.5 text-xs rounded-control transition-colors flex items-center gap-1.5 font-medium border ${
             regionFilter === 'KZ'
-              ? 'bg-emerald-600 text-white shadow-sm font-semibold'
-              : 'text-text-muted hover:text-text hover:bg-surface'
+              ? 'bg-surface text-text border-border shadow-none'
+              : 'text-text-muted hover:text-text border-transparent'
           }`}
         >
-          <span>🇰🇿 Казахстан</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20">{regionCounts.kz}</span>
+          <FlagKZ />
+          <span>Казахстан</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-3 text-text-muted font-mono">{regionCounts.kz}</span>
         </button>
       </div>
 
@@ -382,19 +386,7 @@ export const Sources: React.FC = () => {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted mt-0.5">
-                    {source.region === 'EU' ? (
-                      <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
-                        🇪🇺 EU
-                      </span>
-                    ) : source.region === 'KZ' ? (
-                      <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                        🇰🇿 KZ
-                      </span>
-                    ) : (
-                      <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-500/15 text-sky-400 border border-sky-500/30">
-                        🇺🇸 US
-                      </span>
-                    )}
+                    <RegionBadge region={source.region} />
                     <span>•</span>
                     <span className="uppercase text-[10px] font-mono px-1.5 py-0.2 rounded bg-surface-2">
                       {source.type === 'group' ? 'Группа' : 'Канал'}

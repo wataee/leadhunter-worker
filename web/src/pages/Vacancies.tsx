@@ -14,6 +14,7 @@ import { VacancyCard } from '../components/VacancyCard';
 import { PitchGeneratorModal } from '../components/PitchGeneratorModal';
 import { UpworkCopilotModal } from '../components/UpworkCopilotModal';
 import { VacancyHeader } from '../components/vacancies/VacancyHeader';
+import { FlagEU, FlagUS, FlagKZ } from '../components/RegionBadge';
 import {
   VacancyFiltersBar,
   FormatFilter,
@@ -497,8 +498,8 @@ export const Vacancies: React.FC = () => {
             onClick={() => setPlatformTab('all')}
             className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
               platformTab === 'all'
-                ? 'bg-surface text-text shadow font-semibold'
-                : 'text-text-muted hover:text-text'
+                ? 'bg-surface text-text border-border font-medium shadow-none'
+                : 'text-text-muted hover:text-text border-transparent'
             }`}
           >
             <span>Все потоки</span>
@@ -507,10 +508,10 @@ export const Vacancies: React.FC = () => {
           <button
             type="button"
             onClick={() => setPlatformTab('telegram')}
-            className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+            className={`px-2.5 py-1 text-xs rounded-control transition-colors flex items-center gap-1.5 font-medium border ${
               platformTab === 'telegram'
-                ? 'bg-sky-600 text-white shadow font-semibold'
-                : 'text-text-muted hover:text-text'
+                ? 'bg-surface text-text border-border font-medium shadow-none'
+                : 'text-text-muted hover:text-text border-transparent'
             }`}
           >
             <span>Telegram</span>
@@ -519,10 +520,10 @@ export const Vacancies: React.FC = () => {
           <button
             type="button"
             onClick={() => setPlatformTab('reddit')}
-            className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+            className={`px-2.5 py-1 text-xs rounded-control transition-colors flex items-center gap-1.5 font-medium border ${
               platformTab === 'reddit'
-                ? 'bg-orange-600 text-white shadow font-semibold'
-                : 'text-text-muted hover:text-text'
+                ? 'bg-surface text-text border-border font-medium shadow-none'
+                : 'text-text-muted hover:text-text border-transparent'
             }`}
           >
             <span>Reddit [Hiring]</span>
@@ -531,10 +532,10 @@ export const Vacancies: React.FC = () => {
           <button
             type="button"
             onClick={() => setPlatformTab('upwork')}
-            className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+            className={`px-2.5 py-1 text-xs rounded-control transition-colors flex items-center gap-1.5 font-medium border ${
               platformTab === 'upwork'
-                ? 'bg-emerald-600 text-white shadow font-semibold'
-                : 'text-text-muted hover:text-text'
+                ? 'bg-surface text-text border-border font-medium shadow-none'
+                : 'text-text-muted hover:text-text border-transparent'
             }`}
           >
             <span>Upwork</span>
@@ -545,9 +546,9 @@ export const Vacancies: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowUpworkCopilot(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-control shadow-sm transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 hover:bg-surface-3 text-text text-xs font-medium rounded-control border border-border transition-colors min-h-[36px]"
         >
-          <Zap size={13} />
+          <Zap size={13} className="text-text-muted" />
           <span>Upwork Copilot</span>
         </button>
       </div>
@@ -557,50 +558,53 @@ export const Vacancies: React.FC = () => {
         <button
           type="button"
           onClick={() => setRegionTab('all')}
-          className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+          className={`px-3 py-1.5 text-xs rounded-control transition-colors flex items-center gap-1.5 font-medium border ${
             regionTab === 'all'
-              ? 'bg-accent text-white shadow font-semibold'
-              : 'text-text-muted hover:text-text hover:bg-surface'
+              ? 'bg-surface text-text border-border shadow-none'
+              : 'text-text-muted hover:text-text border-transparent'
           }`}
         >
-          <span>🌍 Все (EU + US + KZ)</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/25">{regionCounts.total}</span>
+          <span>Все (EU + US + KZ)</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-3 text-text-muted font-mono">{regionCounts.total}</span>
         </button>
         <button
           type="button"
           onClick={() => setRegionTab('eu')}
-          className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+          className={`px-3 py-1.5 text-xs rounded-control transition-colors flex items-center gap-1.5 font-medium border ${
             regionTab === 'eu'
-              ? 'bg-indigo-600 text-white shadow font-semibold'
-              : 'text-text-muted hover:text-text hover:bg-surface'
+              ? 'bg-surface text-text border-border shadow-none'
+              : 'text-text-muted hover:text-text border-transparent'
           }`}
         >
-          <span>🇪🇺 Европа / UK</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/25">{regionCounts.eu}</span>
+          <FlagEU />
+          <span>Европа / UK</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-3 text-text-muted font-mono">{regionCounts.eu}</span>
         </button>
         <button
           type="button"
           onClick={() => setRegionTab('us')}
-          className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+          className={`px-3 py-1.5 text-xs rounded-control transition-colors flex items-center gap-1.5 font-medium border ${
             regionTab === 'us'
-              ? 'bg-sky-600 text-white shadow font-semibold'
-              : 'text-text-muted hover:text-text hover:bg-surface'
+              ? 'bg-surface text-text border-border shadow-none'
+              : 'text-text-muted hover:text-text border-transparent'
           }`}
         >
-          <span>🇺🇸 США / Global</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/25">{regionCounts.us}</span>
+          <FlagUS />
+          <span>США / Global</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-3 text-text-muted font-mono">{regionCounts.us}</span>
         </button>
         <button
           type="button"
           onClick={() => setRegionTab('kz')}
-          className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+          className={`px-3 py-1.5 text-xs rounded-control transition-colors flex items-center gap-1.5 font-medium border ${
             regionTab === 'kz'
-              ? 'bg-emerald-600 text-white shadow font-semibold'
-              : 'text-text-muted hover:text-text hover:bg-surface'
+              ? 'bg-surface text-text border-border shadow-none'
+              : 'text-text-muted hover:text-text border-transparent'
           }`}
         >
-          <span>🇰🇿 Казахстан</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/25">{regionCounts.kz}</span>
+          <FlagKZ />
+          <span>Казахстан</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-3 text-text-muted font-mono">{regionCounts.kz}</span>
         </button>
       </div>
 

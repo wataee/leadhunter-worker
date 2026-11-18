@@ -297,7 +297,7 @@ export const Settings: React.FC = () => {
 
           <div>
             <label className="block text-text-muted mb-1 font-medium">
-              Ссылка на сэмпл (ре-эдит для огнемёта)
+              Ссылка на сэмпл (пример монтажа/ре-эдит)
             </label>
             <input
               type="text"
@@ -308,19 +308,33 @@ export const Settings: React.FC = () => {
             />
           </div>
 
-          {/* Min Rate and Currency */}
-          <div className="grid grid-cols-2 gap-2">
+          {/* Min Rates and Currency */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-text-muted mb-1 font-medium">
-                Мин. ставка (за проект / ролик)
+                Мин. ставка за Reels / Shorts
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="5"
+                value={profile.minRateShorts ?? 30}
+                onChange={(e) => updateProfile({ minRateShorts: Number(e.target.value) || 0 })}
+                className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent font-mono text-xs"
+                placeholder="30"
+              />
+            </div>
+            <div>
+              <label className="block text-text-muted mb-1 font-medium">
+                Мин. ставка за горизонт. формат (YouTube)
               </label>
               <input
                 type="number"
                 min="0"
                 step="10"
-                value={profile.minRate ?? 80}
-                onChange={(e) => updateProfile({ minRate: Number(e.target.value) || 0 })}
-                className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent font-mono"
+                value={profile.minRateLong ?? 80}
+                onChange={(e) => updateProfile({ minRateLong: Number(e.target.value) || 0, minRate: Number(e.target.value) || 0 })}
+                className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent font-mono text-xs"
                 placeholder="80"
               />
             </div>
@@ -333,7 +347,7 @@ export const Settings: React.FC = () => {
                 onChange={(e) =>
                   updateProfile({ minRateCurrency: e.target.value as 'USD' | 'EUR' | 'GBP' | 'KZT' | 'RUB' })
                 }
-                className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent"
+                className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent text-xs"
               >
                 <option value="USD">USD ($)</option>
                 <option value="EUR">EUR (€)</option>
@@ -344,7 +358,7 @@ export const Settings: React.FC = () => {
           </div>
         </div>
 
-        {/* Formats and Skills */}
+        {/* Formats and Fixed Software */}
         <div className="pt-2 border-t border-border space-y-3 text-xs">
           <div>
             <label className="block text-text-muted mb-1.5 font-medium">
@@ -377,43 +391,8 @@ export const Settings: React.FC = () => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-text-muted mb-1.5 font-medium">
-              Используемый софт и навыки (для скоринга вакансий)
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {[
-                'Premiere Pro',
-                'After Effects',
-                'DaVinci Resolve',
-                'CapCut',
-                'Blender',
-                'Photoshop',
-                'Final Cut Pro',
-              ].map((skill) => {
-                const currentSkills = profile.skills || ['Premiere Pro', 'After Effects', 'DaVinci Resolve', 'CapCut'];
-                const isSelected = currentSkills.includes(skill);
-                return (
-                  <button
-                    key={skill}
-                    type="button"
-                    onClick={() => {
-                      const updated = isSelected
-                        ? currentSkills.filter((s) => s !== skill)
-                        : [...currentSkills, skill];
-                      updateProfile({ skills: updated });
-                    }}
-                    className={`px-3 py-1.5 rounded-control text-xs font-medium border transition-colors ${
-                      isSelected
-                        ? 'bg-accent/20 border-accent text-accent'
-                        : 'bg-surface-2 border-border text-text-muted hover:border-accent/40'
-                    }`}
-                  >
-                    {isSelected ? '✓ ' : '+ '}{skill}
-                  </button>
-                );
-              })}
-            </div>
+          <div className="text-[11px] text-text-muted">
+            <span className="font-medium text-text">Программы:</span> After Effects, Premiere Pro, DaVinci Resolve (зафиксированы).
           </div>
         </div>
       </div>

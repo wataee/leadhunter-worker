@@ -190,7 +190,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile drawer backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/70 z-40 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/75 z-40 md:hidden"
           onClick={onCloseMobile}
         />
       )}

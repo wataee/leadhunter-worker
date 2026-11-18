@@ -21,7 +21,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onToggleMobile }) => {
   return (
     <>
       {/* Mobile Topbar */}
-      <header className="md:hidden h-14 bg-surface/90 backdrop-blur-md border-b border-border sticky top-0 z-20 flex items-center justify-between px-4">
+      <header className="md:hidden h-14 bg-surface border-b border-border sticky top-0 z-20 flex items-center justify-between px-4">
         <button
           onClick={onToggleMobile}
           aria-label="Открыть меню"

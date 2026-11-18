@@ -156,7 +156,7 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
     <div className="fixed inset-0 z-40 flex justify-end">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/70 transition-opacity"
         onClick={onClose}
       />
 

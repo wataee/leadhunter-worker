@@ -137,10 +137,10 @@ export const Leads: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-text flex items-center gap-2">
-            <Kanban size={22} className="text-accent" />
+            <Kanban size={20} className="text-text" />
             <span>Воронка клиентов</span>
           </h1>
-          <p className="text-xs md:text-sm text-text-muted mt-0.5">
+          <p className="text-xs text-text-muted mt-0.5">
             Управление контактами, статусами и первыми сообщениями по каждому клиенту.
           </p>
         </div>
@@ -155,12 +155,12 @@ export const Leads: React.FC = () => {
           </button>
 
           {/* View mode toggle */}
-          <div className="flex items-center border border-border rounded-control overflow-hidden bg-surface">
+          <div className="flex items-center border border-border rounded-control overflow-hidden bg-surface-2 p-0.5">
             <button
               onClick={() => setViewMode('kanban')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-control transition-colors ${
                 viewMode === 'kanban'
-                  ? 'bg-accent text-white'
+                  ? 'bg-surface text-text border border-border shadow-none'
                   : 'text-text-muted hover:text-text'
               }`}
             >
@@ -169,9 +169,9 @@ export const Leads: React.FC = () => {
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-control transition-colors ${
                 viewMode === 'table'
-                  ? 'bg-accent text-white'
+                  ? 'bg-surface text-text border border-border shadow-none'
                   : 'text-text-muted hover:text-text'
               }`}
             >
@@ -431,7 +431,7 @@ export const Leads: React.FC = () => {
                     <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => setPitchLead(lead)}
-                        className="px-2.5 py-1 bg-accent text-white rounded text-xs font-semibold hover:bg-accent-hover transition-colors"
+                        className="px-2.5 py-1 bg-text text-bg hover:bg-white rounded-control text-xs font-medium transition-colors"
                       >
                         Написать
                       </button>

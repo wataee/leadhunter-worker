@@ -7,7 +7,6 @@ import { useToastStore } from '../store/toastStore';
 import { Lead, Vacancy } from '../types';
 import { PitchGeneratorModal } from '../components/PitchGeneratorModal';
 import { UpworkCopilotModal } from '../components/UpworkCopilotModal';
-import { OnboardingModal } from '../components/OnboardingModal';
 import { SystemHealthModal } from '../components/SystemHealthModal';
 import { syncCrmWithCloud } from '../lib/cloudSync';
 import { isOverdue, isToday } from '../lib/time';
@@ -42,9 +41,6 @@ export const Dashboard: React.FC = () => {
   const [activeOpeningAngle, setActiveOpeningAngle] = useState<string | undefined>(undefined);
   const [showSystemHealth, setShowSystemHealth] = useState(false);
   const [showUpworkCopilot, setShowUpworkCopilot] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(() => {
-    return !localStorage.getItem('leadhunter_onboarding_completed');
-  });
 
   const redditVacanciesCount = vacancies.filter((v) => !v.hidden && v.sourcePlatform === 'reddit').length;
   const upworkVacanciesCount = vacancies.filter((v) => !v.hidden && v.sourcePlatform === 'upwork').length;
@@ -103,12 +99,12 @@ export const Dashboard: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-text">
-            Привет, {profile.name || 'Мастер'}!
+          <h1 className="text-xl font-bold text-text">
+            Дашборд
           </h1>
-          <p className="text-xs md:text-sm text-text-muted mt-0.5">
+          <p className="text-xs text-text-muted mt-0.5">
             Откликов сегодня:{' '}
-            <strong className="text-accent font-mono text-sm">{responsesToday}</strong>
+            <strong className="text-text font-mono text-sm">{responsesToday}</strong>
           </p>
         </div>
 
@@ -122,13 +118,12 @@ export const Dashboard: React.FC = () => {
             <span>Всё ли работает?</span>
           </button>
 
-          <button
-            onClick={() => setShowOnboarding(true)}
+          <Link
+            to="/settings"
             className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-2 hover:bg-surface-3 text-text text-xs font-medium rounded-control border border-border transition-colors min-h-[36px]"
           >
-            <Sparkles size={14} className="text-accent" />
-            <span>Профиль</span>
-          </button>
+            <span>Настройки</span>
+          </Link>
         </div>
       </div>
 
@@ -143,7 +138,7 @@ export const Dashboard: React.FC = () => {
           </div>
           <Link
             to="/vacancies?platform=reddit"
-            className="text-[11px] font-semibold text-orange-300 hover:underline shrink-0"
+            className="text-[11px] font-medium text-text-muted hover:text-text shrink-0"
           >
             Reddit →
           </Link>
@@ -159,9 +154,9 @@ export const Dashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowUpworkCopilot(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded text-[11px] font-semibold shrink-0"
+            className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-2 hover:bg-surface-3 text-text border border-border rounded-control text-[11px] font-medium shrink-0"
           >
-            <Zap size={12} />
+            <Zap size={12} className="text-text-muted" />
             <span>Upwork Copilot</span>
           </button>
         </div>
@@ -239,7 +234,7 @@ export const Dashboard: React.FC = () => {
                           setActiveStrategy('followup_1');
                           setActiveOpeningAngle(undefined);
                         }}
-                        className="flex-1 py-1 px-2 text-xs text-white bg-accent hover:bg-accent-hover rounded font-semibold transition-colors flex items-center justify-center gap-1"
+                        className="flex-1 py-1 px-2 text-xs text-bg bg-text hover:bg-white rounded-control font-medium transition-colors flex items-center justify-center gap-1 min-h-[30px]"
                       >
                         <Send size={11} />
                         <span>Написать</span>
@@ -247,7 +242,7 @@ export const Dashboard: React.FC = () => {
                       <button
                         onClick={() => handleDoneTouch(lead)}
                         title="Отметить выполненным (+2 дня)"
-                        className="py-1 px-2.5 text-xs text-text bg-surface-2 hover:bg-surface-3 rounded border border-border transition-colors font-medium"
+                        className="py-1 px-2.5 text-xs text-text bg-surface-2 hover:bg-surface-3 rounded-control border border-border transition-colors font-medium min-h-[30px]"
                       >
                         +2д
                       </button>
@@ -289,12 +284,12 @@ export const Dashboard: React.FC = () => {
                     className="p-3 rounded-card bg-surface-2/40 border border-border hover:border-border-strong space-y-1.5 transition-colors"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-xs text-accent truncate">
+                      <span className="font-medium text-xs text-text truncate">
                         @{vac.channel.replace(/^@/, '')}
                       </span>
                       {isHot && (
-                        <span className="flex items-center gap-0.5 text-[10px] font-semibold text-danger bg-danger-soft px-1.5 py-0.2 rounded">
-                          <Flame size={10} /> Горячее
+                        <span className="flex items-center gap-1 text-[10px] font-medium text-danger bg-danger/10 px-1.5 py-0.2 rounded-control border border-danger/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-danger inline-block" /> Горячее
                         </span>
                       )}
                     </div>
@@ -309,13 +304,13 @@ export const Dashboard: React.FC = () => {
                           markSeen(vac.id);
                           setActivePitchVacancy(vac);
                         }}
-                        className="py-1 px-2.5 text-xs font-semibold text-white bg-accent hover:bg-accent-hover rounded transition-colors"
+                        className="py-1 px-2.5 text-xs font-medium text-bg bg-text hover:bg-white rounded-control transition-colors min-h-[30px]"
                       >
                         Откликнуться
                       </button>
                       <button
                         onClick={() => handleConvertToLead(vac)}
-                        className="py-1 px-2 text-xs text-text-muted hover:text-text bg-surface-2 hover:bg-surface-3 rounded border border-border transition-colors"
+                        className="py-1 px-2 text-xs text-text-muted hover:text-text bg-surface-2 hover:bg-surface-3 rounded-control border border-border transition-colors min-h-[30px]"
                       >
                         В лиды
                       </button>
@@ -395,13 +390,6 @@ export const Dashboard: React.FC = () => {
         initialOpeningAngle={activeOpeningAngle}
       />
 
-      <OnboardingModal
-        isOpen={showOnboarding}
-        onClose={() => {
-          localStorage.setItem('leadhunter_onboarding_completed', 'true');
-          setShowOnboarding(false);
-        }}
-      />
 
       <SystemHealthModal
         isOpen={showSystemHealth}
