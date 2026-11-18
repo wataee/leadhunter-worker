@@ -103,7 +103,7 @@ flowchart LR
    ```bash
    curl -H "Authorization: Bearer <WEBHOOK_SECRET>" https://<site>/api/sources-enabled
    ```
-   Убедитесь, что `count` больше 0 (базовый каталог содержит 152 проверенных источника).
+   Убедитесь, что `count` больше 0 (базовый каталог содержит 223 проверенных источника EU/US/KZ).
 
 ---
 

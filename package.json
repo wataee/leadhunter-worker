@@ -4,9 +4,6 @@
   "type": "module",
   "description": "24/7 Telegram lead listener worker for LeadHunter",
   "main": "server.js",
-  "workspaces": [
-    "web"
-  ],
   "scripts": {
     "start": "node server.js",
     "auth": "node auth.js",
