@@ -4,7 +4,7 @@ import { useVacanciesStore, computeVacancyRelevance } from '../store/vacanciesSt
 import { useLeadsStore } from '../store/leadsStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
-import { fetchTelegramFeed } from '../lib/api';
+import { fetchTelegramFeed, fetchRedditFeed, fetchUpworkJobs } from '../lib/api';
 import { playNotificationBeep, sendBrowserNotification } from '../lib/notifications';
 import { normalizeText, computeTextHash } from '../shared/filter.js';
 import { detectVacancyRegion } from '../shared/regions.js';
@@ -12,13 +12,16 @@ import { Vacancy } from '../types';
 import { CardSkeleton } from '../components/Skeleton';
 import { VacancyCard } from '../components/VacancyCard';
 import { PitchGeneratorModal } from '../components/PitchGeneratorModal';
+import { UpworkCopilotModal } from '../components/UpworkCopilotModal';
 import { VacancyHeader } from '../components/vacancies/VacancyHeader';
 import {
   VacancyFiltersBar,
   FormatFilter,
 } from '../components/vacancies/VacancyFiltersBar';
+import { Zap } from 'lucide-react';
 
 export type RegionTab = 'all' | 'eu' | 'us' | 'kz';
+export type PlatformTab = 'all' | 'telegram' | 'reddit' | 'upwork';
 
 export const Vacancies: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -53,6 +56,7 @@ export const Vacancies: React.FC = () => {
   const addToast = useToastStore((s) => s.addToast);
 
   const [activePitchVacancy, setActivePitchVacancy] = useState<Vacancy | null>(null);
+  const [showUpworkCopilot, setShowUpworkCopilot] = useState(false);
   const [showShady, setShowShady] = useState(false);
   const isRefreshingRef = useRef(false);
 
@@ -61,6 +65,23 @@ export const Vacancies: React.FC = () => {
   const regionTab: RegionTab = (
     rawParam === 'eu' || rawParam === 'us' || rawParam === 'kz' ? rawParam : 'all'
   );
+
+  // Source Platform Tab: Telegram + Reddit [Hiring] + Upwork
+  const rawPlatform = searchParams.get('platform') || 'all';
+  const platformTab: PlatformTab = (
+    rawPlatform === 'telegram' || rawPlatform === 'reddit' || rawPlatform === 'upwork'
+      ? rawPlatform
+      : 'all'
+  );
+
+  const setPlatformTab = (tab: PlatformTab) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (tab && tab !== 'all') next.set('platform', tab);
+      else next.delete('platform');
+      return next;
+    });
+  };
 
   const setRegionTab = (tab: RegionTab) => {
     setSearchParams((prev) => {
@@ -130,57 +151,95 @@ export const Vacancies: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await fetchTelegramFeed(batchChannels);
-      setLastError(null);
+      const [tgSettled, redditSettled, upworkSettled] = await Promise.allSettled([
+        fetchTelegramFeed(batchChannels),
+        fetchRedditFeed(),
+        fetchUpworkJobs(),
+      ]);
+
       const processed: Vacancy[] = [];
 
-      for (const msg of res.allMessages) {
-        const isWorkerLead = Boolean((msg as any).fromWorker === true);
+      if (tgSettled.status === 'fulfilled') {
+        const res = tgSettled.value;
+        setLastError(null);
+        for (const msg of res.allMessages) {
+          const isWorkerLead = Boolean((msg as any).fromWorker === true);
 
-        const {
-          relevance,
-          matchedKeywords,
-          skills,
-          isExcluded,
-          formatTag,
-          qualityTier,
-          statusBadge,
-          budget,
-          region,
-        } = computeVacancyRelevance(
-          msg.text,
-          includeKeywords,
-          excludeKeywords,
-          isWorkerLead,
-          msg.postedAt,
-          msg.channel
-        );
-
-        if (region === 'RU' || budget?.currency === 'RUB') {
-          continue;
-        }
-
-        if (!isExcluded && (isWorkerLead || matchedKeywords.length > 0)) {
-          processed.push({
-            id: msg.id,
-            channel: msg.channel,
-            text: msg.text,
-            url: msg.url,
-            postedAt: msg.postedAt,
-            views: msg.views,
+          const {
+            relevance,
             matchedKeywords,
             skills,
-            relevance,
+            isExcluded,
             formatTag,
             qualityTier,
             statusBadge,
+            budget,
             region,
-            budget: budget || (msg as any).budget || null,
-            fromWorker: isWorkerLead,
-            seen: false,
-            hidden: false,
+          } = computeVacancyRelevance(
+            msg.text,
+            includeKeywords,
+            excludeKeywords,
+            isWorkerLead,
+            msg.postedAt,
+            msg.channel
+          );
+
+          if (region === 'RU' || budget?.currency === 'RUB') {
+            continue;
+          }
+
+          if (!isExcluded && (isWorkerLead || matchedKeywords.length > 0)) {
+            processed.push({
+              id: msg.id,
+              channel: msg.channel,
+              text: msg.text,
+              url: msg.url,
+              postedAt: msg.postedAt,
+              views: msg.views,
+              matchedKeywords,
+              skills,
+              relevance,
+              formatTag,
+              qualityTier,
+              statusBadge,
+              region,
+              sourcePlatform: 'telegram',
+              budget: budget || (msg as any).budget || null,
+              fromWorker: isWorkerLead,
+              seen: false,
+              hidden: false,
+            });
+          }
+        }
+      }
+
+      if (redditSettled.status === 'fulfilled' && Array.isArray(redditSettled.value?.items)) {
+        for (const rItem of redditSettled.value.items) {
+          processed.push({
+            ...rItem,
+            sourcePlatform: 'reddit',
+            region: rItem.region === 'RU' ? 'US' : rItem.region || 'US',
           });
         }
+      }
+
+      if (upworkSettled.status === 'fulfilled' && Array.isArray(upworkSettled.value?.items)) {
+        for (const uItem of upworkSettled.value.items) {
+          processed.push({
+            ...uItem,
+            sourcePlatform: 'upwork',
+            region: 'US',
+          });
+        }
+      }
+
+      if (
+        tgSettled.status === 'rejected' &&
+        redditSettled.status === 'rejected' &&
+        upworkSettled.status === 'rejected'
+      ) {
+        const reason = tgSettled.reason;
+        throw reason instanceof Error ? reason : new Error('Не удалось обновить источники');
       }
 
       const { newCount, hotCount } = mergeNewVacancies(processed);
@@ -264,6 +323,25 @@ export const Vacancies: React.FC = () => {
     return sources.filter((s) => s.enabled && s.region !== 'RU').length;
   }, [sources]);
 
+  // Source platform counts & Region counts
+  const platformCounts = useMemo(() => {
+    let telegram = 0;
+    let reddit = 0;
+    let upwork = 0;
+    for (const v of vacancies) {
+      if (v.hidden) continue;
+      const r = v.region || detectVacancyRegion(v.text, v.channel);
+      if (r === 'RU' || v.budget?.currency === 'RUB') continue;
+      const plat =
+        v.sourcePlatform ||
+        (v.channel.startsWith('r/') ? 'reddit' : v.channel === 'Upwork' ? 'upwork' : 'telegram');
+      if (plat === 'reddit') reddit++;
+      else if (plat === 'upwork') upwork++;
+      else telegram++;
+    }
+    return { telegram, reddit, upwork, total: telegram + reddit + upwork };
+  }, [vacancies]);
+
   // Region counts for tabs (EU, US, KZ only — RU excluded)
   const regionCounts = useMemo(() => {
     let eu = 0;
@@ -280,7 +358,7 @@ export const Vacancies: React.FC = () => {
     return { eu, us, kz, total: eu + us + kz };
   }, [vacancies]);
 
-  // Filter vacancies (fixed: includes regionTab in dependencies and drops RU items)
+  // Filter vacancies (includes platformTab & regionTab dependencies and drops RU items)
   const filteredVacancies = useMemo(() => {
     const hiddenSet = new Set(hiddenChannels.map((c) => c.toLowerCase()));
     const now = Date.now();
@@ -291,6 +369,11 @@ export const Vacancies: React.FC = () => {
 
       const vRegion = v.region || detectVacancyRegion(v.text, v.channel);
       if (vRegion === 'RU' || v.budget?.currency === 'RUB') return false;
+
+      const plat =
+        v.sourcePlatform ||
+        (v.channel.startsWith('r/') ? 'reddit' : v.channel === 'Upwork' ? 'upwork' : 'telegram');
+      if (platformTab !== 'all' && plat !== platformTab) return false;
 
       if (regionTab === 'eu' && vRegion !== 'EU') return false;
       if (regionTab === 'us' && vRegion !== 'US') return false;
@@ -320,7 +403,7 @@ export const Vacancies: React.FC = () => {
 
       return true;
     });
-  }, [vacancies, hiddenChannels, regionTab, hotOnly, formatFilter]);
+  }, [vacancies, hiddenChannels, platformTab, regionTab, hotOnly, formatFilter]);
 
   // Cluster cross-posts
   const clusteredVacancies = useMemo(() => {
@@ -370,17 +453,22 @@ export const Vacancies: React.FC = () => {
     }
 
     const r = vac.region || detectVacancyRegion(vac.text, vac.channel);
+    const plat = vac.sourcePlatform || (vac.channel.startsWith('r/') ? 'reddit' : vac.channel === 'Upwork' ? 'upwork' : 'telegram');
     addLead({
-      name: `@${vac.channel.replace(/^@/, '')}`,
+      name: plat === 'telegram' ? `@${vac.channel.replace(/^@/, '')}` : `${vac.channel}: ${vac.text.slice(0, 36)}`,
       channelUrl: vac.url,
-      notes: vac.text,
+      notes: vac.translatedText ? `${vac.translatedText}\n\n---\n${vac.text}` : vac.text,
       region: r === 'RU' ? 'US' : r,
+      source: plat === 'reddit' ? 'Reddit [Hiring]' : plat === 'upwork' ? 'Upwork' : 'Telegram',
+      sourcePlatform: plat,
+      connectsSpent: vac.upworkMeta?.connectsRequired,
+      upworkMeta: vac.upworkMeta,
       status: 'new',
     });
     addToast({
       type: 'success',
       title: 'Сохранено в лиды',
-      message: `Заказ из @${vac.channel.replace(/^@/, '')} перенесён в воронку.`,
+      message: `Заказ из ${vac.channel} перенесён в воронку.`,
     });
   };
 
@@ -393,6 +481,69 @@ export const Vacancies: React.FC = () => {
         onRefresh={handleRefresh}
         lastError={lastError}
       />
+
+      {/* Platform Tabs: All / Telegram / Reddit [Hiring] / Upwork Copilot */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-surface-2 rounded-control border border-border">
+          <button
+            type="button"
+            onClick={() => setPlatformTab('all')}
+            className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+              platformTab === 'all'
+                ? 'bg-surface text-text shadow font-semibold'
+                : 'text-text-muted hover:text-text'
+            }`}
+          >
+            <span>Все потоки</span>
+            <span className="text-[10px] font-mono opacity-80">{platformCounts.total}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setPlatformTab('telegram')}
+            className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+              platformTab === 'telegram'
+                ? 'bg-sky-600 text-white shadow font-semibold'
+                : 'text-text-muted hover:text-text'
+            }`}
+          >
+            <span>Telegram</span>
+            <span className="text-[10px] font-mono opacity-80">{platformCounts.telegram}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setPlatformTab('reddit')}
+            className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+              platformTab === 'reddit'
+                ? 'bg-orange-600 text-white shadow font-semibold'
+                : 'text-text-muted hover:text-text'
+            }`}
+          >
+            <span>Reddit [Hiring]</span>
+            <span className="text-[10px] font-mono opacity-80">{platformCounts.reddit}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setPlatformTab('upwork')}
+            className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+              platformTab === 'upwork'
+                ? 'bg-emerald-600 text-white shadow font-semibold'
+                : 'text-text-muted hover:text-text'
+            }`}
+          >
+            <span>Upwork</span>
+            <span className="text-[10px] font-mono opacity-80">{platformCounts.upwork}</span>
+          </button>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowUpworkCopilot(true)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-control shadow-sm transition-colors"
+        >
+          <Zap size={13} />
+          <span>Upwork Copilot</span>
+        </button>
+      </div>
 
       {/* Region Tabs: EU + US + KZ */}
       <div className="flex flex-wrap items-center gap-1.5 p-1 bg-surface-2 rounded-control border border-border">
@@ -549,6 +700,12 @@ export const Vacancies: React.FC = () => {
         isOpen={Boolean(activePitchVacancy)}
         onClose={() => setActivePitchVacancy(null)}
         vacancy={activePitchVacancy}
+      />
+
+      {/* Upwork Copilot Modal */}
+      <UpworkCopilotModal
+        isOpen={showUpworkCopilot}
+        onClose={() => setShowUpworkCopilot(false)}
       />
     </div>
   );

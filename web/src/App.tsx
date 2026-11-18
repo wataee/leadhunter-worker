@@ -5,6 +5,7 @@ import { Topbar } from './components/Topbar';
 import { ToastContainer } from './components/ToastContainer';
 import { CardSkeleton } from './components/Skeleton';
 import { fetchInbox, ackInbox } from './lib/api';
+import { syncCrmWithCloud } from './lib/cloudSync';
 import { useLeadsStore } from './store/leadsStore';
 import { useToastStore } from './store/toastStore';
 import { RefreshCw } from 'lucide-react';
@@ -108,6 +109,25 @@ const AppContent: React.FC = () => {
       clearInterval(interval);
     };
   }, [addLead, addToast]);
+
+  // Автоматическая облачная синхронизация CRM между ПК и телефоном
+  useEffect(() => {
+    if (window.location.pathname === '/login') return;
+    syncCrmWithCloud();
+    const syncTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        syncCrmWithCloud();
+      }
+    }, 90_000);
+    const onFocus = () => {
+      syncCrmWithCloud();
+    };
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(syncTimer);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, []);
 
   const isLoginPage = window.location.pathname === '/login';
 

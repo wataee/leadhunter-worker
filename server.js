@@ -391,6 +391,7 @@ async function dispatchLeadNotification(leadItem) {
       text: leadItem.text,
       url: leadItem.url,
       channel: leadItem.channel,
+      region: leadItem.region,
       budget: leadItem.budget,
       type: 'lead',
       kind: 'lead',

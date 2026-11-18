@@ -1,4 +1,5 @@
 import { PitchTemplate, Lead, UserProfile } from '../types';
+import { matchPortfolioDeepLink, PortfolioCategoryKey } from '../shared/portfolioMatcher.js';
 
 export const DEFAULT_TEMPLATES: PitchTemplate[] = [
   {
@@ -129,7 +130,8 @@ export function substituteVariables(
   templateBody: string,
   lead: Partial<Lead> | null,
   profile: UserProfile,
-  customFinding?: { timecode: string; note: string }
+  customFinding?: { timecode: string; note: string },
+  context?: { text?: string; channel?: string; region?: string; lang?: string; portfolioCategory?: PortfolioCategoryKey }
 ): string {
   let result = templateBody;
 
@@ -144,9 +146,17 @@ export function substituteVariables(
     lead?.findings?.[0]?.note ||
     (isEn ? 'pacing slows down slightly' : 'затянутый переход');
 
-  const sampleUrl = profile.sampleUrl || 'https://youtu.be/cZZgi5xn930';
-  const basePortfolio = (profile.portfolioUrl || 'https://fleur-editor.netlify.app/').replace(/\/$/, '');
-  const portfolioUrl = isEn ? `${basePortfolio}/` : `${basePortfolio}/ru/`;
+  const portfolioMatch = matchPortfolioDeepLink({
+    text: `${context?.text || ''} ${lead?.notes || ''} ${lead?.niche || ''} ${topic}`,
+    channelOrNiche: context?.channel || lead?.niche || '',
+    region: context?.region || lead?.region || (isEn ? 'US' : 'KZ'),
+    lang: context?.lang || (isEn ? 'en' : 'ru'),
+    basePortfolioUrl: profile.portfolioUrl || 'https://fleur-editor.netlify.app',
+    overrideCategory: context?.portfolioCategory || 'auto',
+  });
+
+  const sampleUrl = profile.sampleUrl || portfolioMatch.sampleUrl || 'https://youtu.be/cZZgi5xn930';
+  const portfolioUrl = portfolioMatch.url;
 
   result = result
     .replace(/{имя}/g, leadName)

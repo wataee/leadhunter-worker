@@ -6,6 +6,7 @@ import { detectVacancyRegion } from '../shared/regions.js';
 
 export * from './types';
 export * from './TelegramSource';
+export * from './RedditSource';
 
 /**
  * 5.10 Unified Normalizer & Deduplicator for all EU / US / KZ lead sources
@@ -37,10 +38,17 @@ export function normalizeAndFilterItems(
 
     // 2. Core hiring intent match
     const match = matchesVacancy(text);
-    if (!match.isMatch) {
+    const allowPreScreenedReddit =
+      item.source === 'reddit' &&
+      !match.isMatch &&
+      match.reason === 'no_hiring_intent_within_proximity';
+
+    if (!match.isMatch && !allowPreScreenedReddit) {
       filteredCount++;
       continue;
     }
+
+    const matchedTags = allowPreScreenedReddit ? ['[Hiring]', 'Reddit'] : match.matched;
 
     // 3. Budget & region exclusion (skip RU domestic / RUB posts)
     const budget = parseBudget(text);
@@ -78,6 +86,13 @@ export function normalizeAndFilterItems(
       ? 'great'
       : 'fair';
 
+    const sourcePlatform: 'telegram' | 'reddit' | 'upwork' =
+      item.source === 'reddit'
+        ? 'reddit'
+        : item.source === 'upwork'
+        ? 'upwork'
+        : 'telegram';
+
     vacancies.push({
       id: item.id,
       channel: item.channelOrAuthor,
@@ -85,12 +100,13 @@ export function normalizeAndFilterItems(
       url: item.url,
       postedAt: item.publishedAt,
       views: item.views || '',
-      matchedKeywords: match.matched,
+      matchedKeywords: matchedTags,
       relevance: qualityTier === 'great' ? 85 : qualityTier === 'shady' ? 35 : 65,
       formatTag,
       qualityTier,
       statusBadge: risks.isRisky ? 'shady' : 'new',
       region,
+      sourcePlatform,
       budget,
       risks: risks.reasons,
       seen: false,

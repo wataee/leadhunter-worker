@@ -14,6 +14,12 @@ import { rewritePitchWithAi, translateTextWithAi } from '../lib/api';
 import { needsRussianTranslation, detectTextLanguage } from '../shared/translate.js';
 import { detectVacancyRegion } from '../shared/regions.js';
 import {
+  PORTFOLIO_CATEGORIES,
+  matchPortfolioDeepLink,
+  PortfolioCategoryKey,
+} from '../shared/portfolioMatcher.js';
+import { analyzeUpworkPreviewHook, generateUpworkProposal } from '../shared/upwork.js';
+import {
   Sparkles,
   Copy,
   Send,
@@ -23,6 +29,9 @@ import {
   Info,
   Split,
   Languages,
+  Scissors,
+  Link as LinkIcon,
+  Video,
 } from 'lucide-react';
 
 interface PitchGeneratorModalProps {
@@ -55,11 +64,28 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
   const [isTranslatingEn, setIsTranslatingEn] = useState<boolean>(false);
   const [showDiffView, setShowDiffView] = useState<boolean>(false);
   const [vacancyTranslationRu, setVacancyTranslationRu] = useState<string | null>(null);
+  const [portfolioCategory, setPortfolioCategory] = useState<PortfolioCategoryKey>('auto');
+  const [upworkMode, setUpworkMode] = useState<boolean>(false);
+  const [loomScript, setLoomScript] = useState<string>('');
 
   const directVacancyHandle = useMemo(
     () => (vacancy ? extractDirectContactHandle(vacancy.text, vacancy.channel) : null),
     [vacancy]
   );
+
+  const portfolioMatch = useMemo(() => {
+    const text = vacancy?.text || `${lead?.niche || ''} ${lead?.notes || ''} ${lead?.lastVideo?.title || ''}`;
+    const lang = vacancy ? detectTextLanguage(vacancy.text) : lead?.region === 'KZ' ? 'ru' : 'en';
+    const region = vacancy?.region || (lead?.region === 'RU' ? 'US' : lead?.region) || 'US';
+    return matchPortfolioDeepLink({
+      text,
+      channelOrNiche: vacancy?.channel || lead?.niche || '',
+      region,
+      lang,
+      basePortfolioUrl: profile.portfolioUrl || 'https://fleur-editor.netlify.app',
+      overrideCategory: portfolioCategory,
+    });
+  }, [vacancy, lead, profile.portfolioUrl, portfolioCategory]);
 
   // Pick suitable language & strategy template
   useEffect(() => {
@@ -96,7 +122,16 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
 
     if (target) {
       setSelectedTemplateId(target.id);
-      let subbed = substituteVariables(target.body, effectiveLead, profile);
+      const subContext = vacancy
+        ? {
+            text: vacancy.text,
+            channel: vacancy.channel,
+            region: vacancy.region || detectVacancyRegion(vacancy.text, vacancy.channel),
+            lang: detectTextLanguage(vacancy.text),
+            portfolioCategory: 'auto' as PortfolioCategoryKey,
+          }
+        : undefined;
+      let subbed = substituteVariables(target.body, effectiveLead, profile, undefined, subContext);
       const angle = initialOpeningAngle || lead?.aiAngle;
       if (angle) {
         const lines = subbed.split('\n');
@@ -104,6 +139,9 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
       }
       setPitchText(subbed);
     }
+    setPortfolioCategory('auto');
+    setUpworkMode(Boolean(vacancy?.sourcePlatform === 'upwork' || lead?.sourcePlatform === 'upwork'));
+    setLoomScript('');
     setCopied(false);
     setVacancyTranslationRu(vacancy?.translatedText || null);
   }, [isOpen, lead, vacancy, directVacancyHandle, initialStrategy, initialOpeningAngle, templates, profile]);
@@ -144,9 +182,53 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
         : vacancy && directVacancyHandle
         ? { name: `@${directVacancyHandle}` }
         : null;
-      const subbed = substituteVariables(chosen.body, effectiveLead, profile);
+      const subContext = vacancy
+        ? {
+            text: vacancy.text,
+            channel: vacancy.channel,
+            region: vacancy.region || detectVacancyRegion(vacancy.text, vacancy.channel),
+            lang: detectTextLanguage(vacancy.text),
+            portfolioCategory,
+          }
+        : { portfolioCategory };
+      const subbed = substituteVariables(chosen.body, effectiveLead, profile, undefined, subContext);
       setPitchText(subbed);
     }
+  };
+
+  const handlePortfolioCategoryChange = (nextCategory: PortfolioCategoryKey) => {
+    setPortfolioCategory(nextCategory);
+    const text = vacancy?.text || `${lead?.niche || ''} ${lead?.notes || ''}`;
+    const nextMatch = matchPortfolioDeepLink({
+      text,
+      channelOrNiche: vacancy?.channel || lead?.niche || '',
+      region: vacancy?.region || lead?.region || 'US',
+      lang: vacancy ? detectTextLanguage(vacancy.text) : 'en',
+      basePortfolioUrl: profile.portfolioUrl || 'https://fleur-editor.netlify.app',
+      overrideCategory: nextCategory,
+    });
+    const nextText = pitchText.replace(/https?:\/\/fleur-editor\.netlify\.app[^\s)]*/gi, nextMatch.url);
+    if (nextText !== pitchText) {
+      setPitchText(nextText);
+    }
+  };
+
+  const handleOptimizeForUpwork = () => {
+    setUpworkMode(true);
+    const bundle = generateUpworkProposal(
+      {
+        title: lead?.name || (vacancy ? `Video Editor (${vacancy.channel})` : 'YouTube / Shorts Video Editing'),
+        description: vacancy?.text || lead?.notes || pitchText,
+      },
+      { name: profile.name, portfolioUrl: profile.portfolioUrl }
+    );
+    setPitchText(bundle.coverLetter);
+    setLoomScript(bundle.loomScript);
+    addToast({
+      type: 'success',
+      title: 'Сжато под Upwork!',
+      message: 'Главная суть и ссылка .fleur перенесены в первые 200 символов + готов 45s Loom-скрипт.',
+    });
   };
 
   const handleCopy = async () => {
@@ -288,6 +370,7 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
   };
 
   const quality = analyzePitchQuality(pitchText);
+  const upworkPreview = analyzeUpworkPreviewHook(pitchText);
   const canOpenTelegram = Boolean(lead?.telegram || vacancy?.url || directVacancyHandle);
 
   return (
@@ -383,22 +466,104 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
           </div>
         </div>
 
-        {/* Telegram Chat Preview Line */}
+        {/* Smart Portfolio Deep-Link + Upwork Hook Toggle */}
+        <div className="p-2.5 bg-surface-2/60 rounded-control border border-border flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <LinkIcon size={13} className="text-accent shrink-0" />
+            <select
+              value={portfolioCategory}
+              onChange={(e) => handlePortfolioCategoryChange(e.target.value as PortfolioCategoryKey)}
+              className="bg-surface text-text text-xs rounded border border-border px-2 py-1 focus:outline-none focus:border-accent"
+              aria-label="Раздел портфолио"
+            >
+              {PORTFOLIO_CATEGORIES.map((c) => (
+                <option key={c.key} value={c.key}>
+                  {c.labelRu}
+                </option>
+              ))}
+            </select>
+            <a
+              href={portfolioMatch.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] font-mono text-accent hover:underline truncate"
+              title={portfolioMatch.url}
+            >
+              {portfolioMatch.url}
+            </a>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleOptimizeForUpwork}
+            className={`px-2.5 py-1 rounded text-[11px] font-semibold border transition-colors flex items-center gap-1 ${
+              upworkMode
+                ? 'bg-emerald-600/20 text-emerald-300 border-emerald-500/40'
+                : 'bg-surface hover:bg-surface-3 text-text-muted border-border'
+            }`}
+          >
+            <Scissors size={11} />
+            <span>Под Upwork (200 симв.)</span>
+          </button>
+        </div>
+
+        {/* Telegram / Upwork Preview Line */}
         <div className="p-3 bg-surface-2/80 rounded-control border border-border">
           <div className="flex items-center justify-between text-[11px] text-text-muted mb-1">
             <span className="font-medium">
-              Превью в списке чатов Telegram (первые ~60 символов):
+              {upworkMode
+                ? '✂️ Превью клиента на Upwork (первые 200 символов до «More»):'
+                : 'Превью в списке чатов Telegram (первые ~60 символов):'}
             </span>
-            {quality.genericPreview && (
-              <span className="flex items-center gap-1 text-warning text-[10px] font-medium">
-                <AlertTriangle size={12} /> Банальное начало
+            {upworkMode ? (
+              <span
+                className={`text-[10px] font-mono font-semibold ${
+                  upworkPreview.previewScore >= 80 ? 'text-emerald-400' : 'text-warning'
+                }`}
+              >
+                Hook Score: {upworkPreview.previewScore}/100
               </span>
+            ) : (
+              quality.genericPreview && (
+                <span className="flex items-center gap-1 text-warning text-[10px] font-medium">
+                  <AlertTriangle size={12} /> Банальное начало
+                </span>
+              )
             )}
           </div>
-          <div className="font-mono text-xs text-text bg-surface px-2.5 py-1.5 rounded border border-border/80 truncate">
-            {quality.previewLine || '...'}
+          <div className="font-mono text-xs text-text bg-surface px-2.5 py-1.5 rounded border border-border/80 whitespace-pre-wrap break-words">
+            {upworkMode ? upworkPreview.first200Chars || '...' : quality.previewLine || '...'}
           </div>
+          {upworkMode && upworkPreview.warnings.length > 0 && (
+            <p className="text-[11px] text-warning mt-1.5">
+              ⚠️ {upworkPreview.warnings[0]}
+            </p>
+          )}
         </div>
+
+        {upworkMode && loomScript && (
+          <div className="p-2.5 bg-sky-500/10 rounded-control border border-sky-400/25 text-xs space-y-1">
+            <div className="flex items-center justify-between font-semibold text-sky-300">
+              <span className="flex items-center gap-1">
+                <Video size={12} />
+                <span>45-сек Loom скрипт (EN)</span>
+              </span>
+              <button
+                type="button"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(loomScript);
+                  addToast({ type: 'success', message: 'Loom-скрипт скопирован' });
+                }}
+                className="text-[11px] text-accent hover:underline font-normal"
+              >
+                Копировать
+              </button>
+            </div>
+            <pre className="text-[11px] text-text-muted whitespace-pre-wrap font-sans leading-relaxed">
+              {loomScript}
+            </pre>
+          </div>
+        )}
 
         {/* AI Opening Angle Suggestion */}
         {lead?.aiAngle && (

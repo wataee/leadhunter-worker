@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LeadHunter Upwork Copilot</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="brand">
+        <span class="dot">⚡</span>
+        <strong>LeadHunter × Upwork</strong>
+      </div>
+      <button id="open-sidepanel-btn" type="button" class="btn btn-ghost" title="Закрепить сбоку">
+        Side Panel
+      </button>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div class="row-between">
+          <span class="label">1. Заказ Upwork</span>
+          <button id="scan-tab-btn" type="button" class="btn btn-primary">Считать со вкладки</button>
+        </div>
+        <textarea
+          id="job-input"
+          rows="4"
+          placeholder="Откройте страницу вакансии на Upwork и нажмите «Считать со вкладки», или вставьте текст заказа вручную..."
+        ></textarea>
+        <button id="analyze-btn" type="button" class="btn btn-accent full">
+          Рассчитать ROI Connects + Перевести + Сгенерировать Proposal
+        </button>
+      </section>
+
+      <section id="roi-card" class="card hidden">
+        <div class="row-between">
+          <strong>Connects ROI Score</strong>
+          <span id="roi-badge" class="badge">0/100</span>
+        </div>
+        <p id="roi-verdict" class="muted"></p>
+        <ul id="roi-flags" class="flags"></ul>
+      </section>
+
+      <section id="translation-card" class="card hidden">
+        <strong>🌐 Перевод ТЗ (RU)</strong>
+        <p id="translated-text" class="prose"></p>
+      </section>
+
+      <section id="proposal-card" class="card hidden">
+        <div class="row-between">
+          <strong>✂️ Первые 200 символов превью</strong>
+          <span id="hook-score" class="mono">Hook 0/100</span>
+        </div>
+        <div id="preview-200" class="preview-box"></div>
+
+        <label class="label" for="proposal-output">Готовый Cover Letter (EN + .fleur ссылка):</label>
+        <textarea id="proposal-output" rows="6"></textarea>
+        <div class="actions">
+          <button id="copy-proposal-btn" type="button" class="btn btn-ghost">Копировать</button>
+          <button id="insert-proposal-btn" type="button" class="btn btn-accent">Вставить в форму Upwork</button>
+        </div>
+
+        <label class="label" for="loom-output">🎥 Loom-скрипт (45 сек):</label>
+        <textarea id="loom-output" rows="4" readonly></textarea>
+      </section>
+
+      <details class="card">
+        <summary class="label">Настройки API LeadHunter</summary>
+        <div class="settings-grid">
+          <input id="api-url-input" type="url" placeholder="https://fleurleads-work.netlify.app" />
+          <input id="secret-input" type="password" placeholder="WEBHOOK_SECRET (опционально для автосохранения)" />
+          <button id="save-settings-btn" type="button" class="btn btn-ghost">Сохранить</button>
+        </div>
+      </details>
+
+      <p id="status-line" class="status"></p>
+    </main>
+
+    <script src="popup.js" type="module"></script>
+  </body>
+</html>

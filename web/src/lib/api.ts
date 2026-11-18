@@ -514,3 +514,73 @@ export async function translateTextWithAi(params: {
   return promise;
 }
 
+export interface CrmSyncPayload {
+  leads: unknown[];
+  blacklist: string[];
+  hiddenChannels: string[];
+  deletedLeadIds: string[];
+}
+
+export interface CrmSyncResponse {
+  ok: boolean;
+  redisConfigured: boolean;
+  persistedToRedis?: boolean;
+  syncedAt?: string;
+  state: {
+    updatedAt: string;
+    leads: any[];
+    blacklist: string[];
+    hiddenChannels: string[];
+    deletedLeadIds: string[];
+  };
+}
+
+export async function fetchCrmSync(): Promise<CrmSyncResponse> {
+  const res = await fetch('/api/crm-sync');
+  return handleApiResponse<CrmSyncResponse>(res);
+}
+
+export async function postCrmSync(payload: CrmSyncPayload): Promise<CrmSyncResponse> {
+  const res = await fetch('/api/crm-sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return handleApiResponse<CrmSyncResponse>(res);
+}
+
+export async function fetchRedditFeed(): Promise<{
+  ok: boolean;
+  items: any[];
+  totalRaw: number;
+  subreddits: string[];
+}> {
+  const res = await fetch('/api/reddit-feed');
+  return handleApiResponse(res);
+}
+
+export async function fetchUpworkJobs(): Promise<{
+  ok: boolean;
+  items: any[];
+}> {
+  const res = await fetch('/api/upwork-ingest');
+  return handleApiResponse(res);
+}
+
+export async function ingestUpworkJob(payload: Record<string, unknown>): Promise<{
+  ok: boolean;
+  job: any;
+  roi: any;
+  proposal: any;
+  translatedRu?: string | null;
+  vacancy?: any;
+}> {
+  const res = await fetch('/api/upwork-ingest', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return handleApiResponse(res);
+}
+
+

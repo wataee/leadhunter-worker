@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "LeadHunter Copilot for Upwork (.fleur)",
+  "version": "1.0.0",
+  "description": "Connects ROI check, Russian translation, 200-char Hook Cover Letter (.fleur links) & Loom script right on Upwork job pages.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "scripting",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "https://*.upwork.com/*",
+    "https://fleurleads-work.netlify.app/*",
+    "http://localhost:*/*"
+  ],
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "LeadHunter Upwork Copilot"
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.upwork.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import {
   fetchWithTimeout,
   type NetlifyResponse,
 } from './_shared/response';
+import { buildReadyTelegramPitch } from '../../src/shared/telegramAlert.js';
 
 interface HandlerEvent {
   httpMethod: string;
@@ -28,6 +29,7 @@ interface NotifyBody {
   text: string;
   url: string;
   channel?: string;
+  region?: string;
   budget?: string | BudgetObject | null;
   type?: 'lead' | 'digest';
   kind?: 'lead' | 'digest';
@@ -199,13 +201,27 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
     inlineButtons.push([{ text: '🔗 Открыть LeadHunter', url: cleanUrl }]);
   } else {
-    const cleanSnippet = escapeHtml(body.text.slice(0, 500).trim());
+    const cleanSnippet = escapeHtml(body.text.slice(0, 450).trim());
     const safeChannel = body.channel && typeof body.channel === 'string' ? escapeHtml(body.channel.trim()) : '';
     const safeTitle = body.title && typeof body.title === 'string' ? escapeHtml(body.title.trim()) : 'Новая вакансия';
     const formattedBudget = formatBudget(body.budget);
 
+    const readyPitch = buildReadyTelegramPitch({
+      text: body.text,
+      channel: body.channel || '',
+      region: body.region,
+      basePortfolioUrl: 'https://fleur-editor.netlify.app',
+    });
+
+    const regionBadge =
+      readyPitch.region === 'EU'
+        ? '🇪🇺 EU'
+        : readyPitch.region === 'KZ'
+        ? '🇰🇿 KZ'
+        : '🇺🇸 US';
+
     const messageLines = [
-      `🎯 <b>${safeTitle}</b> ${safeChannel ? `(${safeChannel})` : ''}`,
+      `🎯 <b>${safeTitle}</b> · ${regionBadge} ${safeChannel ? `(${safeChannel})` : ''}`,
     ];
     if (formattedBudget) {
       messageLines.push(`<b>${escapeHtml(formattedBudget)}</b>`);
@@ -213,11 +229,11 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     let translatedSnippetHtml = '';
     try {
       const { needsRussianTranslation, translateFreeNeural } = await import('../../src/shared/translate.js');
-      const sourceSnippet = body.text.slice(0, 550).trim();
+      const sourceSnippet = body.text.slice(0, 480).trim();
       if (needsRussianTranslation(sourceSnippet)) {
         const tr = await translateFreeNeural(sourceSnippet, 'ru', 'auto');
         if (tr?.translatedText && tr.translatedText.trim() !== sourceSnippet) {
-          translatedSnippetHtml = escapeHtml(tr.translatedText.slice(0, 550).trim());
+          translatedSnippetHtml = escapeHtml(tr.translatedText.slice(0, 480).trim());
         }
       }
     } catch {
@@ -225,11 +241,17 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     }
 
     messageLines.push('');
-    messageLines.push(cleanSnippet + (body.text.length > 500 ? '...' : ''));
+    messageLines.push(cleanSnippet + (body.text.length > 450 ? '...' : ''));
     if (translatedSnippetHtml) {
       messageLines.push('');
-      messageLines.push(`🌐 <b>Перевод (RU):</b>\n<i>${translatedSnippetHtml}</i>`);
+      messageLines.push(`🌐 <b>Перевод сути (RU):</b>\n<i>${translatedSnippetHtml}</i>`);
     }
+    messageLines.push('');
+    messageLines.push(
+      `🎬 <b>Подборка портфолио:</b> <a href="${escapeHtml(readyPitch.portfolioUrl)}">${escapeHtml(readyPitch.portfolioCategoryLabel)}</a>`
+    );
+    messageLines.push('');
+    messageLines.push(`⚡ <b>Готовый отклик (1 тап чтобы скопировать):</b>\n<pre>${escapeHtml(readyPitch.pitchText)}</pre>`);
     messageLines.push('');
     messageLines.push(`🔗 <a href="${cleanUrl}">Открыть пост в Telegram</a>`);
     message = messageLines.join('\n');
@@ -240,12 +262,22 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     const leadId = (body.id || `lead_${Date.now()}`).trim();
     const leadBytes = truncateToBytes(leadId, 50); // 'lead:' is 5 bytes -> max 55 bytes
 
+    if (readyPitch.directWriteUrl && readyPitch.directHandle) {
+      inlineButtons.push([
+        {
+          text: `✉️ Написать @${readyPitch.directHandle} (с откликом)`,
+          url: readyPitch.directWriteUrl,
+        },
+      ]);
+    }
+
     const row: Array<{ text: string; url?: string; callback_data?: string }> = [
-      { text: '🔗 Открыть', url: cleanUrl },
+      { text: '🔗 Пост', url: cleanUrl },
+      { text: '🎬 Кейсы', url: readyPitch.portfolioUrl },
     ];
 
     if (chanBytes) {
-      row.push({ text: '🙈 Скрыть источник', callback_data: `hide:${chanBytes}` });
+      row.push({ text: '🙈 Скрыть', callback_data: `hide:${chanBytes}` });
     }
     row.push({ text: '📥 В воронку', callback_data: `lead:${leadBytes}` });
     inlineButtons.push(row);

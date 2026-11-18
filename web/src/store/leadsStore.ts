@@ -7,11 +7,21 @@ import { useSettingsStore } from './settingsStore';
 interface LeadsState {
   leads: Lead[];
   blacklist: string[]; // ignored channelIds
+  deletedLeadIds: string[];
   searchHistory: string[]; // last 10 search queries
   selectedLeadId: string | null;
+  lastCloudSyncAt: string | null;
+  isSyncingCloud: boolean;
 
   // Actions
   setSelectedLeadId: (id: string | null) => void;
+  setIsSyncingCloud: (syncing: boolean) => void;
+  applyCloudSyncState: (cloudState: {
+    leads?: Lead[];
+    blacklist?: string[];
+    deletedLeadIds?: string[];
+    syncedAt?: string;
+  }) => void;
   addLead: (lead: Partial<Lead> & { name: string; channelUrl: string }) => void;
   addLeads: (leads: Array<Partial<Lead> & { name: string; channelUrl: string }>) => void;
   updateLead: (id: string, updates: Partial<Lead>) => void;
@@ -61,6 +71,7 @@ export const useLeadsStore = create<LeadsState>()(
     (set, get) => ({
       leads: [],
       blacklist: [],
+      deletedLeadIds: [],
       searchHistory: [
         'ai automation',
         'saas marketing',
@@ -68,8 +79,31 @@ export const useLeadsStore = create<LeadsState>()(
         'бизнес казахстан',
       ],
       selectedLeadId: null,
+      lastCloudSyncAt: null,
+      isSyncingCloud: false,
 
       setSelectedLeadId: (id) => set({ selectedLeadId: id }),
+      setIsSyncingCloud: (isSyncingCloud) => set({ isSyncingCloud }),
+      applyCloudSyncState: (cloudState) =>
+        set((state) => {
+          const mergedDeleted = Array.from(
+            new Set([...(state.deletedLeadIds || []), ...(cloudState.deletedLeadIds || [])])
+          ).slice(-500);
+          const deletedSet = new Set(mergedDeleted);
+          const mergedBlacklist = Array.from(
+            new Set([...(state.blacklist || []), ...(cloudState.blacklist || [])])
+          );
+          const nextLeads = Array.isArray(cloudState.leads)
+            ? cloudState.leads.filter((l) => l && !deletedSet.has(l.id))
+            : state.leads.filter((l) => !deletedSet.has(l.id));
+
+          return {
+            leads: nextLeads,
+            blacklist: mergedBlacklist,
+            deletedLeadIds: mergedDeleted,
+            lastCloudSyncAt: cloudState.syncedAt || new Date().toISOString(),
+          };
+        }),
 
       addLead: (leadData) => {
         const id = leadData.id || `lead_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
@@ -79,6 +113,7 @@ export const useLeadsStore = create<LeadsState>()(
         );
         if (exists) return;
 
+        const nowIso = new Date().toISOString();
         const newLead: Lead = {
           id,
           name: leadData.name || 'Без названия',
@@ -107,15 +142,24 @@ export const useLeadsStore = create<LeadsState>()(
           currency: leadData.currency || 'USD',
           tags: leadData.tags || [],
           notes: leadData.notes || '',
-          createdAt: leadData.createdAt || new Date().toISOString(),
+          createdAt: leadData.createdAt || nowIso,
+          updatedAt: leadData.updatedAt || nowIso,
+          region: leadData.region,
+          sourcePlatform: leadData.sourcePlatform,
+          connectsSpent: leadData.connectsSpent,
+          upworkMeta: leadData.upworkMeta,
         };
 
-        set((state) => ({ leads: [newLead, ...state.leads] }));
+        set((state) => ({
+          leads: [newLead, ...state.leads],
+          deletedLeadIds: (state.deletedLeadIds || []).filter((d) => d !== id),
+        }));
       },
 
       addLeads: (leadsData) => {
         const current = get().leads;
         const newItems: Lead[] = [];
+        const nowIso = new Date().toISOString();
 
         for (const ld of leadsData) {
           const exists =
@@ -151,7 +195,12 @@ export const useLeadsStore = create<LeadsState>()(
             currency: ld.currency || 'USD',
             tags: ld.tags || [],
             notes: ld.notes || '',
-            createdAt: ld.createdAt || new Date().toISOString(),
+            createdAt: ld.createdAt || nowIso,
+            updatedAt: ld.updatedAt || nowIso,
+            region: ld.region,
+            sourcePlatform: ld.sourcePlatform,
+            connectsSpent: ld.connectsSpent,
+            upworkMeta: ld.upworkMeta,
           });
         }
 
@@ -160,18 +209,22 @@ export const useLeadsStore = create<LeadsState>()(
 
       updateLead: (id, updates) =>
         set((state) => ({
-          leads: state.leads.map((l) => (l.id === id ? { ...l, ...updates } : l)),
+          leads: state.leads.map((l) =>
+            l.id === id ? { ...l, ...updates, updatedAt: new Date().toISOString() } : l
+          ),
         })),
 
       deleteLead: (id) =>
         set((state) => ({
           leads: state.leads.filter((l) => l.id !== id),
+          deletedLeadIds: Array.from(new Set([...(state.deletedLeadIds || []), id])).slice(-500),
           selectedLeadId: state.selectedLeadId === id ? null : state.selectedLeadId,
         })),
 
       deleteLeads: (ids) =>
         set((state) => ({
           leads: state.leads.filter((l) => !ids.includes(l.id)),
+          deletedLeadIds: Array.from(new Set([...(state.deletedLeadIds || []), ...ids])).slice(-500),
           selectedLeadId: ids.includes(state.selectedLeadId || '') ? null : state.selectedLeadId,
         })),
 
@@ -183,7 +236,7 @@ export const useLeadsStore = create<LeadsState>()(
         const settings = useSettingsStore.getState();
         const intervals = settings.followUpIntervals || [2, 2, 3];
 
-        const updates: Partial<Lead> = { status: newStatus };
+        const updates: Partial<Lead> = { status: newStatus, updatedAt: nowIso };
 
         // Automation rules:
         if (newStatus === 'messaged') {
@@ -294,7 +347,7 @@ export const useLeadsStore = create<LeadsState>()(
 
       updateLeadTier: (id, tier) =>
         set((state) => ({
-          leads: state.leads.map((l) => (l.id === id ? { ...l, tier } : l)),
+          leads: state.leads.map((l) => (l.id === id ? { ...l, tier, updatedAt: new Date().toISOString() } : l)),
         })),
 
       bulkUpdateStatus: (ids, newStatus) => {
@@ -303,7 +356,7 @@ export const useLeadsStore = create<LeadsState>()(
 
       bulkUpdateTier: (ids, tier) =>
         set((state) => ({
-          leads: state.leads.map((l) => (ids.includes(l.id) ? { ...l, tier } : l)),
+          leads: state.leads.map((l) => (ids.includes(l.id) ? { ...l, tier, updatedAt: new Date().toISOString() } : l)),
         })),
 
       addFinding: (leadId, timecode, note) => {
@@ -311,7 +364,7 @@ export const useLeadsStore = create<LeadsState>()(
         const finding: LeadFinding = { id, timecode, note };
         set((state) => ({
           leads: state.leads.map((l) =>
-            l.id === leadId ? { ...l, findings: [...l.findings, finding] } : l
+            l.id === leadId ? { ...l, findings: [...l.findings, finding], updatedAt: new Date().toISOString() } : l
           ),
         }));
       },
@@ -320,15 +373,16 @@ export const useLeadsStore = create<LeadsState>()(
         set((state) => ({
           leads: state.leads.map((l) =>
             l.id === leadId
-              ? { ...l, findings: l.findings.filter((f) => f.id !== findingId) }
+              ? { ...l, findings: l.findings.filter((f) => f.id !== findingId), updatedAt: new Date().toISOString() }
               : l
           ),
         })),
 
       addTouch: (leadId, touch) => {
+        const nowIso = new Date().toISOString();
         const fullTouch: LeadTouch = {
           id: `touch_${Date.now()}`,
-          at: touch.at || new Date().toISOString(),
+          at: touch.at || nowIso,
           channel: touch.channel,
           note: touch.note,
           replied: touch.replied,
@@ -340,6 +394,7 @@ export const useLeadsStore = create<LeadsState>()(
                   ...l,
                   touches: [...l.touches, fullTouch],
                   touchesCount: (l.touchesCount || 0) + 1,
+                  updatedAt: nowIso,
                 }
               : l
           ),
@@ -349,7 +404,7 @@ export const useLeadsStore = create<LeadsState>()(
       scheduleNextTouch: (leadId, daysAhead) =>
         set((state) => ({
           leads: state.leads.map((l) =>
-            l.id === leadId ? { ...l, nextTouchAt: addDays(daysAhead) } : l
+            l.id === leadId ? { ...l, nextTouchAt: addDays(daysAhead), updatedAt: new Date().toISOString() } : l
           ),
         })),
 

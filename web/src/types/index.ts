@@ -74,6 +74,16 @@ export interface Lead {
   // Feedback loop for few-shot learning
   outcome?: 'good' | 'bad' | null;
   region?: 'EU' | 'US' | 'KZ' | 'RU';
+  updatedAt?: string;
+  sourcePlatform?: 'telegram' | 'reddit' | 'upwork' | 'youtube' | 'manual';
+  connectsSpent?: number;
+  upworkMeta?: {
+    roiScore?: number;
+    recommendation?: string;
+    connectsRequired?: number;
+    clientHireRate?: number | null;
+    clientTotalSpent?: number | null;
+  };
 }
 
 export interface Vacancy {
@@ -92,6 +102,17 @@ export interface Vacancy {
   qualityTier?: 'great' | 'fair' | 'shady';
   statusBadge?: 'new' | 'hot' | 'shady';
   region?: 'EU' | 'US' | 'KZ' | 'RU';
+  sourcePlatform?: 'telegram' | 'reddit' | 'upwork';
+  upworkMeta?: {
+    roiScore: number;
+    recommendation: 'apply_now' | 'worth_it' | 'caution' | 'skip';
+    badgeTextRu: string;
+    verdictRu: string;
+    connectsRequired: number;
+    connectsCostUsd: number;
+    redFlags: string[];
+    greenFlags: string[];
+  };
   detectedLang?: string;
   translatedText?: string;
   seen: boolean;

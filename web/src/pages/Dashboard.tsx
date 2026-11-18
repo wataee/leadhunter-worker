@@ -6,8 +6,10 @@ import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
 import { Lead, Vacancy } from '../types';
 import { PitchGeneratorModal } from '../components/PitchGeneratorModal';
+import { UpworkCopilotModal } from '../components/UpworkCopilotModal';
 import { OnboardingModal } from '../components/OnboardingModal';
 import { SystemHealthModal } from '../components/SystemHealthModal';
+import { syncCrmWithCloud } from '../lib/cloudSync';
 import { isOverdue, isToday } from '../lib/time';
 import {
   Clock,
@@ -18,6 +20,8 @@ import {
   Activity,
   Sparkles,
   Flame,
+  Zap,
+  Cloud,
 } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
@@ -37,9 +41,15 @@ export const Dashboard: React.FC = () => {
   const [activeStrategy, setActiveStrategy] = useState<string | undefined>(undefined);
   const [activeOpeningAngle, setActiveOpeningAngle] = useState<string | undefined>(undefined);
   const [showSystemHealth, setShowSystemHealth] = useState(false);
+  const [showUpworkCopilot, setShowUpworkCopilot] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('leadhunter_onboarding_completed');
   });
+
+  const redditVacanciesCount = vacancies.filter((v) => !v.hidden && v.sourcePlatform === 'reddit').length;
+  const upworkVacanciesCount = vacancies.filter((v) => !v.hidden && v.sourcePlatform === 'upwork').length;
+  const upworkLeads = leads.filter((l) => l.sourcePlatform === 'upwork' || l.source === 'Upwork');
+  const totalConnectsSpent = upworkLeads.reduce((sum, l) => sum + (l.connectsSpent || 0), 0);
 
   // Автоматический подсчёт откликов за сегодня из воронки
   const todayPrefix = new Date().toISOString().slice(0, 10);
@@ -118,6 +128,64 @@ export const Dashboard: React.FC = () => {
           >
             <Sparkles size={14} className="text-accent" />
             <span>Профиль</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Multi-Source & Upwork Connects Economics Strip */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="bg-surface rounded-card border border-border p-3.5 flex items-center justify-between gap-2">
+          <div>
+            <div className="text-[11px] text-text-muted">Мульти-источники</div>
+            <div className="text-xs font-semibold text-text mt-0.5">
+              TG: {freshVacancies.length} · Reddit: {redditVacanciesCount} · Upwork: {upworkVacanciesCount}
+            </div>
+          </div>
+          <Link
+            to="/vacancies?platform=reddit"
+            className="text-[11px] font-semibold text-orange-300 hover:underline shrink-0"
+          >
+            Reddit →
+          </Link>
+        </div>
+
+        <div className="bg-surface rounded-card border border-border p-3.5 flex items-center justify-between gap-2">
+          <div>
+            <div className="text-[11px] text-text-muted">Экономика Upwork Connects</div>
+            <div className="text-xs font-semibold text-text mt-0.5">
+              {totalConnectsSpent} Connects (~${(totalConnectsSpent * 0.15).toFixed(2)}) · {upworkLeads.length} лидов
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowUpworkCopilot(true)}
+            className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded text-[11px] font-semibold shrink-0"
+          >
+            <Zap size={12} />
+            <span>Upwork Copilot</span>
+          </button>
+        </div>
+
+        <div className="bg-surface rounded-card border border-border p-3.5 flex items-center justify-between gap-2">
+          <div>
+            <div className="text-[11px] text-text-muted">Облако ПК ↔ Телефон</div>
+            <div className="text-xs font-semibold text-text mt-0.5">
+              {leads.length} лидов в единой воронке
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              const res = await syncCrmWithCloud();
+              addToast({
+                type: res?.ok ? 'success' : 'error',
+                message: res?.ok ? 'Воронка синхронизирована!' : 'Не удалось синхронизировать с облаком',
+              });
+            }}
+            className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-2 hover:bg-surface-3 text-text border border-border rounded text-[11px] font-medium shrink-0"
+          >
+            <Cloud size={12} className="text-emerald-400" />
+            <span>Синхронизировать</span>
           </button>
         </div>
       </div>
@@ -338,6 +406,11 @@ export const Dashboard: React.FC = () => {
       <SystemHealthModal
         isOpen={showSystemHealth}
         onClose={() => setShowSystemHealth(false)}
+      />
+
+      <UpworkCopilotModal
+        isOpen={showUpworkCopilot}
+        onClose={() => setShowUpworkCopilot(false)}
       />
     </div>
   );

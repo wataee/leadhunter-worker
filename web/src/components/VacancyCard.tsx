@@ -10,6 +10,7 @@ import { extractDirectContactHandle } from '../lib/templates';
 import { parseStructuredVacancy } from '../shared/vacancyParser';
 import { detectVacancyRegion } from '../shared/regions.js';
 import { detectTextLanguage, needsRussianTranslation, LANG_LABELS } from '../shared/translate.js';
+import { matchPortfolioDeepLink } from '../shared/portfolioMatcher.js';
 import { RateCalculatorModal } from './RateCalculatorModal';
 import { ClientBriefModal } from './ClientBriefModal';
 import { VacancyActionMenu } from './vacancies/VacancyActionMenu';
@@ -153,20 +154,30 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   const [customDraft, setCustomDraft] = useState<string | null>(null);
   const [isDraftCollapsed, setIsDraftCollapsed] = useState(false);
 
+  const portfolioMatch = useMemo(
+    () =>
+      matchPortfolioDeepLink({
+        text: vacancy.text,
+        channelOrNiche: vacancy.channel,
+        region,
+        lang: detectedLang,
+        basePortfolioUrl: profile.portfolioUrl,
+      }),
+    [vacancy.text, vacancy.channel, region, detectedLang, profile.portfolioUrl]
+  );
+
   const initialDraft = useMemo(() => {
     const ch = vacancy.channel.startsWith('@') ? vacancy.channel : `@${vacancy.channel}`;
-    const basePortfolio = (profile.portfolioUrl || 'https://fleur-editor.netlify.app/').replace(/\/$/, '');
     const isForeignPost = region === 'EU' || region === 'US' || (detectedLang !== 'ru' && detectedLang !== 'kk');
 
     if (isForeignPost) {
       const skillsPartEn = profile.skills?.length ? ` (${profile.skills.slice(0, 3).join(', ')})` : '';
-      return `Hi! Saw your post in ${ch} for a video editor. I specialize in retention-focused ${profile.specialization || 'YouTube & Shorts editing'}${skillsPartEn}. Portfolio: ${basePortfolio}/. Happy to cut a quick 30-sec sample — are you still hiring?`;
+      return `Hi! Saw your post in ${ch} for a video editor. I specialize in retention-focused ${profile.specialization || 'YouTube & Shorts editing'}${skillsPartEn}. Portfolio (${portfolioMatch.labelEn}): ${portfolioMatch.url}. Happy to cut a quick 30-sec sample — are you still hiring?`;
     }
 
-    const localePortfolio = detectedLang === 'kk' ? `${basePortfolio}/kz/` : `${basePortfolio}/ru/`;
     const skillsPart = profile.skills?.length ? `Работаю в ${profile.skills.slice(0, 3).join(', ')}.` : '';
-    return `Привет! Увидел заказ в ${ch}. Специализируюсь на ${profile.specialization || 'динамичном видеомонтаже'}. ${skillsPart} Портфолио: ${localePortfolio}. Готов сделать тестовый 30-сек фрагмент — ещё актуально?`;
-  }, [vacancy.channel, profile, region, detectedLang]);
+    return `Привет! Увидел заказ в ${ch}. Специализируюсь на ${profile.specialization || 'динамичном видеомонтаже'}. ${skillsPart} Подборка работ (${portfolioMatch.labelRu}): ${portfolioMatch.url}. Готов сделать тестовый 30-сек фрагмент — ещё актуально?`;
+  }, [vacancy.channel, profile, region, detectedLang, portfolioMatch]);
 
   const activeDraft = customDraft ?? initialDraft;
 
@@ -222,24 +233,37 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   };
 
   const cleanChannel = vacancy.channel.replace(/^@/, '');
+  const isReddit = vacancy.sourcePlatform === 'reddit' || vacancy.channel.startsWith('r/');
+  const isUpwork = vacancy.sourcePlatform === 'upwork' || vacancy.channel === 'Upwork';
+  const displaySourceLabel = isReddit || isUpwork ? vacancy.channel : `@${cleanChannel}`;
   const langLabel = LANG_LABELS[detectedLang as keyof typeof LANG_LABELS] || detectedLang?.toUpperCase();
 
   return (
     <div
       className={`group bg-surface hover:bg-surface-2/40 border ${
-        isHot ? 'border-danger/30' : 'border-border'
+        isHot ? 'border-danger/30' : isUpwork ? 'border-emerald-500/25' : isReddit ? 'border-orange-500/25' : 'border-border'
       } rounded-card p-4 space-y-3 transition-all duration-150`}
     >
       {/* Top Header Row */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2 min-w-0">
+          {isReddit && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-orange-300 bg-orange-500/15 px-1.5 py-0.2 rounded border border-orange-500/30">
+              Reddit [Hiring]
+            </span>
+          )}
+          {isUpwork && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-300 bg-emerald-500/15 px-1.5 py-0.2 rounded border border-emerald-500/30">
+              Upwork
+            </span>
+          )}
           <a
             href={vacancy.url}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs font-bold text-accent hover:underline flex items-center gap-1 truncate"
           >
-            <span>@{cleanChannel}</span>
+            <span>{displaySourceLabel}</span>
             <ExternalLink size={11} />
           </a>
           <span className="text-border">|</span>
@@ -302,6 +326,23 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {vacancy.upworkMeta && (
+            <span
+              className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border ${
+                vacancy.upworkMeta.roiScore >= 75
+                  ? 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30'
+                  : vacancy.upworkMeta.roiScore >= 55
+                  ? 'text-sky-300 bg-sky-500/15 border-sky-500/30'
+                  : vacancy.upworkMeta.roiScore >= 38
+                  ? 'text-amber-300 bg-amber-500/15 border-amber-500/30'
+                  : 'text-danger bg-danger/15 border-danger/30'
+              }`}
+              title={vacancy.upworkMeta.verdictRu}
+            >
+              ROI {vacancy.upworkMeta.roiScore}/100 · {vacancy.upworkMeta.connectsRequired || 0}C
+            </span>
+          )}
+
           {isHot ? (
             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-danger bg-danger/15 px-2 py-0.5 rounded border border-danger/30">
               <Flame size={12} />
