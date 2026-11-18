@@ -114,13 +114,22 @@ export const Vacancies: React.FC = () => {
     });
   };
 
-  // Channel polling & refresh with round-robin rotation
+  // Channel polling & refresh with round-robin rotation (stable reference, no infinite effect loop)
   const handleRefresh = useCallback(async () => {
     if (isRefreshingRef.current) return;
     isRefreshingRef.current = true;
 
-    const hiddenSet = new Set(hiddenChannels.map((c) => c.toLowerCase()));
-    const eligibleChannels = sources.filter(
+    const state = useVacanciesStore.getState();
+    const {
+      sources: currentSources,
+      scrapeOffset: currentOffset,
+      hiddenChannels: currentHidden,
+      includeKeywords: currentInclude,
+      excludeKeywords: currentExclude,
+    } = state;
+
+    const hiddenSet = new Set(currentHidden.map((c) => c.toLowerCase()));
+    const eligibleChannels = currentSources.filter(
       (s) =>
         s.enabled &&
         s.type !== 'group' &&
@@ -140,13 +149,13 @@ export const Vacancies: React.FC = () => {
     }
 
     const batchSize = 15;
-    const currentOffset = scrapeOffset % eligibleChannels.length;
+    const offset = currentOffset % eligibleChannels.length;
     const batchChannels: string[] = [];
     for (let i = 0; i < Math.min(batchSize, eligibleChannels.length); i++) {
-      const idx = (currentOffset + i) % eligibleChannels.length;
+      const idx = (offset + i) % eligibleChannels.length;
       batchChannels.push(eligibleChannels[idx].username);
     }
-    const nextOffset = (currentOffset + batchSize) % eligibleChannels.length;
+    const nextOffset = (offset + batchSize) % eligibleChannels.length;
     setScrapeOffset(nextOffset);
 
     setLoading(true);
@@ -177,8 +186,8 @@ export const Vacancies: React.FC = () => {
             region,
           } = computeVacancyRelevance(
             msg.text,
-            includeKeywords,
-            excludeKeywords,
+            currentInclude,
+            currentExclude,
             isWorkerLead,
             msg.postedAt,
             msg.channel
@@ -262,11 +271,6 @@ export const Vacancies: React.FC = () => {
       isRefreshingRef.current = false;
     }
   }, [
-    sources,
-    scrapeOffset,
-    hiddenChannels,
-    includeKeywords,
-    excludeKeywords,
     mergeNewVacancies,
     setLoading,
     setLastRefreshedAt,
@@ -276,9 +280,12 @@ export const Vacancies: React.FC = () => {
     notificationsEnabled,
   ]);
 
-  // Polling every 60s while tab is visible
+  const refreshRef = useRef(handleRefresh);
+  refreshRef.current = handleRefresh;
+
+  // Polling every 60s while tab is visible (runs once on mount, no endless loop)
   useEffect(() => {
-    handleRefresh();
+    refreshRef.current();
 
     let intervalId: any = null;
 
@@ -286,7 +293,7 @@ export const Vacancies: React.FC = () => {
       if (!intervalId) {
         intervalId = setInterval(() => {
           if (document.visibilityState === 'visible') {
-            handleRefresh();
+            refreshRef.current();
           }
         }, 60000);
       }
@@ -301,7 +308,7 @@ export const Vacancies: React.FC = () => {
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        handleRefresh();
+        refreshRef.current();
         startPolling();
       } else {
         stopPolling();
@@ -317,7 +324,7 @@ export const Vacancies: React.FC = () => {
       stopPolling();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [handleRefresh]);
+  }, []);
 
   const activeSourcesCount = useMemo(() => {
     return sources.filter((s) => s.enabled && s.region !== 'RU').length;
