@@ -32,7 +32,8 @@ test('1.3 Session token generation and verification', () => {
   assert.equal(verifySessionToken(tamperedPayload, secret), false, 'Tampered token must fail');
 
   // Tampered signature
-  const tamperedSig = `${parts[0]}.${parts[1]}.${parts[2].slice(0, -2)}aa`;
+  const flippedSuffix = parts[2].endsWith('aa') ? 'bb' : 'aa';
+  const tamperedSig = `${parts[0]}.${parts[1]}.${parts[2].slice(0, -2)}${flippedSuffix}`;
   assert.equal(verifySessionToken(tamperedSig, secret), false, 'Tampered signature must fail');
 
   // Expired token

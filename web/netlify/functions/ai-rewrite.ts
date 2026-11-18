@@ -8,6 +8,7 @@ import {
 } from './_shared/response';
 import { generateAiCompletion, sanitizeInput, wrapUserData, PROMPT_INJECTION_DEFENSE } from './_shared/ai';
 import { requireAuth } from './_shared/auth';
+import { detectTextLanguage } from '../../src/shared/translate.js';
 
 interface HandlerEvent {
   httpMethod: string;
@@ -26,10 +27,15 @@ interface RewriteBody {
   customProvider?: string;
 }
 
-const SYSTEM_PROMPT =
-  "Ты помогаешь видеомонтажёру писать холодные сообщения. Сделай текст короче, конкретнее, без лести и без слов 'услуги монтажа'. Сохрани все факты, таймкоды и вопрос в конце. " +
+const SYSTEM_PROMPT_RU =
+  "Ты помогаешь видеомонтажёру писать холодные сообщения. Сделай текст короче, конкретнее, без лести и без слов 'услуги монтажа'. Сохрани все факты, таймкоды и вопрос с нулевым трением в конце. " +
   PROMPT_INJECTION_DEFENSE +
-  " Верни только готовый текст сообщения.";
+  " Верни только готовый текст сообщения на русском языке.";
+
+const SYSTEM_PROMPT_EN =
+  "You help a video editor write sharp cold outreach messages and job replies in English. Make the message shorter, punchier, zero flattery, and never use the cliché 'video editing services'. Preserve all URLs, @handles, facts, timecodes, and keep a low-friction question at the end. " +
+  PROMPT_INJECTION_DEFENSE +
+  " Return ONLY the finished message text in English.";
 
 export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   const origin = event.headers?.origin || event.headers?.Origin;
@@ -79,10 +85,17 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   const cleanText = sanitizeInput(body.text, 5000);
   const clientName = body.leadContext?.name ? sanitizeInput(body.leadContext.name, 100) : '';
+  const detectedLang = detectTextLanguage(cleanText);
+  const isRussian = detectedLang === 'ru' || detectedLang === 'kk';
+  const systemPrompt = isRussian ? SYSTEM_PROMPT_RU : SYSTEM_PROMPT_EN;
 
-  const userPrompt = `Улучши следующее сообщение для клиента${
-    clientName ? ` (Клиент: ${clientName})` : ''
-  }:\n\n${wrapUserData(cleanText, 'PITCH_DRAFT')}`;
+  const userPrompt = isRussian
+    ? `Улучши следующее сообщение для клиента${
+        clientName ? ` (Клиент: ${clientName})` : ''
+      }:\n\n${wrapUserData(cleanText, 'PITCH_DRAFT')}`
+    : `Improve this outreach pitch for the client${
+        clientName ? ` (Client: ${clientName})` : ''
+      }:\n\n${wrapUserData(cleanText, 'PITCH_DRAFT')}`;
 
   const customKey = (
     event.headers?.['x-custom-ai-key'] ||
@@ -100,7 +113,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   try {
     const result = await generateAiCompletion(
-      SYSTEM_PROMPT,
+      systemPrompt,
       userPrompt,
       customKey ? { apiKey: customKey, provider: customProvider } : undefined
     );

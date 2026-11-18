@@ -6,6 +6,7 @@ import { TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions/index.js';
 import { NewMessage } from 'telegram/events/index.js';
 import { parseBudget } from './web/src/shared/budget.js';
+import { detectVacancyRegion } from './web/src/shared/regions.js';
 import {
   matchesVacancy,
   buildPostUrl,
@@ -141,7 +142,7 @@ function loadAllowedChats() {
     }
   }
 
-  // 3. Fallback: verified catalog (152 sources)
+  // 3. Fallback: verified EU/US/KZ catalog
   if (chats.size === 0) {
     try {
       const catalogPath = './web/src/shared/sources.catalog.json';
@@ -592,6 +593,14 @@ async function processIncomingMessage(message, chatMeta = {}) {
     return;
   }
 
+  const budget = parseBudget(message.text);
+  const detectedRegion = detectVacancyRegion(message.text, chatUsername);
+  if (detectedRegion === 'RU' || budget?.currency === 'RUB') {
+    filterStats.total++;
+    filterStats.reasons['excluded_ru_region'] = (filterStats.reasons['excluded_ru_region'] || 0) + 1;
+    return;
+  }
+
   const leadId = buildLeadId(rawChatId, message.id);
   const textHash = computeTextHash(message.text);
 
@@ -610,7 +619,6 @@ async function processIncomingMessage(message, chatMeta = {}) {
     message.id
   );
 
-  const budget = parseBudget(message.text);
   const postedAt = message.date
     ? new Date(message.date * 1000).toISOString()
     : new Date().toISOString();
@@ -622,6 +630,7 @@ async function processIncomingMessage(message, chatMeta = {}) {
     url: postUrl,
     matchedKeywords: matchResult.matched || [],
     budget,
+    region: detectedRegion,
     postedAt,
   };
 

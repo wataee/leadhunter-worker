@@ -239,30 +239,12 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return errorResponse(400, sizeValidation.error || 'Слишком большой запрос', null, origin);
   }
 
-  const hasAiKey = Boolean(
-    process.env.GEMINI_API_KEY?.trim() ||
-    process.env.GROQ_API_KEY?.trim() ||
-    process.env.OPENROUTER_API_KEY?.trim() ||
-    process.env.ANTHROPIC_API_KEY?.trim()
-  );
-
-  if (!hasAiKey) {
-    return jsonResponse(200, { enabled: false }, origin);
-  }
-
   let body: ScoreRequestBody;
   try {
     body = JSON.parse(event.body || '{}');
   } catch {
     return errorResponse(400, 'Некорректный JSON в теле запроса.', null, origin);
   }
-
-  const leads = Array.isArray(body.leads) ? body.leads.slice(0, 5) : [];
-  if (leads.length === 0) {
-    return errorResponse(400, 'Список leads пуст или не передан.', null, origin);
-  }
-
-  const userPrompt = buildUserPrompt(leads, body.examples);
 
   const customKey = (
     event.headers?.['x-custom-ai-key'] ||
@@ -277,6 +259,25 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     (body as any)?.customProvider ||
     ''
   ).trim();
+
+  const hasAiKey = Boolean(
+    customKey ||
+    process.env.GEMINI_API_KEY?.trim() ||
+    process.env.GROQ_API_KEY?.trim() ||
+    process.env.OPENROUTER_API_KEY?.trim() ||
+    process.env.ANTHROPIC_API_KEY?.trim()
+  );
+
+  if (!hasAiKey) {
+    return jsonResponse(200, { enabled: false }, origin);
+  }
+
+  const leads = Array.isArray(body.leads) ? body.leads.slice(0, 5) : [];
+  if (leads.length === 0) {
+    return errorResponse(400, 'Список leads пуст или не передан.', null, origin);
+  }
+
+  const userPrompt = buildUserPrompt(leads, body.examples);
 
   let completionResult;
   try {

@@ -163,6 +163,20 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   const webhookSecretConfigured = Boolean(process.env.WEBHOOK_SECRET?.trim());
   const telegramChatIdConfigured = Boolean(chatId);
   const youtubeConfigured = Boolean(process.env.YOUTUBE_API_KEY?.trim());
+  const providers = {
+    gemini: Boolean(process.env.GEMINI_API_KEY?.trim()),
+    groq: Boolean(process.env.GROQ_API_KEY?.trim()),
+    openrouter: Boolean(process.env.OPENROUTER_API_KEY?.trim()),
+    anthropic: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
+  };
+  const models = {
+    gemini: process.env.GEMINI_MODEL?.trim() || 'gemini-2.5-flash',
+    groq: process.env.GROQ_MODEL?.trim() || 'llama-3.3-70b-versatile',
+    openrouter: process.env.OPENROUTER_MODEL?.trim() || 'meta-llama/llama-3.3-70b-instruct:free',
+  };
+  const aiConfigured = Boolean(
+    providers.gemini || providers.groq || providers.openrouter || providers.anthropic
+  );
 
   // Общий статус системы
   let overallStatus: 'ok' | 'degraded' | 'error' = 'ok';
@@ -182,6 +196,11 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     200,
     {
       status: overallStatus,
+      youtube: youtubeConfigured,
+      telegram: telegramBot.status === 'ok',
+      ai: aiConfigured,
+      providers,
+      models,
       telegramBot,
       telegramWebhook,
       redis,

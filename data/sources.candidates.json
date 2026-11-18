@@ -1,2580 +1,1340 @@
 [
   {
-    "id": "prodjob",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://vc.ru/media/765432-video-jobs",
-    "tags": [
-      "video",
-      "youtube",
-      "production",
-      "premiere"
-    ]
-  },
-  {
-    "id": "editors_video",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@editors_video",
-    "tags": [
-      "editing",
-      "reels",
-      "youtube",
-      "freelance"
-    ]
-  },
-  {
-    "id": "reelsmakervacancy",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@reelsmakervacancy",
-    "tags": [
-      "reels",
-      "shorts",
-      "tiktok",
-      "capcut"
-    ]
-  },
-  {
-    "id": "vakansii_reelsmaker",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@vakansii_reelsmaker",
-    "tags": [
-      "reels",
-      "editing",
-      "video",
-      "urgent"
-    ]
-  },
-  {
-    "id": "motionhunter",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@motionhunter",
-    "tags": [
-      "motion",
-      "aftereffects",
-      "3d",
-      "animation"
-    ]
-  },
-  {
-    "id": "mediajobs_ru",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@mediajobs_ru",
-    "tags": [
-      "media",
-      "tv",
-      "production",
-      "video"
-    ]
-  },
-  {
-    "id": "jump_cut",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/jump_cut",
-    "tags": [
-      "editing",
-      "director",
-      "montage",
-      "community"
-    ]
-  },
-  {
-    "id": "getjob_videoedit",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@getjob_videoedit",
-    "tags": [
-      "editing",
-      "reels",
-      "hiring",
-      "video"
-    ]
-  },
-  {
-    "id": "cgfreelance",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@cgfreelance",
-    "tags": [
-      "cg",
-      "vfx",
-      "motion",
-      "freelance"
-    ]
-  },
-  {
-    "id": "animator_jobs",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@animator_jobs",
-    "tags": [
-      "animation",
-      "2d",
-      "3d",
-      "motion"
-    ]
-  },
-  {
-    "id": "searcheditorr",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@SearchEditorr",
-    "tags": [
-      "video",
-      "editing",
-      "orders",
-      "freelance"
-    ]
-  },
-  {
-    "id": "real_video_client",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@real_video_client",
-    "tags": [
-      "video",
-      "ai",
-      "montage",
-      "hiring"
-    ]
-  },
-  {
-    "id": "designer_work",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@designer_work",
-    "tags": [
-      "design",
-      "animation",
-      "visual",
-      "remote"
-    ]
-  },
-  {
-    "id": "designerworkchat",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@designerworkchat",
-    "tags": [
-      "design",
-      "freelance",
-      "motion",
-      "chat"
-    ]
-  },
-  {
-    "id": "designhunters",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@designhunters",
-    "tags": [
-      "design",
-      "creative",
-      "motion",
-      "video"
-    ]
-  },
-  {
-    "id": "render_ru",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@render_ru",
-    "tags": [
-      "3d",
-      "vfx",
-      "cgi",
-      "motion"
-    ]
-  },
-  {
-    "id": "designbirzha",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@designbirzha",
-    "tags": [
-      "design",
-      "orders",
-      "projects",
-      "freelance"
-    ]
-  },
-  {
-    "id": "fordesigner",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@fordesigner",
-    "tags": [
-      "design",
-      "art",
-      "creative",
-      "video"
-    ]
-  },
-  {
-    "id": "search_infografika",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@search_infografika",
-    "tags": [
-      "infographics",
-      "motion",
-      "orders",
-      "wb"
-    ]
-  },
-  {
-    "id": "motion_hub",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/motion_hub",
-    "tags": [
-      "motion",
-      "animation",
-      "aftereffects"
-    ]
-  },
-  {
-    "id": "montazh_pro",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/montazh_pro",
-    "tags": [
-      "montage",
-      "pro",
-      "editing",
-      "workflow"
-    ]
-  },
-  {
-    "id": "tvjobs",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/tvjobs",
-    "tags": [
-      "tv",
-      "broadcast",
-      "video",
-      "crew"
-    ]
-  },
-  {
-    "id": "cgeducation",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/cgeducation",
-    "tags": [
-      "cg",
-      "education",
-      "vfx",
-      "3d"
-    ]
-  },
-  {
-    "id": "kinomod",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/kinomod",
-    "tags": [
-      "cinema",
-      "video",
-      "editing",
-      "production"
-    ]
-  },
-  {
-    "id": "workasap",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@workasap",
-    "tags": [
-      "media",
-      "digital",
-      "video",
-      "production"
-    ]
-  },
-  {
-    "id": "reels_jobs",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/reels_jobs",
-    "tags": [
-      "reels",
-      "shorts",
-      "vertical",
-      "tiktok"
-    ]
-  },
-  {
-    "id": "youtube_jobs",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/youtube_jobs",
-    "tags": [
-      "youtube",
-      "editing",
-      "production",
-      "hiring"
-    ]
-  },
-  {
-    "id": "sounddesign",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/sounddesign",
-    "tags": [
-      "sound",
-      "audio",
-      "sfx",
-      "video"
-    ]
-  },
-  {
-    "id": "aftereffects",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/aftereffects",
-    "tags": [
-      "aftereffects",
-      "motion",
-      "vfx",
-      "animation"
-    ]
-  },
-  {
-    "id": "capcut_video",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/capcut_video",
-    "tags": [
-      "capcut",
-      "mobile",
-      "reels",
-      "editing"
-    ]
-  },
-  {
-    "id": "videomakers",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/videomakers",
-    "tags": [
-      "videomaker",
-      "clips",
-      "shooting",
-      "production"
-    ]
-  },
-  {
-    "id": "youtube_creators",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/youtube_creators",
-    "tags": [
-      "youtube",
-      "creators",
-      "video",
-      "editing"
-    ]
-  },
-  {
-    "id": "colorpost",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@colorpost",
-    "tags": [
-      "color",
-      "grading",
-      "davinci",
-      "postproduction"
-    ]
-  },
-  {
-    "id": "cinema4dchat",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@Cinema4DChat",
-    "tags": [
-      "c4d",
-      "3d",
-      "motion",
-      "vfx"
-    ]
-  },
-  {
-    "id": "blender_ru_talks",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@blender_ru_talks",
-    "tags": [
-      "blender",
-      "3d",
-      "render",
-      "cgi"
-    ]
-  },
-  {
-    "id": "frilans",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@frilans",
-    "tags": [
-      "freelance",
-      "video",
-      "editing",
-      "design"
-    ]
-  },
-  {
-    "id": "vg_jobs",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@vg_jobs",
-    "tags": [
-      "videography",
-      "editing",
-      "production",
-      "camera"
-    ]
-  },
-  {
-    "id": "motion_design_chat",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/motion_design_chat",
-    "tags": [
-      "motion",
-      "chat",
-      "aftereffects",
-      "freelance"
-    ]
-  },
-  {
-    "id": "vfx_job",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/vfx_job",
-    "tags": [
-      "vfx",
-      "cgi",
-      "compositing",
-      "editing"
-    ]
-  },
-  {
-    "id": "sound_job",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/sound_job",
-    "tags": [
-      "sound",
-      "audio",
-      "sfx",
-      "postproduction"
-    ]
-  },
-  {
-    "id": "video_work",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/video_work",
-    "tags": [
-      "video",
-      "work",
-      "clips",
-      "editing"
-    ]
-  },
-  {
-    "id": "reels_hunter",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/reels_hunter",
-    "tags": [
-      "reels",
-      "ideas",
-      "vertical",
-      "shorts"
-    ]
-  },
-  {
-    "id": "cg_job",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/cg_job",
-    "tags": [
-      "cg",
-      "3d",
-      "animation",
-      "vfx"
-    ]
-  },
-  {
-    "id": "camera_crew",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/camera_crew",
-    "tags": [
-      "camera",
-      "crew",
-      "lighting",
-      "production"
-    ]
-  },
-  {
-    "id": "videomontazh_pro",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/videomontazh_pro",
-    "tags": [
-      "editing",
-      "premiere",
-      "davinci",
-      "video"
-    ]
-  },
-  {
-    "id": "reels_makers_hub",
-    "category": "jobs_video",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/reels_makers_hub",
-    "tags": [
-      "reels",
-      "shorts",
-      "editing",
-      "creators"
-    ]
-  },
-  {
-    "id": "theyseeku",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://vc.ru/theyseeku",
-    "tags": [
-      "remote",
-      "jobs",
-      "digital",
-      "verified"
-    ]
-  },
-  {
-    "id": "normrabota",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://vc.ru/normrabota",
-    "tags": [
-      "digital",
-      "media",
-      "creative",
-      "design"
-    ]
-  },
-  {
-    "id": "tgwork",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://vc.ru/tgwork",
-    "tags": [
-      "remote",
-      "freelance",
-      "projects",
-      "work"
-    ]
-  },
-  {
-    "id": "zapwork",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@zapwork",
-    "tags": [
-      "remote",
-      "work",
-      "freelance",
-      "digital"
-    ]
-  },
-  {
-    "id": "vdhl_good",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@vdhl_good",
-    "tags": [
-      "creative",
-      "media",
-      "design",
-      "culture"
-    ]
-  },
-  {
-    "id": "careerspace",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/careerspace",
-    "tags": [
-      "career",
-      "startups",
-      "remote",
-      "jobs"
-    ]
-  },
-  {
-    "id": "naudalenkebro",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/naudalenkebro",
-    "tags": [
-      "remote",
-      "freelance",
-      "finder",
-      "projects"
-    ]
-  },
-  {
-    "id": "marketing_jobs",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@marketing_jobs",
-    "tags": [
-      "marketing",
-      "content",
-      "smm",
-      "creative"
-    ]
-  },
-  {
-    "id": "zablik_orders",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@zablik_orders",
-    "tags": [
-      "orders",
-      "freelance",
-      "kwork",
-      "flru"
-    ]
-  },
-  {
-    "id": "kwork_market",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@kwork_market",
-    "tags": [
-      "kwork",
-      "freelance",
-      "orders",
-      "bazaar"
-    ]
-  },
-  {
-    "id": "it_vakansii_jobs",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@it_vakansii_jobs",
-    "tags": [
-      "digital",
-      "remote",
-      "seti",
-      "jobs"
-    ]
-  },
-  {
-    "id": "zarubezhom_jobs",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@zarubezhom_jobs",
-    "tags": [
-      "relocation",
-      "remote",
-      "connectable",
-      "global"
-    ]
-  },
-  {
-    "id": "jobforjunior",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@jobforjunior",
-    "tags": [
-      "junior",
-      "remote",
-      "digital",
-      "entry"
-    ]
-  },
-  {
-    "id": "forproducts",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@forproducts",
-    "tags": [
-      "product",
-      "project",
-      "digital",
-      "media"
-    ]
-  },
-  {
-    "id": "foranalysts",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@foranalysts",
-    "tags": [
-      "analytics",
-      "digital",
-      "remote",
-      "data"
-    ]
-  },
-  {
-    "id": "forhr",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@forhr",
-    "tags": [
-      "hr",
-      "recruiting",
-      "remote",
-      "team"
-    ]
-  },
-  {
-    "id": "forallmarketing",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@forallmarketing",
-    "tags": [
-      "marketing",
-      "smm",
-      "pr",
-      "media"
-    ]
-  },
-  {
-    "id": "freelance_orders",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/freelance_orders",
-    "tags": [
-      "freelance",
-      "projects",
-      "orders",
-      "direct"
-    ]
-  },
-  {
-    "id": "freelancetavern",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/freelancetavern",
-    "tags": [
-      "freelance",
-      "tavern",
-      "remote",
-      "gigs"
-    ]
-  },
-  {
-    "id": "freelance_daily",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/freelance_daily",
-    "tags": [
-      "freelance",
-      "daily",
-      "home",
-      "remote"
-    ]
-  },
-  {
-    "id": "remote_ru",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/remote_ru",
-    "tags": [
-      "remote",
-      "vacancies",
-      "online",
-      "premium"
-    ]
-  },
-  {
-    "id": "distantsiya",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/distantsiya",
-    "tags": [
-      "distance",
-      "remote",
-      "projects",
-      "digital"
-    ]
-  },
-  {
-    "id": "online_work",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/online_work",
-    "tags": [
-      "online",
-      "work",
-      "remote",
-      "money"
-    ]
-  },
-  {
-    "id": "telework",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/telework",
-    "tags": [
-      "telework",
-      "telegram",
-      "jobs",
-      "home"
-    ]
-  },
-  {
-    "id": "freelance_leads",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/freelance_leads",
-    "tags": [
-      "leads",
-      "freelance",
-      "gigs",
-      "direct"
-    ]
-  },
-  {
-    "id": "digital_vacancies",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/digital_vacancies",
-    "tags": [
-      "digital",
-      "vacancies",
-      "remote",
-      "chat"
-    ]
-  },
-  {
-    "id": "creative_freelance",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/creative_freelance",
-    "tags": [
-      "creative",
-      "freelance",
-      "motion",
-      "orders"
-    ]
-  },
-  {
-    "id": "freelancers_club",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/freelancers_club",
-    "tags": [
-      "freelancers",
-      "club",
-      "experience",
-      "gigs"
-    ]
-  },
-  {
-    "id": "remote_career",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/remote_career",
-    "tags": [
-      "career",
-      "remote",
-      "jobs",
-      "global"
-    ]
-  },
-  {
-    "id": "gig_economy",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/gig_economy",
-    "tags": [
-      "gig",
-      "economy",
-      "parttime",
-      "freelance"
-    ]
-  },
-  {
-    "id": "freelance_daily_jobs",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/freelance_daily_jobs",
-    "tags": [
-      "freelance",
-      "daily",
-      "orders",
-      "tasks"
-    ]
-  },
-  {
-    "id": "freelance_feed",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/freelance_feed",
-    "tags": [
-      "feed",
-      "orders",
-      "gigs",
-      "direct"
-    ]
-  },
-  {
-    "id": "remote_freelance_ru",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/remote_freelance_ru",
-    "tags": [
-      "freelance",
-      "remote",
-      "russia",
-      "projects"
-    ]
-  },
-  {
-    "id": "workzavr",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@workzavr",
-    "tags": [
-      "workzavr",
-      "freelance",
-      "workzilla",
-      "orders"
-    ]
-  },
-  {
-    "id": "takoyfreelance",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@takoyfreelance",
-    "tags": [
-      "freelance",
-      "remote",
-      "projects",
-      "media"
-    ]
-  },
-  {
-    "id": "remotejobs_ru",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/remotejobs_ru",
-    "tags": [
-      "remote",
-      "jobs",
-      "home",
-      "vacancies"
-    ]
-  },
-  {
-    "id": "remote_work_ru",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/remote_work_ru",
-    "tags": [
-      "remote",
-      "guides",
-      "tools",
-      "work"
-    ]
-  },
-  {
-    "id": "digital_freelance",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/digital_freelance",
-    "tags": [
-      "digital",
-      "freelance",
-      "telegram",
-      "gigs"
-    ]
-  },
-  {
-    "id": "work_from_home",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/work_from_home",
-    "tags": [
-      "wfh",
-      "home",
-      "freelance",
-      "online"
-    ]
-  },
-  {
-    "id": "freelance_order",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/freelance_order",
-    "tags": [
-      "orders",
-      "freelance",
-      "tasks",
-      "contracts"
-    ]
-  },
-  {
-    "id": "designer_jobs",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/designer_jobs",
-    "tags": [
-      "design",
-      "jobs",
-      "freelance",
-      "orders"
-    ]
-  },
-  {
-    "id": "remotelead",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/remotelead",
-    "tags": [
-      "remote",
-      "lead",
-      "tech",
-      "contracts"
-    ]
-  },
-  {
-    "id": "freelance_leads_ru",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/freelance_leads_ru",
-    "tags": [
-      "freelance",
-      "leads",
-      "remote",
-      "clients"
-    ]
-  },
-  {
-    "id": "remote_work_hub_ru",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/remote_work_hub_ru",
-    "tags": [
-      "remote",
-      "hub",
-      "vacancies",
-      "home"
-    ]
-  },
-  {
-    "id": "motiontut",
+    "username": "premiere_pro",
+    "region": "US",
     "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@MotionTut",
-    "tags": [
-      "motion",
-      "chat",
-      "aftereffects",
-      "3d"
-    ]
+    "title": "Premiere Pro | Motion Design"
   },
   {
-    "id": "motiongallerytut",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@MotionGalleryTut",
-    "tags": [
-      "gallery",
-      "motion",
-      "inspiration",
-      "showcase"
-    ]
+    "username": "digital_iskra",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "DIGITAL ВАКАНСИИ KZ | СММ | ДИЗАЙН | ТАРГЕТ | МОБИЛОГРАФИЯ | КАЗАХСТАН | Iskra Station"
   },
   {
-    "id": "a_study",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/channel/@a_study",
-    "tags": [
-      "tutorials",
-      "aftereffects",
-      "motion",
-      "plugins"
-    ]
-  },
-  {
-    "id": "premierepro_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/premierepro_chat",
-    "tags": [
-      "premiere",
-      "chat",
-      "editing",
-      "troubleshooting"
-    ]
-  },
-  {
-    "id": "aftereffects_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/aftereffects_chat",
-    "tags": [
-      "aftereffects",
-      "expressions",
-      "ae",
-      "motion"
-    ]
-  },
-  {
-    "id": "montazh_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/montazh_chat",
-    "tags": [
-      "montage",
-      "editing",
-      "community",
-      "directors"
-    ]
-  },
-  {
-    "id": "c4d_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/c4d_chat",
-    "tags": [
-      "c4d",
-      "3d",
-      "motion",
-      "octane"
-    ]
-  },
-  {
-    "id": "sound_design_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/sound_design_chat",
-    "tags": [
-      "sound",
-      "audio",
-      "sfx",
-      "mixing"
-    ]
-  },
-  {
-    "id": "davinci_resolve_ru",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/davinci_resolve_ru",
-    "tags": [
-      "davinci",
-      "resolve",
-      "color",
-      "fusion"
-    ]
-  },
-  {
-    "id": "editing_tips",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/editing_tips",
-    "tags": [
-      "editing",
-      "tips",
-      "tutorials",
-      "guides"
-    ]
-  },
-  {
-    "id": "blender_ru",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/blender_ru",
-    "tags": [
-      "blender",
-      "3d",
-      "community",
-      "render"
-    ]
-  },
-  {
-    "id": "motion_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/motion_chat",
-    "tags": [
-      "motion",
-      "cup",
-      "animation",
-      "chat"
-    ]
-  },
-  {
-    "id": "cg_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/cg_chat",
-    "tags": [
-      "cg",
-      "chat",
-      "3d",
-      "vfx"
-    ]
-  },
-  {
-    "id": "filmmakers_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/filmmakers_chat",
-    "tags": [
-      "videographers",
-      "filmmakers",
-      "community",
-      "development"
-    ]
-  },
-  {
-    "id": "motion_community",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/motion_community",
-    "tags": [
-      "motion",
-      "community",
-      "2d",
-      "3d"
-    ]
-  },
-  {
-    "id": "cgi_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/cgi_chat",
-    "tags": [
-      "cgi",
-      "chat",
-      "vfx",
-      "compositing"
-    ]
-  },
-  {
-    "id": "director_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/director_chat",
-    "tags": [
-      "director",
-      "commercial",
-      "production",
-      "chat"
-    ]
-  },
-  {
-    "id": "camera_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/camera_chat",
-    "tags": [
-      "camera",
-      "operators",
-      "lighting",
-      "gear"
-    ]
-  },
-  {
-    "id": "ae_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/ae_chat",
-    "tags": [
-      "aftereffects",
-      "motion",
-      "plugins",
-      "chat"
-    ]
-  },
-  {
-    "id": "blender_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/blender_chat",
-    "tags": [
-      "blender",
-      "modeling",
-      "texturing",
-      "chat"
-    ]
-  },
-  {
-    "id": "audio_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/audio_chat",
-    "tags": [
-      "audio",
-      "sound",
-      "recording",
-      "voice"
-    ]
-  },
-  {
-    "id": "video_community",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/video_community",
-    "tags": [
-      "video",
-      "community",
-      "cinema",
-      "films"
-    ]
-  },
-  {
-    "id": "colorist_chat",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/colorist_chat",
-    "tags": [
-      "colorist",
-      "visual",
-      "craft",
-      "chat"
-    ]
-  },
-  {
-    "id": "davinci_resolve",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/davinci_resolve",
-    "tags": [
-      "davinci",
-      "grading",
-      "color",
-      "pro"
-    ]
-  },
-  {
-    "id": "videoeditors",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/videoeditors",
-    "tags": [
-      "premiere",
-      "montage",
-      "community",
-      "adobe"
-    ]
-  },
-  {
-    "id": "animation_ru",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/animation_ru",
-    "tags": [
-      "animation",
-      "2d",
-      "motion",
-      "cartoons"
-    ]
-  },
-  {
-    "id": "filmmakers_russia",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/filmmakers_russia",
-    "tags": [
-      "filmmakers",
-      "video",
-      "production",
-      "russia"
-    ]
-  },
-  {
-    "id": "capcut_masters",
-    "category": "editors_community",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/capcut_masters",
-    "tags": [
-      "capcut",
-      "video",
-      "mobile",
-      "reels"
-    ]
-  },
-  {
-    "id": "instalogiya_chat",
+    "username": "digitalbussinesskz",
+    "region": "KZ",
     "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://exlibris.ru/telegram-chats",
-    "tags": [
-      "bloggers",
-      "clients",
-      "marketing",
-      "reels"
-    ]
+    "title": "DigitalBusiness.kz"
   },
   {
-    "id": "svobonayakassa",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://exlibris.ru/telegram-chats",
-    "tags": [
-      "advertising",
-      "bloggers",
-      "integration",
-      "media"
-    ]
+    "username": "cresume",
+    "region": "EU",
+    "category": "jobs_video",
+    "title": "Крезюме Вакансії"
   },
   {
-    "id": "badlistblogger",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://exlibris.ru/telegram-chats",
-    "tags": [
-      "bloggers",
-      "verify",
-      "contracts",
-      "safety"
-    ]
+    "username": "almaty_rabotao",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Алматы — Вакансии Работа"
   },
   {
-    "id": "reels_for_business",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/reels_for_business",
-    "tags": [
-      "reels",
-      "business",
-      "clients",
-      "sales"
-    ]
+    "username": "almaty_rabota_v",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "Алматы Работа"
   },
   {
-    "id": "otzovik_blogger",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://exlibris.ru/telegram-chats",
-    "tags": [
-      "reviews",
-      "bloggers",
-      "reputation",
-      "clients"
-    ]
-  },
-  {
-    "id": "fromberek",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://exlibris.ru/telegram-chats",
-    "tags": [
-      "blogging",
-      "pr",
-      "experts",
-      "content"
-    ]
-  },
-  {
-    "id": "infobiz_chat",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@infobiz_chat",
-    "tags": [
-      "infobiz",
-      "launches",
-      "experts",
-      "funnels"
-    ]
-  },
-  {
-    "id": "wildberries_video",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@wildberries_video",
-    "tags": [
-      "wb",
-      "ozon",
-      "reviews",
-      "catalog"
-    ]
-  },
-  {
-    "id": "biznes_chat",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@biznes_chat",
-    "tags": [
-      "business",
-      "networking",
-      "entrepreneurs",
-      "leads"
-    ]
-  },
-  {
-    "id": "freelead",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@freelead",
-    "tags": [
-      "entrepreneurs",
-      "sales",
-      "marketing",
-      "business"
-    ]
-  },
-  {
-    "id": "infobizz1",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@infobizz1",
-    "tags": [
-      "infobiz",
-      "online_schools",
-      "producers",
-      "getcourse"
-    ]
-  },
-  {
-    "id": "blogerytut",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@blogerytut",
-    "tags": [
-      "bloggers",
-      "creators",
-      "advertising",
-      "collab"
-    ]
-  },
-  {
-    "id": "youtube_blogeri_chat",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@youtube_blogeri_chat",
-    "tags": [
-      "youtube",
-      "bloggers",
-      "hiring",
-      "channel"
-    ]
-  },
-  {
-    "id": "youtube_talks_ru",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@youtube_talks_ru",
-    "tags": [
-      "youtube",
-      "talks",
-      "promotion",
-      "editors"
-    ]
-  },
-  {
-    "id": "infobiz_ru",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@infobiz_ru",
-    "tags": [
-      "infobiz",
-      "work",
-      "projects",
-      "funnels"
-    ]
-  },
-  {
-    "id": "bloggers_chat",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@bloggers_chat",
-    "tags": [
-      "bloggers",
-      "chat",
-      "influence",
-      "content"
-    ]
-  },
-  {
-    "id": "smm_chat",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://tgstat.ru/chat/@smm_chat",
-    "tags": [
-      "smm",
-      "telegram",
-      "instagram",
-      "marketing"
-    ]
-  },
-  {
-    "id": "target_chat",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/target_chat",
-    "tags": [
-      "target",
-      "marketers",
-      "traffic",
-      "creatives"
-    ]
-  },
-  {
-    "id": "wb_chat",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/wb_chat",
-    "tags": [
-      "wildberries",
-      "sellers",
-      "marketplaces",
-      "video"
-    ]
-  },
-  {
-    "id": "ozon_chat",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/ozon_chat",
-    "tags": [
-      "ozon",
-      "sellers",
-      "ecommerce",
-      "creatives"
-    ]
-  },
-  {
-    "id": "business_chat_ru",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/business_chat_ru",
-    "tags": [
-      "business",
-      "networking",
-      "entrepreneurs",
-      "leads"
-    ]
-  },
-  {
-    "id": "startups_chat",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/startups_chat",
-    "tags": [
-      "startups",
-      "pitch",
-      "founders",
-      "video"
-    ]
-  },
-  {
-    "id": "ecommerce_chat",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/ecommerce_chat",
-    "tags": [
-      "ecommerce",
-      "business",
-      "sales",
-      "products"
-    ]
-  },
-  {
-    "id": "reels_community",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/reels_community",
-    "tags": [
-      "reels",
-      "community",
-      "growth",
-      "views"
-    ]
-  },
-  {
-    "id": "podcasts_chat",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/podcasts_chat",
-    "tags": [
-      "podcasts",
-      "audio",
-      "video",
-      "production"
-    ]
-  },
-  {
-    "id": "producers_chat",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/producers_chat",
-    "tags": [
-      "producers",
-      "edtech",
-      "launches",
-      "media"
-    ]
-  },
-  {
-    "id": "infobiz_community",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/infobiz_community",
-    "tags": [
-      "infobiz",
-      "marketing",
-      "experts",
-      "launches"
-    ]
-  },
-  {
-    "id": "youtube_creators_hub",
-    "category": "clients_entrepreneurs",
-    "language": "ru",
-    "discoveredFrom": "https://t.me/youtube_creators_hub",
-    "tags": [
-      "youtube",
-      "creators",
-      "hub",
-      "production"
-    ]
-  },
-  {
-    "id": "remotejobs",
+    "username": "remotejobss",
+    "region": "US",
     "category": "international_en",
-    "language": "en",
-    "discoveredFrom": "https://t.me/remotejobs",
-    "tags": [
-      "remote",
-      "worldwide",
-      "jobs",
-      "contracts"
-    ]
+    "title": "Remote Jobs"
   },
   {
-    "id": "cryptojobs",
-    "category": "international_en",
-    "language": "en",
-    "discoveredFrom": "https://t.me/cryptojobs",
-    "tags": [
-      "crypto",
-      "web3",
-      "media",
-      "video"
-    ]
-  },
-  {
-    "id": "crypto_jobs",
-    "category": "international_en",
-    "language": "en",
-    "discoveredFrom": "https://t.me/crypto_jobs",
-    "tags": [
-      "crypto",
-      "jobs",
-      "remote",
-      "blockchain"
-    ]
-  },
-  {
-    "id": "remoteok",
-    "category": "international_en",
-    "language": "en",
-    "discoveredFrom": "https://t.me/remoteok",
-    "tags": [
-      "remoteok",
-      "worldwide",
-      "tech",
-      "creative"
-    ]
-  },
-  {
-    "id": "cryptojobslist",
-    "category": "international_en",
-    "language": "en",
-    "discoveredFrom": "https://t.me/cryptojobslist",
-    "tags": [
-      "web3",
-      "blockchain",
-      "remote",
-      "hiring"
-    ]
-  },
-  {
-    "id": "relocateme",
-    "category": "international_en",
-    "language": "en",
-    "discoveredFrom": "https://t.me/relocateme",
-    "tags": [
-      "relocation",
-      "jobs",
-      "global",
-      "abroad"
-    ]
-  },
-  {
-    "id": "techjobs_daily",
-    "category": "international_en",
-    "language": "en",
-    "discoveredFrom": "https://t.me/techjobs_daily",
-    "tags": [
-      "tech",
-      "daily",
-      "jobs",
-      "remote"
-    ]
-  },
-  {
-    "id": "global_work",
-    "category": "international_en",
-    "language": "en",
-    "discoveredFrom": "https://t.me/global_work",
-    "tags": [
-      "global",
-      "work",
-      "contracts",
-      "freelance"
-    ]
-  },
-  {
-    "id": "english_jobs",
-    "category": "international_en",
-    "language": "en",
-    "discoveredFrom": "https://t.me/english_jobs",
-    "tags": [
-      "english",
-      "international",
-      "jobs",
-      "remote"
-    ]
-  },
-  {
-    "id": "remote_work_global",
-    "category": "international_en",
-    "language": "en",
-    "discoveredFrom": "https://t.me/remote_work_global",
-    "tags": [
-      "remote",
-      "global",
-      "portal",
-      "freelance"
-    ]
-  },
-  {
-    "id": "freelancers",
-    "category": "international_en",
-    "language": "en",
-    "discoveredFrom": "https://t.me/freelancers",
-    "tags": [
-      "freelancers",
-      "worldwide",
-      "gigs",
-      "projects"
-    ]
-  },
-  {
-    "id": "web3jobs",
-    "category": "international_en",
-    "language": "en",
-    "discoveredFrom": "https://t.me/web3jobs",
-    "tags": [
-      "web3",
-      "crypto",
-      "remote",
-      "worldwide"
-    ]
-  },
-  {
-    "id": "dzhmaterials",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "templates",
-      "video",
-      "editing"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "capcut_futazhi",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "capcut",
-      "templates",
-      "reels"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "freelanceanchor",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "video",
-      "freelance",
-      "montage"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "videoediting_ideas",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "video",
-      "ideas",
-      "reels"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "belinkovna",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "reels",
-      "montage",
-      "mobile"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "reelsbypushkareva",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "reels",
-      "video",
-      "montage"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "premierepro_templates",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "premiere",
-      "templates",
-      "video"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "reels_production",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "reels",
-      "production",
-      "video"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "vfx_artist",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "vfx",
-      "cgi",
-      "motion"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "reels_montazh",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "reels",
-      "montazh",
-      "orders"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "montazh_rabota",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "montazh",
-      "rabota",
-      "video"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "creators_market",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "creators",
-      "video",
-      "market"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "cg_jobs",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "cg",
-      "vfx",
-      "animation"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "videoboy_edit",
+    "username": "skwanggur",
+    "region": "KZ",
     "category": "editors_community",
-    "language": "ru",
-    "tags": [
-      "community",
-      "video",
-      "chat"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
+    "title": "@kzcleve | preset&#33;"
   },
   {
-    "id": "aftereffects_free",
+    "username": "designervsekz",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "ПРОЕКТИРОВЩИКИ/KZ"
+  },
+  {
+    "username": "jobforukrainians",
+    "region": "EU",
     "category": "editors_community",
-    "language": "ru",
-    "tags": [
-      "aftereffects",
-      "free",
-      "community"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
+    "title": "JOB for Ukrainians"
   },
   {
-    "id": "blender_3d_ru",
+    "username": "jobs_in_european_countries",
+    "region": "EU",
+    "category": "jobs_video",
+    "title": "Jobs in Europe"
+  },
+  {
+    "username": "product_jobs",
+    "region": "US",
+    "category": "jobs_remote_freelance",
+    "title": "Вакансии для продактов и проджектов"
+  },
+  {
+    "username": "bluescreenkz",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "bluescreen.kz"
+  },
+  {
+    "username": "cryptojobslist",
+    "region": "US",
     "category": "editors_community",
-    "language": "ru",
-    "tags": [
-      "blender",
-      "3d",
-      "community"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
+    "title": "CryptoJobsList | Web3 Jobs"
   },
   {
-    "id": "blender3d_chat",
+    "username": "workersinlondon",
+    "region": "EU",
+    "category": "jobs_video",
+    "title": "Chat №1 JOBS in LONDON/ London's Chats"
+  },
+  {
+    "username": "smartrecruit_deutschland",
+    "region": "EU",
+    "category": "jobs_video",
+    "title": "Работа в Германии / Arbeit in Deutschland"
+  },
+  {
+    "username": "rabota_astanau",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Вакансии в Астане"
+  },
+  {
+    "username": "zhumys_astana_kz",
+    "region": "KZ",
     "category": "editors_community",
-    "language": "ru",
-    "tags": [
-      "blender",
-      "3d",
-      "chat"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
+    "title": "Работа в Астане | Жұмыс"
   },
   {
-    "id": "design_careers",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "design",
-      "careers",
-      "jobs"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "uiux_job",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "design",
-      "uiux",
-      "jobs"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "workhome",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "remote",
-      "freelance",
-      "home"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "freelancce",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "freelance",
-      "remote",
-      "jobs"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "sova_freelance",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "freelance",
-      "orders",
-      "remote"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "easy_wrk",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "freelance",
-      "easy",
-      "remote"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "startfreelancer",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "freelance",
-      "start",
-      "remote"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "work_remote_ru",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "remote",
-      "work",
-      "freelance"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "freelance_tg",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "freelance",
-      "orders",
-      "work"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "remote_work_it",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "remote",
-      "it",
-      "freelance"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "digital_jobs_ru",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "digital",
-      "jobs",
-      "remote"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "remote_russia",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "remote",
-      "russia",
-      "work"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "zakazy_freelance",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "freelance",
-      "zakazy",
-      "remote"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "frilans_zakazy",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "frilans",
-      "zakazy",
-      "work"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "birzha_freelance",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "birzha",
-      "freelance",
-      "orders"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "rabota_tut_ru",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "rabota",
-      "remote",
-      "freelance"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "freelance_chat",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "freelance",
-      "chat",
-      "orders"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "freelance_birzha",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "freelance",
-      "birzha",
-      "chat"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "freelance_hub_ru",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "freelance",
-      "hub",
-      "remote"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "digital_tender",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "digital",
-      "tender",
-      "freelance"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "hiddengurus",
-    "category": "international_en",
-    "language": "en",
-    "tags": [
-      "remote",
-      "tech",
-      "global"
-    ],
-    "discoveredFrom": "https://tgstat.com"
-  },
-  {
-    "id": "remotejobss",
-    "category": "international_en",
-    "language": "en",
-    "tags": [
-      "remote",
-      "jobs",
-      "global"
-    ],
-    "discoveredFrom": "https://telegramchannels.me"
-  },
-  {
-    "id": "remotejobs4u",
-    "category": "international_en",
-    "language": "en",
-    "tags": [
-      "remote",
-      "wfh",
-      "freelance"
-    ],
-    "discoveredFrom": "https://telegramchannels.me"
-  },
-  {
-    "id": "remote_tech_jobs",
-    "category": "international_en",
-    "language": "en",
-    "tags": [
-      "remote",
-      "tech",
-      "jobs"
-    ],
-    "discoveredFrom": "https://tgstat.com"
-  },
-  {
-    "id": "cryptojobsdaily",
-    "category": "international_en",
-    "language": "en",
-    "tags": [
-      "crypto",
-      "jobs",
-      "remote"
-    ],
-    "discoveredFrom": "https://tgstat.com"
-  },
-  {
-    "id": "blockchain_jobs",
-    "category": "international_en",
-    "language": "en",
-    "tags": [
-      "blockchain",
-      "jobs",
-      "web3"
-    ],
-    "discoveredFrom": "https://tgstat.com"
-  },
-  {
-    "id": "web3_remote",
-    "category": "international_en",
-    "language": "en",
-    "tags": [
-      "web3",
-      "remote",
-      "jobs"
-    ],
-    "discoveredFrom": "https://tgstat.com"
-  },
-  {
-    "id": "tech_jobs_remote",
-    "category": "international_en",
-    "language": "en",
-    "tags": [
-      "tech",
-      "jobs",
-      "remote"
-    ],
-    "discoveredFrom": "https://tgstat.com"
-  },
-  {
-    "id": "it_jobs_remote",
-    "category": "international_en",
-    "language": "en",
-    "tags": [
-      "it",
-      "jobs",
-      "remote"
-    ],
-    "discoveredFrom": "https://tgstat.com"
-  },
-  {
-    "id": "devjobs",
-    "category": "international_en",
-    "language": "en",
-    "tags": [
-      "developer",
-      "jobs",
-      "remote"
-    ],
-    "discoveredFrom": "https://tgstat.com"
-  },
-  {
-    "id": "remotedevjobs",
-    "category": "international_en",
-    "language": "en",
-    "tags": [
-      "remote",
-      "developer",
-      "jobs"
-    ],
-    "discoveredFrom": "https://tgstat.com"
-  },
-  {
-    "id": "web3gigs",
-    "category": "international_en",
-    "language": "en",
-    "tags": [
-      "web3",
-      "gigs",
-      "freelance"
-    ],
-    "discoveredFrom": "https://tgstat.com"
-  },
-  {
-    "id": "editcghunter",
+    "username": "devjobs",
+    "region": "US",
     "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "video",
-      "editing",
-      "cgi",
-      "freelance"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
+    "title": "Game Development Jobs"
   },
   {
-    "id": "shot_creative",
+    "username": "almaty_rabota_vq",
+    "region": "KZ",
     "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "creative",
-      "video",
-      "commercial"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
+    "title": "Вакансии Алматы | Работа"
   },
   {
-    "id": "videomaker_chat",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "videomaker",
-      "chat",
-      "production"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "reels_maker",
-    "category": "jobs_video",
-    "language": "ru",
-    "tags": [
-      "reels",
-      "maker",
-      "video"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
-  },
-  {
-    "id": "frilans_chatik",
+    "username": "almaty_rabota_vw",
+    "region": "KZ",
     "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "freelance",
-      "chat",
-      "orders"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
+    "title": "Работа Алматы | Вакансии"
   },
   {
-    "id": "zakazy_udalenka",
+    "username": "astana_rabota",
+    "region": "KZ",
     "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "zakazy",
-      "udalenka",
-      "remote"
-    ],
-    "discoveredFrom": "https://tgstat.ru"
+    "title": "Работа в Астане"
   },
   {
-    "id": "remoteit",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "remote",
-      "it",
-      "jobs"
-    ],
-    "discoveredFrom": "https://habr.com"
-  },
-  {
-    "id": "getitrussia",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "remote",
-      "it",
-      "jobs"
-    ],
-    "discoveredFrom": "https://habr.com"
-  },
-  {
-    "id": "devops_jobs_feed",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "devops",
-      "tech",
-      "remote"
-    ],
-    "discoveredFrom": "https://habr.com"
-  },
-  {
-    "id": "qa_jobs",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "qa",
-      "tech",
-      "remote"
-    ],
-    "discoveredFrom": "https://habr.com"
-  },
-  {
-    "id": "digital_hr",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "digital",
-      "hr",
-      "jobs"
-    ],
-    "discoveredFrom": "https://habr.com"
-  },
-  {
-    "id": "it_recruiter_jobs",
-    "category": "jobs_remote_freelance",
-    "language": "ru",
-    "tags": [
-      "recruiter",
-      "it",
-      "jobs"
-    ],
-    "discoveredFrom": "https://habr.com"
-  },
-  {
-    "id": "tech_remote_jobs",
+    "username": "relocateme",
+    "region": "EU",
     "category": "international_en",
-    "language": "en",
-    "tags": [
-      "tech",
-      "remote",
-      "global"
-    ],
-    "discoveredFrom": "https://tgstat.com"
+    "title": "Relocate.Me: Jobs & Moving Abroad"
+  },
+  {
+    "username": "rabota_a1maty",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Работа в Алматы🕵🏻‍♂️"
+  },
+  {
+    "username": "almaty_rabota05",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "Работа Алматы | Вакансии"
+  },
+  {
+    "username": "almaty_rabota01",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Ярмарка вакансий Алматы | Работа Алматы"
+  },
+  {
+    "username": "it_jobs_kz",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "IT Jobs (DSML.KZ)"
+  },
+  {
+    "username": "astana_it_university_official",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Astana IT University"
+  },
+  {
+    "username": "brodetsky",
+    "region": "US",
+    "category": "editors_community",
+    "title": "Brodetskyi. Tech, VC, Startups"
+  },
+  {
+    "username": "rabota_astanakzt",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Астана жұмыс | Работа"
+  },
+  {
+    "username": "germantechjobs",
+    "region": "EU",
+    "category": "clients_entrepreneurs",
+    "title": "GermanTechJobs.de - IT & Developer jobs in Germany"
+  },
+  {
+    "username": "vacantesremotasempleoverse",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Trabajo Remoto - Empleoverse 🌎"
+  },
+  {
+    "username": "aitujobs",
+    "region": "KZ",
+    "category": "editors_community",
+    "title": "Daily Jobs IT KZ"
+  },
+  {
+    "username": "remote_kazakhstan",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Казахстан. Удаленно"
+  },
+  {
+    "username": "uiux_jobs",
+    "region": "US",
+    "category": "jobs_video",
+    "title": "UI/UX Jobs — вакансии и аналитика"
+  },
+  {
+    "username": "videoeditors",
+    "region": "US",
+    "category": "editors_community",
+    "title": "Монтаж Adobe Premiere"
+  },
+  {
+    "username": "rabota_almaty",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Работа в Алмате | Алматы"
+  },
+  {
+    "username": "hiddengurus",
+    "region": "US",
+    "category": "international_en",
+    "title": "Hidden Gurus - Remote IT"
+  },
+  {
+    "username": "remotejobs4u",
+    "region": "US",
+    "category": "jobs_video",
+    "title": "Side Hustle/Remote/WFH Jobs/Freelancing Jobs/Data Entry Jobs/Part-Time Jobs ⛥"
+  },
+  {
+    "username": "astana_rabota_jumys",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Работа в Астане&#33;"
+  },
+  {
+    "username": "shokhrukh_smm",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "Smm||Mobilografiya||Kontent Idea"
+  },
+  {
+    "username": "european_jobs",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Работа в Европе 🇪🇺"
+  },
+  {
+    "username": "blockchain_job",
+    "region": "US",
+    "category": "editors_community",
+    "title": "Blockchain Jobs"
+  },
+  {
+    "username": "hrtech_jobs",
+    "region": "US",
+    "category": "editors_community",
+    "title": "HR-Tech.Карьера 🔥"
+  },
+  {
+    "username": "jobs_ingermany",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Jobs in Germany-Europe"
+  },
+  {
+    "username": "work_jobs_poland",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Работа в Польше"
+  },
+  {
+    "username": "remotejobs",
+    "region": "US",
+    "category": "editors_community",
+    "title": "Remote Jobs👨‍💻"
+  },
+  {
+    "username": "motion_graphics",
+    "region": "US",
+    "category": "jobs_video",
+    "title": "motion_graphics"
+  },
+  {
+    "username": "rabota_v_evrope5",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Работа в Европе 🇪🇺 Англии"
+  },
+  {
+    "username": "feministjobsgermany",
+    "region": "EU",
+    "category": "international_en",
+    "title": "feminist & diversity jobs germany"
+  },
+  {
+    "username": "remotojob",
+    "region": "EU",
+    "category": "jobs_video",
+    "title": "Empleo Remoto - Trabajo desde Casa"
+  },
+  {
+    "username": "ddevjobs",
+    "region": "US",
+    "category": "editors_community",
+    "title": "Web3 Developer jobs (remotely)"
+  },
+  {
+    "username": "spain_it_jobs",
+    "region": "EU",
+    "category": "editors_community",
+    "title": "SPAIN IT JOBS"
+  },
+  {
+    "username": "notificajobs_madrid",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Madrid, empleos trabajos - Notifica Jobs 📬"
+  },
+  {
+    "username": "jobsineurop",
+    "region": "EU",
+    "category": "international_en",
+    "title": "JOBS IN FRANCE USA ITALY UK AU CA"
+  },
+  {
+    "username": "vakankz",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Вакансии Казахстан 🇰🇿 Бизнес Услуги Работа в Казахстане удалённая подработка фриланс Реклама объявления жумыс кз заработки kz"
+  },
+  {
+    "username": "astanahubcareer",
+    "region": "KZ",
+    "category": "editors_community",
+    "title": "Hub Career"
+  },
+  {
+    "username": "shymkent_rabota_job",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Работа Шымкент | Вакансия | Жұмыс| @shymkent_rabota_job"
+  },
+  {
+    "username": "jsb_charts",
+    "region": "US",
+    "category": "jobs_video",
+    "title": "Crypto Jobs [TA & FA]📈"
+  },
+  {
+    "username": "remoteweb3jobs",
+    "region": "US",
+    "category": "jobs_video",
+    "title": "Remote Web3, AI, Crypto & Blockchain Jobs"
+  },
+  {
+    "username": "seo_jobs",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "SEO Vacancies | SEO Jobs"
+  },
+  {
+    "username": "jobsupportsupport",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Job support and interview Support (Uk USA CANADA)"
+  },
+  {
+    "username": "tecnoempleo_remoto",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "tecnoempleo - Empleo 100% remoto"
+  },
+  {
+    "username": "astana_rabota_vacancy",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Астана Работа Вакансии"
+  },
+  {
+    "username": "jobs_cryptos",
+    "region": "US",
+    "category": "editors_community",
+    "title": "Jobs in Сrypto | Крипто вакансии, работа в крипте, web3, blockhain"
+  },
+  {
+    "username": "remotejobpositions",
+    "region": "EU",
+    "category": "editors_community",
+    "title": "Remote Job Positions"
+  },
+  {
+    "username": "horeca_premium",
+    "region": "EU",
+    "category": "editors_community",
+    "title": "HoReCa Premium Jobs EU 🇪🇺 Ukraine 🇺🇦"
+  },
+  {
+    "username": "notificajobs_barcelona",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Barcelona, empleos trabajos treball - Notifica Jobs 📬"
+  },
+  {
+    "username": "remoteok",
+    "region": "US",
+    "category": "international_en",
+    "title": "Remote Jobs by Remote OK"
+  },
+  {
+    "username": "serbia_jobs",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Serbia IT Jobs [RU/UA/ENG]"
+  },
+  {
+    "username": "tbilisi_work",
+    "region": "EU",
+    "category": "editors_community",
+    "title": "Тбилиси | Грузия - Работа вакансии"
+  },
+  {
+    "username": "minijobs_berlin",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Подработка Берлин | Підробіток Берлін | Mini Jobs Berlin"
+  },
+  {
+    "username": "saas_founders",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "SaaS Founders"
+  },
+  {
+    "username": "jobs_web3",
+    "region": "US",
+    "category": "international_en",
+    "title": "Jobs WEB 3.0"
+  },
+  {
+    "username": "ibcghr",
+    "region": "US",
+    "category": "editors_community",
+    "title": "[IBCG] Вакансии в Blockchain | Jobs in Blockchain Industry"
+  },
+  {
+    "username": "gamedev_and_tech_vacancy",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "Jobs in GameDev & IT"
+  },
+  {
+    "username": "batumi_work",
+    "region": "EU",
+    "category": "editors_community",
+    "title": "Батуми | Грузия - Работа вакансии"
+  },
+  {
+    "username": "jobs_ukrainianinpoland",
+    "region": "EU",
+    "category": "editors_community",
+    "title": "Jobs.Ukrainian in Poland"
+  },
+  {
+    "username": "rabota_v_almaty_kz",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "АЛМАТЫ РАБОТА"
+  },
+  {
+    "username": "mediadam",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "Mediadam.kz🇰🇿 - Вакансии"
+  },
+  {
+    "username": "biznesshtabalmaty",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Бизнес Алматы | Business Almaty"
+  },
+  {
+    "username": "startup_fairy",
+    "region": "US",
+    "category": "editors_community",
+    "title": "AlënaPro | AI-видимость для бизнеса"
+  },
+  {
+    "username": "social3jobs",
+    "region": "US",
+    "category": "international_en",
+    "title": "Web3 Jobs by Social3"
+  },
+  {
+    "username": "startupjobs",
+    "region": "US",
+    "category": "jobs_video",
+    "title": "startupjobs"
+  },
+  {
+    "username": "ukr_jobs",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "UkrJobs | РОБОТА"
+  },
+  {
+    "username": "jobs0germany",
+    "region": "EU",
+    "category": "international_en",
+    "title": "job germany"
+  },
+  {
+    "username": "london_jobs",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Jobs In London, United Kingdom"
+  },
+  {
+    "username": "rabotav_kz",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "ВАКАНСИИ В КАЗАХСТАНЕ"
+  },
+  {
+    "username": "designerkz",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "Designer.kz Дизайн в Казахстане"
+  },
+  {
+    "username": "yourweb3jobs",
+    "region": "US",
+    "category": "jobs_video",
+    "title": "Web3 Jobs - Crypto Jobs, Solidity, NFT Jobs"
+  },
+  {
+    "username": "united_kingdom_jobs",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Jobs In London & UK 🇬🇧"
+  },
+  {
+    "username": "arbeit_ausbildung_deutschland",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Профессия , учёба, работа в Германии. Deutschland"
+  },
+  {
+    "username": "jobsin_poland",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Работа в Польше"
+  },
+  {
+    "username": "affiliate_jobs_warsaw",
+    "region": "EU",
+    "category": "editors_community",
+    "title": "AFF JOBS WAW - Работа в Варшаве"
+  },
+  {
+    "username": "rabota_astana_online",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Работа в Астане | Вакансии"
+  },
+  {
+    "username": "itnomads_jobs",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "IT вакансии & стажировки | it-nomads.kz"
+  },
+  {
+    "username": "atyrau_job_pavlin",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Pavlin - Работа | Жұмыс Атырауда"
+  },
+  {
+    "username": "techjobsdaily",
+    "region": "US",
+    "category": "jobs_video",
+    "title": "Global Jobs"
+  },
+  {
+    "username": "rabota_v_polshe_evrope",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Работа в Польше ⚡ 🌏"
+  },
+  {
+    "username": "work_ukr_deutschland",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Работа Германия / Arbeit Deutschland work"
+  },
+  {
+    "username": "tbilisi_it",
+    "region": "EU",
+    "category": "editors_community",
+    "title": "IT-чат 💻 Тбилиси | Tbilisi"
+  },
+  {
+    "username": "it_jobkz",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "IT Jobs | KZ"
+  },
+  {
+    "username": "nationalbusiness_kz",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "National Business Kazakhstan"
+  },
+  {
+    "username": "astana_hub_community",
+    "region": "KZ",
+    "category": "editors_community",
+    "title": "Community Astana Hub"
+  },
+  {
+    "username": "chainjobs1",
+    "region": "US",
+    "category": "editors_community",
+    "title": "Blockchain Jobs"
+  },
+  {
+    "username": "workeuropeeuwww",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Work in Europe"
+  },
+  {
+    "username": "work_with_us_in_europe",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Work in Europe/Работа в Европе"
+  },
+  {
+    "username": "arbeit_germaniya",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Deutschland Job"
+  },
+  {
+    "username": "job_rabota888",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Remote/hybrid IT vacancies KZ"
+  },
+  {
+    "username": "digitalagentkz",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Digital Agent KZ"
+  },
+  {
+    "username": "designerkz_chat",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "Designer.kz"
+  },
+  {
+    "username": "cryptoblockchainjobs",
+    "region": "US",
+    "category": "editors_community",
+    "title": "Crypto | Blockchain | Web3 | FinTech JOBS"
+  },
+  {
+    "username": "robotaeuro",
+    "region": "EU",
+    "category": "editors_community",
+    "title": "Робота Європа Германія Франція Англія Чехія Нідерланди Норвегія Швеція Литва Естонія Іспанія Італія Польща Work in Europe"
+  },
+  {
+    "username": "almaty_vakansii_kz",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Работа в Алматы | Алмата Вакансии"
+  },
+  {
+    "username": "vakankz1",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Вакансии Казахстан 🇰🇿 Работа и фриланс"
+  },
+  {
+    "username": "rabota_kz_vsem",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Работа в Казахстане"
+  },
+  {
+    "username": "digitalministry_kz",
+    "region": "KZ",
+    "category": "editors_community",
+    "title": "AI & Digital Ministry"
+  },
+  {
+    "username": "startup_ai",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "Стартапим"
+  },
+  {
+    "username": "hr_tech_startups",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "HR tech friends"
+  },
+  {
+    "username": "jobstream_ukr",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Удалёнка Тут | UA"
+  },
+  {
+    "username": "techinuk",
+    "region": "EU",
+    "category": "clients_entrepreneurs",
+    "title": "Tech в UK"
+  },
+  {
+    "username": "arbeit_doska_deutschland",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Работа в Германии/Arbeit in Deutschland/Job in Germany"
+  },
+  {
+    "username": "jobs_in_poland1",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Работа в Польше"
+  },
+  {
+    "username": "vakansii_qazaqstan_kz",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "Вакансии | Казахстан"
+  },
+  {
+    "username": "vakansii_kz",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Свежие вакансии Казахстан"
+  },
+  {
+    "username": "jobs_it_kz",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "IT ВАКАНСИИ | СТАЖИРОВКИ | ЗАКАЗЫ PART TIME | ПРОЕКТЫ KZ"
+  },
+  {
+    "username": "rabota_zhumys_kz",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Работа онлайн"
+  },
+  {
+    "username": "sapjobscisg",
+    "region": "EU",
+    "category": "international_en",
+    "title": "SAP Jobs in Europe #StandWithUkraine"
+  },
+  {
+    "username": "metaworkdao",
+    "region": "US",
+    "category": "international_en",
+    "title": "MetaWork #web3 Jobs"
+  },
+  {
+    "username": "georgia_it",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Грузия IT чат"
+  },
+  {
+    "username": "findmyremote_europe",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Remote Jobs in Europe"
+  },
+  {
+    "username": "berlinwork",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Jobs in Berlin"
+  },
+  {
+    "username": "jobs24_spain",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Trabajo en España 🇪🇸 | Jobs"
+  },
+  {
+    "username": "web3jobs",
+    "region": "US",
+    "category": "international_en",
+    "title": "Web3 Crypto Jobs - Remote"
+  },
+  {
+    "username": "almaty_zhumys_kz",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "АЛМАТЫ АСТАНА ЖҰМЫС"
+  },
+  {
+    "username": "designerkz_flood",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "Designer.kz болталка"
+  },
+  {
+    "username": "ai9campus",
+    "region": "EU",
+    "category": "clients_entrepreneurs",
+    "title": "AI9 startup campus"
+  },
+  {
+    "username": "rust_jobs_nobc",
+    "region": "US",
+    "category": "jobs_remote_freelance",
+    "title": "Rust Jobs without Blockchain"
+  },
+  {
+    "username": "unitedkingdom_jobs",
+    "region": "EU",
+    "category": "international_en",
+    "title": "🇬🇧 Jobs In London & UK 🇬🇧"
+  },
+  {
+    "username": "work_jobs_germany",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Work | Jobs | Germany | Arbeit in Deutschland"
+  },
+  {
+    "username": "armenia_it",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Армения | IT чат Ереван"
+  },
+  {
+    "username": "blockchain_jobs",
+    "region": "US",
+    "category": "jobs_remote_freelance",
+    "title": "BlockchainJobs"
+  },
+  {
+    "username": "ecommerce_hub",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "EcomHub"
+  },
+  {
+    "username": "vakansii_v_kz",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Работа и подработка в Казахстане"
+  },
+  {
+    "username": "digitalnomad_club",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Нетворкинг ALMATY"
+  },
+  {
+    "username": "tiktokforbusiness_kz",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "TikTok for Business Kazakhstan"
+  },
+  {
+    "username": "productvibe",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "Продуктовый Вайб | StartUps & AI"
+  },
+  {
+    "username": "happyhiring",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Remote IT Jobs in Europe"
+  },
+  {
+    "username": "hotberlinjobs",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Berlin Jobs"
+  },
+  {
+    "username": "barcajobs",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Barcelona Jobs"
+  },
+  {
+    "username": "empleos_remoto",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Empleos Remotos 📣🌀"
+  },
+  {
+    "username": "emploifrance",
+    "region": "EU",
+    "category": "international_en",
+    "title": "🇫🇷 Emplois France 🇫🇷 online jobs"
+  },
+  {
+    "username": "international_jobs",
+    "region": "EU",
+    "category": "clients_entrepreneurs",
+    "title": "Jobs In UK,USA, France, Germany, Italy,UAE,"
+  },
+  {
+    "username": "jobsinberlin",
+    "region": "EU",
+    "category": "clients_entrepreneurs",
+    "title": "JOBS in Berlin und Brandenburg (Deutschland/Germany)"
+  },
+  {
+    "username": "freelance_chat_kz",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Фрилансеры Казахстана"
+  },
+  {
+    "username": "kzanatty_design",
+    "region": "KZ",
+    "category": "jobs_video",
+    "title": "Натали | Будни дизайнера💭"
+  },
+  {
+    "username": "jobsweb3",
+    "region": "US",
+    "category": "international_en",
+    "title": "Web3 jobs"
+  },
+  {
+    "username": "crypto_jobs_hub",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "CryptoJobs HUB"
+  },
+  {
+    "username": "techie_jobs",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "TECHIE JOBS - off campus drives"
+  },
+  {
+    "username": "london_jobs_4u",
+    "region": "EU",
+    "category": "international_en",
+    "title": "JOBS IN LONDON & UK"
+  },
+  {
+    "username": "remotejobsspain",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Remote Jobs Spain"
+  },
+  {
+    "username": "almaty1_rabota",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Работа в Алматы | Вакансии"
+  },
+  {
+    "username": "businesshub_kz",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Экспортный клуб Казахстана | Export Club of Kazakhstan"
+  },
+  {
+    "username": "shymkent_job_pavlin",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Pavlin - Работа | Жұмыс Шымкентте"
+  },
+  {
+    "username": "digitalmarketing",
+    "region": "EU",
+    "category": "clients_entrepreneurs",
+    "title": "Marketing Digital"
+  },
+  {
+    "username": "empleosremotos",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Empleos Remotos Mundiales"
+  },
+  {
+    "username": "astanaituniversity",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Astana IT University"
+  },
+  {
+    "username": "beelinebusinesskz",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Beeline Business Kazakhstan"
+  },
+  {
+    "username": "marketingalmaty",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Marketing Almaty"
+  },
+  {
+    "username": "business_it_astana_hub",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Регистрация бизнеса в Казахстане и Дубае"
+  },
+  {
+    "username": "remotejobsglobal",
+    "region": "US",
+    "category": "jobs_video",
+    "title": "Remote Jobs 🌏 [Tech, Gaming, Web3]"
+  },
+  {
+    "username": "rabota_evropa_vakansii",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Работа в Европе вакансии"
+  },
+  {
+    "username": "remotejobs_munbuh",
+    "region": "EU",
+    "category": "clients_entrepreneurs",
+    "title": "Munbuh Jobs Europe +Latam"
+  },
+  {
+    "username": "technolozhka_in_uk",
+    "region": "EU",
+    "category": "clients_entrepreneurs",
+    "title": "technolozhka_in_uk"
+  },
+  {
+    "username": "jobswarsaw",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Jobs in Warsaw without Polish"
+  },
+  {
+    "username": "vacantesremotasdiarias",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Trabajo Remoto 24/7 - Empleoverse 🌎🤖"
+  },
+  {
+    "username": "ai_jobs",
+    "region": "US",
+    "category": "jobs_remote_freelance",
+    "title": "AI Jobs"
+  },
+  {
+    "username": "itsastana",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "IT'S ASTANA"
+  },
+  {
+    "username": "opvakansii",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "JumysHub.Kz | Вакансия каналы"
+  },
+  {
+    "username": "qazaqbiz_chat",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Digital Bridge | Qazaqbiz Chat"
+  },
+  {
+    "username": "europeremote",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Remote jobs EUROPE"
+  },
+  {
+    "username": "europe_jobs",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Работа в Европе"
+  },
+  {
+    "username": "it_jobs_europe",
+    "region": "EU",
+    "category": "international_en",
+    "title": "IT Jobs - Europe🧑🏻‍💻👩🏻‍💻"
+  },
+  {
+    "username": "target_kz",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Таргетологи Казахстана, SMM смм Маркетинг"
+  },
+  {
+    "username": "almatydigital",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Освоиться в Алматы | Digital и IT"
+  },
+  {
+    "username": "crypto_jobs",
+    "region": "US",
+    "category": "international_en",
+    "title": "Crypto Job"
+  },
+  {
+    "username": "graphicdesign",
+    "region": "US",
+    "category": "international_en",
+    "title": "Specto - Graphic Design & Development"
+  },
+  {
+    "username": "creators_kz",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Creators.kz"
+  },
+  {
+    "username": "digitalalmaty24",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Digital Almaty 2025💥"
+  },
+  {
+    "username": "webflow_jobs",
+    "region": "US",
+    "category": "jobs_remote_freelance",
+    "title": "Webflow Jobs"
+  },
+  {
+    "username": "arbeite_in_deutschland_nvr",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Работа в Германии NRW"
+  },
+  {
+    "username": "tech_ai_startups",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "Тех, ии и стартапы"
+  },
+  {
+    "username": "work_in_europe",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Вакансії в Європі"
+  },
+  {
+    "username": "aftereffects",
+    "region": "US",
+    "category": "editors_community",
+    "title": ".: Ae®|C4D™ :."
+  },
+  {
+    "username": "remote_eu_ua",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Дистанційна робота в Україні та ЄС"
+  },
+  {
+    "username": "youtube_creators",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "YouTube creators"
+  },
+  {
+    "username": "smmjobkz",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Вакансии Digital KZ"
+  },
+  {
+    "username": "atamekenalmaty",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Almaty Business Atameken"
+  },
+  {
+    "username": "prague_it",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "IT по-чешски | ЧАТ"
+  },
+  {
+    "username": "rabotaem_v_evrope",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Работа в Европе Optima GmbH"
+  },
+  {
+    "username": "it_jobs_france",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Emplois Informatique France IT Paris"
+  },
+  {
+    "username": "tech_remote_jobs",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "Remote Jobs from Remotive"
+  },
+  {
+    "username": "indiehackers",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "IndieHackers - Community Chat"
+  },
+  {
+    "username": "freelancersofkz",
+    "region": "KZ",
+    "category": "jobs_remote_freelance",
+    "title": "Freelancers | KZ 👩🏻‍💻"
+  },
+  {
+    "username": "digitalbusinesskzcommunity",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Комьюнити DigitalBusiness.kz"
+  },
+  {
+    "username": "almatydigitalcommunity",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "Almaty Digital Community"
+  },
+  {
+    "username": "mediadigitalalmaty",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "MEDIA-Digital Almaty"
+  },
+  {
+    "username": "gtmbe",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "GTMBE | Tech Startups Execution"
+  },
+  {
+    "username": "londonjobs",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Jobs in London"
+  },
+  {
+    "username": "marketing_vacancies",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "Маркетинг. Вакансии без воды"
+  },
+  {
+    "username": "creators_jobs",
+    "region": "US",
+    "category": "clients_entrepreneurs",
+    "title": "UGC вакансії | Робота для креаторів"
+  },
+  {
+    "username": "smm_almaty_kz",
+    "region": "KZ",
+    "category": "clients_entrepreneurs",
+    "title": "|SMM АЛМАТЫ| • портфолио •"
+  },
+  {
+    "username": "vieorks",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Work in Europe"
+  },
+  {
+    "username": "euro_jobs_rabota_v_evrope",
+    "region": "EU",
+    "category": "jobs_remote_freelance",
+    "title": "Euro Jobs, Работы в Европе."
+  },
+  {
+    "username": "affcareers_berlin",
+    "region": "EU",
+    "category": "clients_entrepreneurs",
+    "title": "Jobs in IT, Affiliate, Marketing — Berlin / Вакансии IT и арбитраж — Берлин"
+  },
+  {
+    "username": "berlinjobsr",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Berlin Jobs For Ukranians"
+  },
+  {
+    "username": "it_jobs_germany0",
+    "region": "EU",
+    "category": "international_en",
+    "title": "IT jobs Deutschland / Berlin / Germany"
+  },
+  {
+    "username": "berlinstartups",
+    "region": "EU",
+    "category": "clients_entrepreneurs",
+    "title": "Startups in Berlin by StartupBlink"
+  },
+  {
+    "username": "digital_poland",
+    "region": "EU",
+    "category": "clients_entrepreneurs",
+    "title": "Jobs Digital Poland"
+  },
+  {
+    "username": "greenbridgepoland",
+    "region": "EU",
+    "category": "international_en",
+    "title": "GREENBRIDGE POLAND 🇵🇱 Jobs • Legalization • Life in Poland"
+  },
+  {
+    "username": "jobs_poland_peopleup",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Poland, Cyprus, Lithuania & Remote Jobs"
+  },
+  {
+    "username": "jobs_poland",
+    "region": "EU",
+    "category": "international_en",
+    "title": "Работа в Польше 🇵🇱"
+  },
+  {
+    "username": "eng_jobs_spain",
+    "region": "EU",
+    "category": "international_en",
+    "title": "English Speaking Jobs in Spain 🇪🇸"
   }
 ]

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useVacanciesStore } from '../store/vacanciesStore';
+import { useVacanciesStore, computeVacancyRelevance } from '../store/vacanciesStore';
 import { useLeadsStore } from '../store/leadsStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
 import { fetchTelegramFeed } from '../lib/api';
-import { computeVacancyRelevance } from '../store/vacanciesStore';
 import { playNotificationBeep, sendBrowserNotification } from '../lib/notifications';
 import { normalizeText, computeTextHash } from '../shared/filter.js';
+import { detectVacancyRegion } from '../shared/regions.js';
 import { Vacancy } from '../types';
 import { CardSkeleton } from '../components/Skeleton';
 import { VacancyCard } from '../components/VacancyCard';
@@ -17,6 +17,8 @@ import {
   VacancyFiltersBar,
   FormatFilter,
 } from '../components/vacancies/VacancyFiltersBar';
+
+export type RegionTab = 'all' | 'eu' | 'us' | 'kz';
 
 export const Vacancies: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -42,12 +44,32 @@ export const Vacancies: React.FC = () => {
   } = useVacanciesStore();
 
   const addLead = useLeadsStore((s) => s.addLead);
-  const { soundEnabled, notificationsEnabled } = useSettingsStore();
+  const {
+    soundEnabled,
+    notificationsEnabled,
+    autoTranslateVacancies,
+    setAutoTranslateVacancies,
+  } = useSettingsStore();
   const addToast = useToastStore((s) => s.addToast);
 
   const [activePitchVacancy, setActivePitchVacancy] = useState<Vacancy | null>(null);
   const [showShady, setShowShady] = useState(false);
   const isRefreshingRef = useRef(false);
+
+  // Region Tab: EU + US + KZ combined by default
+  const rawParam = searchParams.get('region') || 'all';
+  const regionTab: RegionTab = (
+    rawParam === 'eu' || rawParam === 'us' || rawParam === 'kz' ? rawParam : 'all'
+  );
+
+  const setRegionTab = (tab: RegionTab) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (tab && tab !== 'all') next.set('region', tab);
+      else next.delete('region');
+      return next;
+    });
+  };
 
   // 2 URL Filters: Hot (<20 min) and Format
   const hotOnly = searchParams.get('hot') === '1';
@@ -76,13 +98,15 @@ export const Vacancies: React.FC = () => {
     if (isRefreshingRef.current) return;
     isRefreshingRef.current = true;
 
-    // Filter only eligible channels (no groups, enabled, not hidden)
     const hiddenSet = new Set(hiddenChannels.map((c) => c.toLowerCase()));
     const eligibleChannels = sources.filter(
-      (s) => s.enabled && s.type !== 'group' && !hiddenSet.has(s.username.toLowerCase())
+      (s) =>
+        s.enabled &&
+        s.type !== 'group' &&
+        s.region !== 'RU' &&
+        !hiddenSet.has(s.username.toLowerCase())
     );
 
-    // Prioritize recommended channels
     eligibleChannels.sort((a, b) => {
       const aScore = (a as any).recommended ? 2 : 1;
       const bScore = (b as any).recommended ? 2 : 1;
@@ -94,7 +118,6 @@ export const Vacancies: React.FC = () => {
       return;
     }
 
-    // Round-robin slice of 15 channels
     const batchSize = 15;
     const currentOffset = scrapeOffset % eligibleChannels.length;
     const batchChannels: string[] = [];
@@ -112,7 +135,6 @@ export const Vacancies: React.FC = () => {
       const processed: Vacancy[] = [];
 
       for (const msg of res.allMessages) {
-        // A3.a: Only genuine worker leads have fromWorker === true
         const isWorkerLead = Boolean((msg as any).fromWorker === true);
 
         const {
@@ -124,13 +146,19 @@ export const Vacancies: React.FC = () => {
           qualityTier,
           statusBadge,
           budget,
+          region,
         } = computeVacancyRelevance(
           msg.text,
           includeKeywords,
           excludeKeywords,
           isWorkerLead,
-          msg.postedAt
+          msg.postedAt,
+          msg.channel
         );
+
+        if (region === 'RU' || budget?.currency === 'RUB') {
+          continue;
+        }
 
         if (!isExcluded && (isWorkerLead || matchedKeywords.length > 0)) {
           processed.push({
@@ -146,6 +174,7 @@ export const Vacancies: React.FC = () => {
             formatTag,
             qualityTier,
             statusBadge,
+            region,
             budget: budget || (msg as any).budget || null,
             fromWorker: isWorkerLead,
             seen: false,
@@ -188,7 +217,7 @@ export const Vacancies: React.FC = () => {
     notificationsEnabled,
   ]);
 
-  // A3.b: Polling every 60s while tab is visible, immediate on mount and visibility change
+  // Polling every 60s while tab is visible
   useEffect(() => {
     handleRefresh();
 
@@ -231,12 +260,27 @@ export const Vacancies: React.FC = () => {
     };
   }, [handleRefresh]);
 
-  // Active sources count (sources with leads in last 7 days)
   const activeSourcesCount = useMemo(() => {
-    return sources.filter((s) => s.enabled).length;
+    return sources.filter((s) => s.enabled && s.region !== 'RU').length;
   }, [sources]);
 
-  // Filter vacancies
+  // Region counts for tabs (EU, US, KZ only — RU excluded)
+  const regionCounts = useMemo(() => {
+    let eu = 0;
+    let us = 0;
+    let kz = 0;
+    for (const v of vacancies) {
+      if (v.hidden) continue;
+      const r = v.region || detectVacancyRegion(v.text, v.channel);
+      if (r === 'RU' || v.budget?.currency === 'RUB') continue;
+      if (r === 'EU') eu++;
+      else if (r === 'KZ') kz++;
+      else us++;
+    }
+    return { eu, us, kz, total: eu + us + kz };
+  }, [vacancies]);
+
+  // Filter vacancies (fixed: includes regionTab in dependencies and drops RU items)
   const filteredVacancies = useMemo(() => {
     const hiddenSet = new Set(hiddenChannels.map((c) => c.toLowerCase()));
     const now = Date.now();
@@ -245,13 +289,18 @@ export const Vacancies: React.FC = () => {
       if (v.hidden) return false;
       if (hiddenSet.has(v.channel.toLowerCase().replace(/^@/, ''))) return false;
 
-      // Hot filter (<20 min)
+      const vRegion = v.region || detectVacancyRegion(v.text, v.channel);
+      if (vRegion === 'RU' || v.budget?.currency === 'RUB') return false;
+
+      if (regionTab === 'eu' && vRegion !== 'EU') return false;
+      if (regionTab === 'us' && vRegion !== 'US') return false;
+      if (regionTab === 'kz' && vRegion !== 'KZ') return false;
+
       if (hotOnly) {
         const isHot = now - new Date(v.postedAt).getTime() < 20 * 60 * 1000;
         if (!isHot && v.statusBadge !== 'hot') return false;
       }
 
-      // Format filter
       if (formatFilter !== 'all') {
         const lower = v.text.toLowerCase();
         if (formatFilter === 'reels') {
@@ -264,16 +313,16 @@ export const Vacancies: React.FC = () => {
           const isPod = /подкаст|интервью|podcast/i.test(lower);
           if (!isPod) return false;
         } else if (formatFilter === 'other') {
-          const isOther = !/reels|shorts|tiktok|рилс|youtube|ютуб|подкаст/i.test(lower);
+          const isOther = !/reels|shorts|tiktok|рилс|youtube|ютуб|подкаст|podcast/i.test(lower);
           if (!isOther) return false;
         }
       }
 
       return true;
     });
-  }, [vacancies, hiddenChannels, hotOnly, formatFilter]);
+  }, [vacancies, hiddenChannels, regionTab, hotOnly, formatFilter]);
 
-  // Cluster cross-posts (deduplicate identical announcements across channels)
+  // Cluster cross-posts
   const clusteredVacancies = useMemo(() => {
     const clusters = new Map<string, Vacancy[]>();
     for (const v of filteredVacancies) {
@@ -286,17 +335,14 @@ export const Vacancies: React.FC = () => {
 
     const result: Vacancy[] = [];
     for (const list of clusters.values()) {
-      const primary = { ...list[0] };
-      result.push(primary);
+      result.push({ ...list[0] });
     }
 
-    // Always sort by date, newest first
     return result.sort(
       (a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime()
     );
   }, [filteredVacancies]);
 
-  // Split normal vs shady
   const normalVacancies = useMemo(
     () => clusteredVacancies.filter((v) => v.qualityTier !== 'shady'),
     [clusteredVacancies]
@@ -318,27 +364,28 @@ export const Vacancies: React.FC = () => {
       addToast({
         type: 'info',
         title: 'Уже в воронке',
-        message: `Этот заказ из @${vac.channel} уже добавлен в воронку.`,
+        message: `Этот заказ из @${vac.channel.replace(/^@/, '')} уже добавлен в воронку.`,
       });
       return;
     }
 
+    const r = vac.region || detectVacancyRegion(vac.text, vac.channel);
     addLead({
       name: `@${vac.channel.replace(/^@/, '')}`,
       channelUrl: vac.url,
       notes: vac.text,
+      region: r === 'RU' ? 'US' : r,
       status: 'new',
     });
     addToast({
       type: 'success',
       title: 'Сохранено в лиды',
-      message: `Заказ из @${vac.channel} перенесён в воронку.`,
+      message: `Заказ из @${vac.channel.replace(/^@/, '')} перенесён в воронку.`,
     });
   };
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-4">
-      {/* 2.1 Header: Title + count + Refresh */}
       <VacancyHeader
         count={normalVacancies.length}
         lastRefreshedAt={lastRefreshedAt}
@@ -347,16 +394,71 @@ export const Vacancies: React.FC = () => {
         lastError={lastError}
       />
 
-      {/* 2.5 Filters: Hot toggle + Format dropdown + Sources link */}
+      {/* Region Tabs: EU + US + KZ */}
+      <div className="flex flex-wrap items-center gap-1.5 p-1 bg-surface-2 rounded-control border border-border">
+        <button
+          type="button"
+          onClick={() => setRegionTab('all')}
+          className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+            regionTab === 'all'
+              ? 'bg-accent text-white shadow font-semibold'
+              : 'text-text-muted hover:text-text hover:bg-surface'
+          }`}
+        >
+          <span>🌍 Все (EU + US + KZ)</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/25">{regionCounts.total}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setRegionTab('eu')}
+          className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+            regionTab === 'eu'
+              ? 'bg-indigo-600 text-white shadow font-semibold'
+              : 'text-text-muted hover:text-text hover:bg-surface'
+          }`}
+        >
+          <span>🇪🇺 Европа / UK</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/25">{regionCounts.eu}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setRegionTab('us')}
+          className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+            regionTab === 'us'
+              ? 'bg-sky-600 text-white shadow font-semibold'
+              : 'text-text-muted hover:text-text hover:bg-surface'
+          }`}
+        >
+          <span>🇺🇸 США / Global</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/25">{regionCounts.us}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setRegionTab('kz')}
+          className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 font-medium ${
+            regionTab === 'kz'
+              ? 'bg-emerald-600 text-white shadow font-semibold'
+              : 'text-text-muted hover:text-text hover:bg-surface'
+          }`}
+        >
+          <span>🇰🇿 Казахстан</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/25">{regionCounts.kz}</span>
+        </button>
+      </div>
+
+      {/* Filters & Translation Toggle */}
       <VacancyFiltersBar
         hotOnly={hotOnly}
         onToggleHotOnly={setHotOnly}
         formatFilter={formatFilter}
         onChangeFormatFilter={setFormatFilter}
         activeSourcesCount={activeSourcesCount}
+        totalSourcesCount={sources.length}
+        autoTranslate={autoTranslateVacancies ?? true}
+        onToggleAutoTranslate={setAutoTranslateVacancies}
       />
 
-      {/* Vacancy Card List (Single column) */}
+      {/* Vacancy Card List */}
       <div className="space-y-3 pt-1">
         {isLoading && displayedList.length === 0 ? (
           <div className="space-y-3">
@@ -384,7 +486,13 @@ export const Vacancies: React.FC = () => {
                 <p className="text-sm text-text-muted">
                   {hotOnly
                     ? 'Сейчас нет горящих вакансий за последние 20 минут.'
-                    : 'По выбранным фильтрам пока нет вакансий.'}
+                    : regionTab === 'eu'
+                    ? 'В ленте Европы / UK пока нет заказов по выбранным фильтрам.'
+                    : regionTab === 'us'
+                    ? 'В ленте США / Global пока нет заказов по выбранным фильтрам.'
+                    : regionTab === 'kz'
+                    ? 'В ленте Казахстана пока нет заказов по выбранным фильтрам.'
+                    : 'В лентах EU, US и KZ пока нет заказов по выбранным фильтрам.'}
                 </p>
                 {hotOnly && (
                   <button
@@ -421,7 +529,7 @@ export const Vacancies: React.FC = () => {
         )}
       </div>
 
-      {/* Shady toggle link at bottom */}
+      {/* Shady toggle */}
       {shadyVacancies.length > 0 && (
         <div className="text-center pt-4 pb-8">
           <button

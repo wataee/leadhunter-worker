@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Modal } from './Modal';
 import { Lead, Vacancy } from '../types';
 import { useTemplatesStore } from '../store/templatesStore';
@@ -8,8 +8,11 @@ import { useToastStore } from '../store/toastStore';
 import {
   substituteVariables,
   analyzePitchQuality,
+  extractDirectContactHandle,
 } from '../lib/templates';
-import { rewritePitchWithAi } from '../lib/api';
+import { rewritePitchWithAi, translateTextWithAi } from '../lib/api';
+import { needsRussianTranslation, detectTextLanguage } from '../shared/translate.js';
+import { detectVacancyRegion } from '../shared/regions.js';
 import {
   Sparkles,
   Copy,
@@ -19,6 +22,7 @@ import {
   AlertTriangle,
   Info,
   Split,
+  Languages,
 } from 'lucide-react';
 
 interface PitchGeneratorModalProps {
@@ -48,15 +52,32 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
   const [pitchText, setPitchText] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
+  const [isTranslatingEn, setIsTranslatingEn] = useState<boolean>(false);
   const [showDiffView, setShowDiffView] = useState<boolean>(false);
+  const [vacancyTranslationRu, setVacancyTranslationRu] = useState<string | null>(null);
 
-  // Pick suitable template
+  const directVacancyHandle = useMemo(
+    () => (vacancy ? extractDirectContactHandle(vacancy.text, vacancy.channel) : null),
+    [vacancy]
+  );
+
+  // Pick suitable language & strategy template
   useEffect(() => {
     if (!isOpen) return;
 
     let target = templates[0];
     if (vacancy) {
-      target = templates.find((t) => t.type === 'shotgun') || target;
+      const region = vacancy.region || detectVacancyRegion(vacancy.text, vacancy.channel);
+      const lang = detectTextLanguage(vacancy.text);
+      const isForeign = region === 'EU' || region === 'US' || (lang !== 'ru' && lang !== 'kk');
+      if (isForeign) {
+        target =
+          templates.find((t) => t.id === 'tpl_shotgun_en') ||
+          templates.find((t) => t.type === 'shotgun') ||
+          target;
+      } else {
+        target = templates.find((t) => t.id === 'tpl_shotgun') || templates.find((t) => t.type === 'shotgun') || target;
+      }
     } else if (initialStrategy) {
       target = templates.find((t) => t.type === initialStrategy) || target;
     } else if (lead?.status === 'followup') {
@@ -65,19 +86,43 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
       target = templates.find((t) => t.type === 'sniper') || target;
     }
 
+    const effectiveLead: Partial<Lead> | null = lead
+      ? lead
+      : vacancy
+      ? {
+          name: directVacancyHandle ? `@${directVacancyHandle}` : undefined,
+        }
+      : null;
+
     if (target) {
       setSelectedTemplateId(target.id);
-      let subbed = substituteVariables(target.body, lead || null, profile);
+      let subbed = substituteVariables(target.body, effectiveLead, profile);
       const angle = initialOpeningAngle || lead?.aiAngle;
       if (angle) {
         const lines = subbed.split('\n');
-        // Replace generic greeting with the AI opening angle
         subbed = `${angle}\n\n` + lines.slice(1).join('\n').trim();
       }
       setPitchText(subbed);
     }
     setCopied(false);
-  }, [isOpen, lead, vacancy, initialStrategy, initialOpeningAngle, templates, profile]);
+    setVacancyTranslationRu(vacancy?.translatedText || null);
+  }, [isOpen, lead, vacancy, directVacancyHandle, initialStrategy, initialOpeningAngle, templates, profile]);
+
+  // Translate vacancy in diff pane when needed
+  useEffect(() => {
+    if (!isOpen || !showDiffView || !vacancy || vacancyTranslationRu) return;
+    if (!needsRussianTranslation(vacancy.text)) return;
+
+    let cancelled = false;
+    translateTextWithAi({ text: vacancy.text, targetLang: 'ru', mode: 'vacancy' })
+      .then((res) => {
+        if (!cancelled && res.translatedText) setVacancyTranslationRu(res.translatedText);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, showDiffView, vacancy, vacancyTranslationRu]);
 
   const handleInsertAngle = (angle: string) => {
     const lines = pitchText.split('\n');
@@ -94,7 +139,12 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
     setSelectedTemplateId(tplId);
     const chosen = templates.find((t) => t.id === tplId);
     if (chosen) {
-      const subbed = substituteVariables(chosen.body, lead || null, profile);
+      const effectiveLead: Partial<Lead> | null = lead
+        ? lead
+        : vacancy && directVacancyHandle
+        ? { name: `@${directVacancyHandle}` }
+        : null;
+      const subbed = substituteVariables(chosen.body, effectiveLead, profile);
       setPitchText(subbed);
     }
   };
@@ -106,7 +156,7 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
       addToast({
         type: 'success',
         title: 'Скопировано в буфер',
-        message: 'Текст сообщения скопирован. Готово для отправки вручную.',
+        message: 'Текст сообщения скопирован. Готово для отправки.',
       });
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -117,16 +167,31 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
     }
   };
 
-  const handleOpenTelegram = () => {
-    const rawTg = lead?.telegram || (vacancy ? vacancy.channel : '');
-    const cleanUsername = rawTg.replace(/^@/, '').replace(/^(?:https?:\/\/)?(?:t\.me)\//, '');
-
+  const handleOpenTelegram = async () => {
     const encoded = encodeURIComponent(pitchText);
-    const tgUrl = cleanUsername
-      ? `https://t.me/${cleanUsername}?text=${encoded}`
-      : `https://t.me/share/url?url=&text=${encoded}`;
 
-    window.open(tgUrl, '_blank', 'noopener,noreferrer');
+    if (lead?.telegram) {
+      const cleanUsername = lead.telegram.replace(/^@/, '').replace(/^(?:https?:\/\/)?(?:t\.me)\//, '');
+      window.open(`https://t.me/${cleanUsername}?text=${encoded}`, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    if (vacancy && directVacancyHandle) {
+      window.open(`https://t.me/${directVacancyHandle}?text=${encoded}`, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // No direct user handle in vacancy: copy text and open the post URL directly
+    await handleCopy();
+    if (vacancy?.url) {
+      addToast({
+        type: 'info',
+        message: 'Текст скопирован — откройте пост и отправьте отклик автору.',
+      });
+      window.open(vacancy.url, '_blank', 'noopener,noreferrer');
+    } else {
+      window.open(`https://t.me/share/url?url=&text=${encoded}`, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const handleMarkAsSent = () => {
@@ -145,10 +210,38 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
     } else {
       addToast({
         type: 'info',
-        message: 'Отклик отправлен',
+        message: 'Отклик отмечен',
       });
     }
     onClose();
+  };
+
+  const handleTranslateToEnglish = async () => {
+    if (!pitchText.trim()) return;
+    setIsTranslatingEn(true);
+    try {
+      const res = await translateTextWithAi({
+        text: pitchText,
+        targetLang: 'en',
+        mode: 'pitch',
+      });
+      if (res.translatedText) {
+        setPitchText(res.translatedText);
+        addToast({
+          type: 'success',
+          title: 'Переведено на английский',
+          message: `Провайдер: ${res.provider}`,
+        });
+      }
+    } catch (err: unknown) {
+      addToast({
+        type: 'error',
+        title: 'Ошибка перевода',
+        message: err instanceof Error ? err.message : 'Не удалось перевести питч.',
+      });
+    } finally {
+      setIsTranslatingEn(false);
+    }
   };
 
   const handleAiImprove = async () => {
@@ -161,6 +254,12 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
               name: lead.name,
               channel: lead.channelUrl,
               niche: lead.niche,
+            }
+          : vacancy
+          ? {
+              name: directVacancyHandle ? `@${directVacancyHandle}` : vacancy.channel,
+              channel: vacancy.channel,
+              niche: vacancy.matchedKeywords?.join(', ') || 'video editing',
             }
           : undefined,
       });
@@ -178,9 +277,10 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
       addToast({
         type: 'error',
         title: 'AI рерайтер недоступен',
-        message: msg.includes('ANTHROPIC_API_KEY')
-          ? 'Для работы рерайтера укажите ANTHROPIC_API_KEY в переменных Netlify.'
-          : msg,
+        message:
+          msg.includes('ключ') || msg.includes('KEY')
+            ? 'Укажите бесплатный ключ Gemini / Groq / OpenRouter в разделе «Настройки».'
+            : msg,
       });
     } finally {
       setIsAiLoading(false);
@@ -188,7 +288,7 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
   };
 
   const quality = analyzePitchQuality(pitchText);
-  const targetUsername = lead?.telegram || (vacancy ? `@${vacancy.channel}` : null);
+  const canOpenTelegram = Boolean(lead?.telegram || vacancy?.url || directVacancyHandle);
 
   return (
     <Modal
@@ -202,7 +302,7 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
             {lead
               ? `Сообщение для: ${lead.name}`
               : vacancy
-              ? `Отклик на вакансию (@${vacancy.channel})`
+              ? `Отклик на вакансию (@${vacancy.channel.replace(/^@/, '')})`
               : 'Конструктор сообщения'}
           </span>
         </div>
@@ -229,13 +329,19 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
               <span>{copied ? 'Скопировано!' : 'Копировать'}</span>
             </button>
 
-            {targetUsername && (
+            {canOpenTelegram && (
               <button
                 onClick={handleOpenTelegram}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-info bg-info-soft hover:bg-info/20 rounded-control border border-info/20 transition-colors"
               >
                 <ExternalLink size={14} />
-                <span>Открыть в Telegram</span>
+                <span>
+                  {directVacancyHandle
+                    ? `Написать @${directVacancyHandle}`
+                    : lead?.telegram
+                    ? 'Открыть в Telegram'
+                    : 'Открыть пост'}
+                </span>
               </button>
             )}
 
@@ -318,11 +424,11 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
 
         {/* Message Editor */}
         <div className="relative">
-          <div className="flex items-center justify-between mb-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
             <label className="text-xs font-medium text-text-muted">
               Текст сообщения
             </label>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {vacancy && (
                 <button
                   type="button"
@@ -334,6 +440,17 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
                 </button>
               )}
               <button
+                type="button"
+                onClick={handleTranslateToEnglish}
+                disabled={isTranslatingEn}
+                className="flex items-center gap-1 text-[11px] font-medium text-amber-300 hover:underline px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/20 transition-colors disabled:opacity-50"
+                title="Перевести черновик на естественный английский"
+              >
+                <Languages size={12} className={isTranslatingEn ? 'animate-spin' : ''} />
+                <span>{isTranslatingEn ? 'Перевожу...' : 'Перевести на EN'}</span>
+              </button>
+              <button
+                type="button"
                 onClick={handleAiImprove}
                 disabled={isAiLoading}
                 className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover transition-colors disabled:opacity-50"
@@ -346,10 +463,18 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
 
           {showDiffView && vacancy ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
-              <div className="p-3 bg-surface rounded-control border border-border text-xs space-y-1.5 max-h-48 overflow-y-auto">
+              <div className="p-3 bg-surface rounded-control border border-border text-xs space-y-2 max-h-56 overflow-y-auto">
                 <span className="text-[10px] font-bold text-muted uppercase block">
-                  Требования вакансии (@{vacancy.channel}):
+                  Требования вакансии (@{vacancy.channel.replace(/^@/, '')}):
                 </span>
+                {vacancyTranslationRu && (
+                  <div className="p-2 rounded bg-accent/10 border border-accent/20 text-text leading-relaxed whitespace-pre-wrap font-sans">
+                    <span className="text-[10px] font-bold text-accent block mb-1">
+                      🌐 Перевод (RU):
+                    </span>
+                    {vacancyTranslationRu}
+                  </div>
+                )}
                 <p className="text-text-muted leading-relaxed whitespace-pre-wrap font-sans">
                   {vacancy.text}
                 </p>
@@ -358,7 +483,7 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
                 <textarea
                   value={pitchText}
                   onChange={(e) => setPitchText(e.target.value)}
-                  rows={7}
+                  rows={8}
                   className="w-full bg-surface-2 text-text text-sm rounded-control border border-border p-3 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors leading-relaxed font-sans resize-y"
                   placeholder="Введите текст сообщения..."
                 />
@@ -405,7 +530,7 @@ export const PitchGeneratorModal: React.FC<PitchGeneratorModalProps> = ({
             <div className="flex items-center gap-2 text-xs text-danger bg-danger-soft/60 px-3 py-1.5 rounded-control border border-danger/20">
               <AlertTriangle size={14} className="shrink-0" />
               <span>
-                Обнаружено клише "услуги монтажа". Замените на конкретную пользу или ре-эдит.
+                Обнаружено клише («услуги монтажа» / «editing services»). Замените на конкретную пользу или ре-эдит.
               </span>
             </div>
           )}

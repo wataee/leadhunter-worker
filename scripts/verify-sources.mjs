@@ -248,12 +248,20 @@ export async function verifySource(candidate, force = false) {
       isGroup = true;
     }
 
-    const numMatch = rawExtra.match(/([\d\s.,]+)\s*([kmкм])?/i);
-    if (numMatch) {
-      const cleanDigits = numMatch[1].replace(/\s/g, '').replace(',', '.');
+    const primaryPart = rawExtra.split(',')[0].trim();
+    const abbrMatch = primaryPart.match(/^([\d\s.,]+)\s*([kmкм])(?:\s|$)/i);
+    const plainMatch = primaryPart.match(/^([\d\s.,]+)(?:\s+(?:subscribers?|members?|подписчик|участник)|\s*$)/i);
+    const picked = abbrMatch || plainMatch;
+    if (picked) {
+      let cleanDigits = picked[1].replace(/\s/g, '');
+      const unit = abbrMatch ? (abbrMatch[2] || '').toLowerCase() : '';
+      if (!unit && /^\d{1,3}(?:,\d{3})+$/.test(cleanDigits)) {
+        cleanDigits = cleanDigits.replace(/,/g, '');
+      } else {
+        cleanDigits = cleanDigits.replace(',', '.');
+      }
       let val = parseFloat(cleanDigits);
       if (!isNaN(val)) {
-        const unit = (numMatch[2] || '').toLowerCase();
         if (unit === 'k' || unit === 'к') val *= 1000;
         if (unit === 'm' || unit === 'м') val *= 1000000;
         subscribers = Math.round(val);
@@ -389,6 +397,7 @@ export async function verifySource(candidate, force = false) {
 
   const relevanceRatio = totalRecent > 0 ? recentRelevantCount / totalRecent : 0;
   const responseRate = totalRecent > 0 ? recentContactCount / totalRecent : 0;
+  const adRate = totalMsgs > 0 ? adCount / totalMsgs : 0;
 
   const warnings = [];
   if (totalRecent >= 5 && relevanceRatio < 0.10) {

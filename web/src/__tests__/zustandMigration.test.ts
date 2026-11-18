@@ -2,15 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { useVacanciesStore } from '../store/vacanciesStore';
 import { useLeadsStore } from '../store/leadsStore';
 
-describe('Zustand Persist Migration v6', () => {
-  it('correctly migrates legacy state with favorites and removes deleted fields', () => {
+describe('Zustand Persist Migration v6 -> v8', () => {
+  it('correctly migrates legacy state with favorites, removes deleted fields, and strips RU sources/vacancies', () => {
     const legacyState = {
       vacancies: [
         {
           id: 'v_fav_1',
-          channel: 'channel_editor',
-          url: 'https://t.me/channel_editor/10',
-          text: 'Нужен монтажер для Reels',
+          channel: 'mobilograf_kz',
+          url: 'https://t.me/mobilograf_kz/10',
+          text: 'Нужен монтажер для Reels в Алматы, 150000 тенге',
+          region: 'KZ',
           isFavorite: true,
           postedAt: new Date().toISOString(),
           seen: true,
@@ -18,23 +19,32 @@ describe('Zustand Persist Migration v6', () => {
         },
         {
           id: 'v_norm_2',
-          channel: 'channel_norm',
-          url: 'https://t.me/channel_norm/20',
-          text: 'Монтаж YouTube',
+          channel: 'videojobs_global',
+          url: 'https://t.me/videojobs_global/20',
+          text: 'Hiring YouTube Video Editor, $150/video',
+          region: 'US',
+          isFavorite: false,
+          postedAt: new Date().toISOString(),
+          seen: false,
+          hidden: false,
+        },
+        {
+          id: 'v_ru_legacy',
+          channel: 'moskva_rabota',
+          url: 'https://t.me/moskva_rabota/30',
+          text: 'Монтаж видео Москва 50000 руб',
+          region: 'RU',
           isFavorite: false,
           postedAt: new Date().toISOString(),
           seen: false,
           hidden: false,
         },
       ],
-      savedPresets: [
-        { id: 'preset_1', name: 'Рилсы', filterHotOnly: true },
-      ],
+      savedPresets: [{ id: 'preset_1', name: 'Рилсы', filterHotOnly: true }],
       filterFavoritesOnly: true,
-      sources: [],
+      sources: [{ username: 'moskva_rabota', region: 'RU', enabled: true }],
     };
 
-    // Extract the migrate function from vacanciesStore persist options
     const persistOptions = (useVacanciesStore as any).persist?.getOptions?.();
     const migrateFn = persistOptions?.migrate;
 
@@ -42,22 +52,26 @@ describe('Zustand Persist Migration v6', () => {
 
     const migrated = migrateFn(legacyState, 5);
 
-    // Old fields must be deleted
     expect(migrated.savedPresets).toBeUndefined();
     expect(migrated.filterFavoritesOnly).toBeUndefined();
 
-    // isFavorite must be removed from vacancies
+    // RU vacancy removed, KZ & US preserved, isFavorite stripped
     expect(migrated.vacancies.length).toBe(2);
+    expect(migrated.vacancies.some((v: any) => v.region === 'RU')).toBe(false);
     expect(migrated.vacancies[0].isFavorite).toBeUndefined();
 
-    // The favorite vacancy must be migrated to leadsStore
+    // RU legacy sources purged and replaced with EU/US/KZ catalog
+    expect(migrated.sources.some((s: any) => s.region === 'RU')).toBe(false);
+    expect(migrated.sources.length).toBeGreaterThanOrEqual(200);
+
+    // Favorite vacancy migrated to leadsStore
     const leads = useLeadsStore.getState().leads;
-    const migratedLead = leads.find((l) => l.channelUrl === 'https://t.me/channel_editor/10');
+    const migratedLead = leads.find((l) => l.channelUrl === 'https://t.me/mobilograf_kz/10');
     expect(migratedLead).toBeDefined();
-    expect(migratedLead?.name).toBe('@channel_editor');
+    expect(migratedLead?.name).toBe('@mobilograf_kz');
   });
 
-  it('correctly migrates v6 state to v7 removing legacy stopPhrases from excludeKeywords', () => {
+  it('correctly migrates v6 state removing legacy stopPhrases from excludeKeywords', () => {
     const legacyV6State = {
       excludeKeywords: [
         'строительный монтаж',

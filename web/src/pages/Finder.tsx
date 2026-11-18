@@ -32,15 +32,34 @@ import {
   ChevronUp,
 } from 'lucide-react';
 
-const DEFAULT_CHIPS = [
-  'инвестиции в недвижимость',
-  'ai автоматизация',
-  'криптовалюта',
-  'фитнес коучинг',
-  'онлайн-школа',
-  'бизнес авто',
-  'маркетинг',
-  'дропшиппинг',
+const DEFAULT_CHIPS_EU = [
+  'uk business podcast',
+  'saas founder europe',
+  'real estate london',
+  'tech startup berlin',
+  'ai agency uk',
+  'fitness coach uk',
+  'crypto podcast europe',
+];
+
+const DEFAULT_CHIPS_KZ = [
+  'недвижимость алматы',
+  'бизнес казахстан',
+  'подкаст казахстан',
+  'авто алматы',
+  'онлайн курсы казахстан',
+  'инвестиции kz',
+  'маркетинг алматы',
+];
+
+const DEFAULT_CHIPS_US = [
+  'real estate investing',
+  'ai automation',
+  'crypto',
+  'fitness coaching',
+  'ecommerce brand',
+  'podcast',
+  'saas marketing',
 ];
 
 export const Finder: React.FC = () => {
@@ -60,13 +79,13 @@ export const Finder: React.FC = () => {
   const addToast = useToastStore((s) => s.addToast);
 
   // Form states
-  const [query, setQuery] = useState('инвестиции в недвижимость');
-  const [chips, setChips] = useState<string[]>(DEFAULT_CHIPS);
+  const [query, setQuery] = useState('недвижимость алматы');
+  const [chips, setChips] = useState<string[]>(DEFAULT_CHIPS_KZ);
   const [newChipInput, setNewChipInput] = useState('');
   const [minSubs, setMinSubs] = useState<number>(5000);
   const [maxSubs, setMaxSubs] = useState<number>(50000);
   const [language, setLanguage] = useState<string>('ru');
-  const [region, setRegion] = useState<string>('RU');
+  const [region, setRegion] = useState<string>('KZ');
   const [maxDaysActive, setMaxDaysActive] = useState<number>(30);
   const [onlyWithProduct, setOnlyWithProduct] = useState<boolean>(false);
   const [onlyWithEmail, setOnlyWithEmail] = useState<boolean>(false);
@@ -574,6 +593,59 @@ export const Finder: React.FC = () => {
 
       {/* Main Search Panel */}
       <div className="bg-surface rounded-card p-5 border border-border space-y-4">
+        {/* Country / Market Selection */}
+        <div className="flex flex-wrap items-center gap-2 pb-1 border-b border-border/50">
+          <span className="text-xs text-text-muted font-medium mr-1">Рынок клиентов:</span>
+          <button
+            type="button"
+            onClick={() => {
+              setRegion('KZ');
+              setLanguage('ru');
+              setChips(DEFAULT_CHIPS_KZ);
+              setQuery(DEFAULT_CHIPS_KZ[0]);
+            }}
+            className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 ${
+              region === 'KZ'
+                ? 'bg-emerald-600 text-white font-semibold shadow-sm'
+                : 'bg-surface-2 text-text-muted hover:text-text hover:bg-surface-3'
+            }`}
+          >
+            <span>🇰🇿 Казахстан</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setRegion('US');
+              setLanguage('en');
+              setChips(DEFAULT_CHIPS_US);
+              setQuery(DEFAULT_CHIPS_US[0]);
+            }}
+            className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 ${
+              region === 'US'
+                ? 'bg-sky-600 text-white font-semibold shadow-sm'
+                : 'bg-surface-2 text-text-muted hover:text-text hover:bg-surface-3'
+            }`}
+          >
+            <span>🇺🇸 США / Global</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setRegion('GB');
+              setLanguage('en');
+              setChips(DEFAULT_CHIPS_EU);
+              setQuery(DEFAULT_CHIPS_EU[0]);
+            }}
+            className={`px-3 py-1.5 text-xs rounded transition-colors flex items-center gap-1.5 ${
+              ['GB', 'DE', 'NL', 'PL', 'FR', 'ES'].includes(region)
+                ? 'bg-indigo-600 text-white font-semibold shadow-sm'
+                : 'bg-surface-2 text-text-muted hover:text-text hover:bg-surface-3'
+            }`}
+          >
+            <span>🇪🇺 Европа / UK</span>
+          </button>
+        </div>
+
         {/* Input & Search Button */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
@@ -683,11 +755,14 @@ export const Finder: React.FC = () => {
                 onChange={(e) => setRegion(e.target.value)}
                 className="bg-surface-2 border border-border rounded-control px-2 py-1.5 text-text text-xs"
               >
-                <option value="RU">Россия (RU)</option>
                 <option value="KZ">Казахстан (KZ)</option>
-                <option value="UA">Украина (UA)</option>
-                <option value="BY">Беларусь (BY)</option>
                 <option value="US">США (US)</option>
+                <option value="GB">Великобритания (UK)</option>
+                <option value="DE">Германия (DE)</option>
+                <option value="NL">Нидерланды (NL)</option>
+                <option value="PL">Польша (PL)</option>
+                <option value="FR">Франция (FR)</option>
+                <option value="ES">Испания (ES)</option>
                 <option value="ALL">Все</option>
               </select>
             </div>
@@ -920,8 +995,8 @@ export const Finder: React.FC = () => {
           icon={Search}
           title="Запустите поиск каналов"
           description="Выберите нишу из чипов выше или введите свою. Система найдёт каналы, вытащит контакты и посчитает рейтинг клиентов."
-          actionText="Искать 'инвестиции в недвижимость'"
-          onAction={() => executeSearch('инвестиции в недвижимость')}
+          actionText="Искать 'ai automation'"
+          onAction={() => executeSearch('ai automation')}
         />
       )}
 

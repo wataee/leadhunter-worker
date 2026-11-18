@@ -1,29 +1,13 @@
 import { create } from 'zustand';
 import rawCatalog from '../shared/sources.catalog.json';
-import { SourceItem, SourceCategory, SourceLanguage, SourceType } from './catalogTypes';
+import { SourceItem, SourceCategory, SourceLanguage, SourceType, SourceRegion } from './catalogTypes';
 import { useVacanciesStore } from '../store/vacanciesStore';
+import { syncDisabledSourcesToApi } from '../lib/api';
 
 const STORAGE_KEY = 'leadhunter_active_sources';
 const CUSTOM_SOURCES_KEY = 'leadhunter_custom_sources';
 
 const typedCatalog = rawCatalog as unknown as SourceItem[];
-
-function getInitialActiveSources(): string[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length >= 50) {
-        return parsed.map((x) => String(x).toLowerCase());
-      }
-    }
-  } catch {
-    // ignore json error
-  }
-  // Default: all recommended items (full 152 catalog sources)
-  return typedCatalog.filter((s) => s.recommended).map((s) => s.id);
-}
 
 function getInitialCustomSources(): SourceItem[] {
   if (typeof window === 'undefined') return [];
@@ -39,29 +23,59 @@ function getInitialCustomSources(): SourceItem[] {
   return [];
 }
 
-function syncToVacanciesStore(activeIds: string[]) {
+function getInitialActiveSources(customSources: SourceItem[]): string[] {
+  const allCatalogIds = typedCatalog.map((s) => s.id.toLowerCase());
+  const validIds = new Set([...allCatalogIds, ...customSources.map((s) => s.id.toLowerCase())]);
+
+  if (typeof window === 'undefined') return allCatalogIds;
   try {
-    const vStore = useVacanciesStore.getState();
-    const existing = new Set(vStore.sources.map((s) => s.username.toLowerCase()));
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved !== null) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        const cleaned = parsed
+          .map((x) => String(x).toLowerCase())
+          .filter((id) => validIds.has(id));
+        // If a non-empty legacy RU list was completely purged after migration, re-enable new EU/US/KZ catalog
+        if (parsed.length > 0 && cleaned.length === 0) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(allCatalogIds));
+          return allCatalogIds;
+        }
+        return Array.from(new Set(cleaned));
+      }
+    }
+  } catch {
+    // ignore json error
+  }
+  return allCatalogIds;
+}
 
-    // Update enabled state or add missing
-    const updated = [...vStore.sources];
+function syncToVacanciesStore(activeIds: string[], catalogList: SourceItem[], customList: SourceItem[]) {
+  try {
     const activeSet = new Set(activeIds.map((x) => x.toLowerCase()));
-
-    // Enable/disable existing
-    for (let i = 0; i < updated.length; i++) {
-      const uname = updated[i].username.toLowerCase();
-      updated[i] = {
-        ...updated[i],
-        enabled: activeSet.has(uname),
-      };
+    const mergedMap = new Map<string, SourceItem>();
+    for (const item of [...catalogList, ...customList]) {
+      mergedMap.set(item.id.toLowerCase(), item);
     }
 
-    // Add new ones
+    const updated = Array.from(mergedMap.entries()).map(([uname, item]) => ({
+      username: uname,
+      title: item.title,
+      type: item.type,
+      region: item.region || 'US',
+      enabled: activeSet.has(uname),
+      addedAt: new Date().toISOString(),
+    }));
+
+    // Keep any manually imported IDs that were active even without metadata
     for (const id of activeIds) {
-      if (!existing.has(id.toLowerCase())) {
+      const lower = id.toLowerCase();
+      if (!mergedMap.has(lower)) {
         updated.push({
-          username: id.toLowerCase(),
+          username: lower,
+          title: `@${lower}`,
+          type: 'channel',
+          region: 'US',
           enabled: true,
           addedAt: new Date().toISOString(),
         });
@@ -69,6 +83,11 @@ function syncToVacanciesStore(activeIds: string[]) {
     }
 
     useVacanciesStore.setState({ sources: updated });
+
+    if (typeof window !== 'undefined') {
+      const disabled = updated.filter((s) => !s.enabled).map((s) => s.username);
+      syncDisabledSourcesToApi(disabled).catch(() => {});
+    }
   } catch {
     // ignore
   }
@@ -86,6 +105,7 @@ interface CatalogState {
   searchQuery: string;
   selectedCategory: SourceCategory | 'all';
   selectedLanguage: SourceLanguage | 'all';
+  selectedRegion: SourceRegion | 'all';
   selectedType: SourceType | 'all';
   selectedStatus: 'all' | 'active_only';
   selectedTag: string | null;
@@ -95,6 +115,7 @@ interface CatalogState {
   setSearchQuery: (q: string) => void;
   setSelectedCategory: (cat: SourceCategory | 'all') => void;
   setSelectedLanguage: (lang: SourceLanguage | 'all') => void;
+  setSelectedRegion: (region: SourceRegion | 'all') => void;
   setSelectedType: (type: SourceType | 'all') => void;
   setSelectedStatus: (status: 'all' | 'active_only') => void;
   setSelectedTag: (tag: string | null) => void;
@@ -104,6 +125,7 @@ interface CatalogState {
   enableAllSources: () => void;
   disableAllSources: () => void;
   enableRecommended: () => void;
+  enableRegions: (regions: SourceRegion[]) => void;
   addActiveBatch: (ids: string[]) => void;
   removeActiveBatch: (ids: string[]) => void;
 
@@ -117,11 +139,18 @@ interface CatalogState {
 }
 
 export const useCatalogStore = create<CatalogState>((set, get) => {
-  const initialActive = getInitialActiveSources();
   const initialCustom = getInitialCustomSources();
+  const initialActive = getInitialActiveSources(initialCustom);
+
+  const persistAndSync = (arr: string[], customOverride?: SourceItem[]) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    }
+    syncToVacanciesStore(arr, get()?.catalog || typedCatalog, customOverride || get()?.customSources || initialCustom);
+  };
 
   // Initialize vacancies store on first load
-  syncToVacanciesStore(initialActive);
+  syncToVacanciesStore(initialActive, typedCatalog, initialCustom);
 
   return {
     catalog: typedCatalog,
@@ -132,6 +161,7 @@ export const useCatalogStore = create<CatalogState>((set, get) => {
     searchQuery: '',
     selectedCategory: 'all',
     selectedLanguage: 'all',
+    selectedRegion: 'all',
     selectedType: 'all',
     selectedStatus: 'all',
     selectedTag: null,
@@ -140,6 +170,7 @@ export const useCatalogStore = create<CatalogState>((set, get) => {
     setSearchQuery: (q) => set({ searchQuery: q }),
     setSelectedCategory: (cat) => set({ selectedCategory: cat }),
     setSelectedLanguage: (lang) => set({ selectedLanguage: lang }),
+    setSelectedRegion: (region) => set({ selectedRegion: region }),
     setSelectedType: (type) => set({ selectedType: type }),
     setSelectedStatus: (status) => set({ selectedStatus: status }),
     setSelectedTag: (tag) => set({ selectedTag: tag }),
@@ -153,64 +184,51 @@ export const useCatalogStore = create<CatalogState>((set, get) => {
       } else {
         current.add(lower);
       }
-      const arr = Array.from(current);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-      }
-      syncToVacanciesStore(arr);
+      persistAndSync(Array.from(current));
       set({ activeSources: current });
     },
 
     enableAllSources: () => {
-      const allIds = get().catalog.map((s) => s.id.toLowerCase());
+      const allIds = [...get().catalog, ...get().customSources].map((s) => s.id.toLowerCase());
       const next = new Set(allIds);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)));
-      }
-      syncToVacanciesStore(Array.from(next));
+      persistAndSync(Array.from(next));
       set({ activeSources: next });
     },
 
     disableAllSources: () => {
       const next = new Set<string>();
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-      }
-      syncToVacanciesStore([]);
+      persistAndSync([]);
       set({ activeSources: next });
     },
 
     enableRecommended: () => {
       const recommended = get().catalog.filter((s) => s.recommended).map((s) => s.id.toLowerCase());
-      const current = new Set(get().activeSources);
-      recommended.forEach((id) => current.add(id));
-      const arr = Array.from(current);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-      }
-      syncToVacanciesStore(arr);
-      set({ activeSources: current });
+      const next = new Set(recommended);
+      persistAndSync(Array.from(next));
+      set({ activeSources: next });
+    },
+
+    enableRegions: (regions) => {
+      const regionSet = new Set(regions);
+      const targetIds = [...get().catalog, ...get().customSources]
+        .filter((s) => s.region && regionSet.has(s.region))
+        .map((s) => s.id.toLowerCase());
+      const next = new Set(targetIds);
+      persistAndSync(Array.from(next));
+      set({ activeSources: next });
     },
 
     addActiveBatch: (ids) => {
       const current = new Set(get().activeSources);
       ids.forEach((id) => current.add(id.toLowerCase()));
-      const arr = Array.from(current);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-      }
-      syncToVacanciesStore(arr);
+      persistAndSync(Array.from(current));
       set({ activeSources: current });
     },
 
     removeActiveBatch: (ids) => {
       const current = new Set(get().activeSources);
       ids.forEach((id) => current.delete(id.toLowerCase()));
-      const arr = Array.from(current);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-      }
-      syncToVacanciesStore(arr);
+      persistAndSync(Array.from(current));
       set({ activeSources: current });
     },
 
@@ -241,14 +259,9 @@ export const useCatalogStore = create<CatalogState>((set, get) => {
       if (typeof window !== 'undefined') {
         localStorage.setItem(CUSTOM_SOURCES_KEY, JSON.stringify(custom));
       }
-      // Also automatically mark active
       const active = new Set(get().activeSources);
       active.add(lower);
-      const arr = Array.from(active);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-      }
-      syncToVacanciesStore(arr);
+      persistAndSync(Array.from(active), custom);
       set({ customSources: custom, activeSources: active });
     },
 
@@ -268,11 +281,7 @@ export const useCatalogStore = create<CatalogState>((set, get) => {
         added++;
       }
 
-      const arr = Array.from(active);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-      }
-      syncToVacanciesStore(arr);
+      persistAndSync(Array.from(active));
       set({ activeSources: active });
       return { added, errors };
     },

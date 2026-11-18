@@ -158,13 +158,15 @@ export function computeProfileFit(vacancy: Vacancy, profile?: UserProfile): numb
     score += 15;
   }
 
-  // 3. Budget match (up to 25 pts)
+  // 3. Currency-normalized budget match (up to 25 pts)
   if (profile.minRate && profile.minRate > 0) {
     if (vacancy.budget && (vacancy.budget.max !== null || vacancy.budget.min !== null)) {
       const val = vacancy.budget.max ?? vacancy.budget.min ?? 0;
-      if (val >= profile.minRate) {
+      const vacUsd = toApproxUsd(val, vacancy.budget.currency);
+      const minUsd = toApproxUsd(profile.minRate, profile.minRateCurrency || 'USD');
+      if (vacUsd >= minUsd) {
         score += 25;
-      } else if (val >= profile.minRate * 0.7) {
+      } else if (vacUsd >= minUsd * 0.7) {
         score += 10;
       } else {
         score -= 10; // penalty for low pay
@@ -177,4 +179,18 @@ export function computeProfileFit(vacancy: Vacancy, profile?: UserProfile): numb
   }
 
   return Math.max(5, Math.min(99, Math.round(score)));
+}
+
+const APPROX_USD_RATES: Record<string, number> = {
+  USD: 1,
+  EUR: 1.08,
+  GBP: 1.27,
+  KZT: 0.002,
+  UAH: 0.024,
+  RUB: 0.011,
+};
+
+export function toApproxUsd(amount: number, currency?: string): number {
+  const rate = APPROX_USD_RATES[(currency || 'USD').toUpperCase()] ?? 1;
+  return amount * rate;
 }

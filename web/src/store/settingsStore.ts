@@ -15,6 +15,7 @@ interface SettingsState extends UserSettings {
   setNotificationsEnabled: (enabled: boolean) => void;
   setUseAiQualification: (enabled: boolean) => void;
   setAiTopNCount: (count: number) => void;
+  setAutoTranslateVacancies: (enabled: boolean) => void;
   setCustomAiApiKey: (key: string) => void;
   setCustomAiProvider: (provider: 'gemini' | 'groq' | 'openrouter') => void;
   setQuietHours: (enabled: boolean, start?: number, end?: number) => void;
@@ -24,16 +25,16 @@ interface SettingsState extends UserSettings {
 }
 
 const DEFAULT_PROFILE: UserProfile = {
-  name: 'Тимур',
-  specialization: 'Динамичный YouTube-монтаж (MrBeast / Vox style)',
-  telegram: '@editor_timur',
-  portfolioUrl: 'https://fleur-editor.netlify.app/ru/',
-  email: 'editor.timur@gmail.com',
-  sampleUrl: 'https://youtu.be/sample_edit',
+  name: 'Timur (.fleur)',
+  specialization: 'AI, Tech & Finance Video Editing (YouTube + Reels/Shorts)',
+  telegram: '@ffluere',
+  portfolioUrl: 'https://fleur-editor.netlify.app/',
+  email: 'fluere.work@gmail.com',
+  sampleUrl: 'https://youtu.be/cZZgi5xn930',
   formats: ['YouTube', 'Shorts/Reels', 'Подкасты'],
   skills: ['Premiere Pro', 'After Effects', 'DaVinci Resolve', 'CapCut'],
-  minRate: 3000,
-  minRateCurrency: 'RUB',
+  minRate: 80,
+  minRateCurrency: 'USD',
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -51,8 +52,10 @@ export const useSettingsStore = create<SettingsState>()(
       sessionQuotaUsed: 0,
       useAiQualification: true,
       aiTopNCount: 30,
+      autoTranslateVacancies: true,
       customAiApiKey: '',
       customAiProvider: 'gemini',
+      setAutoTranslateVacancies: (autoTranslateVacancies: boolean) => set({ autoTranslateVacancies }),
       setCustomAiApiKey: (customAiApiKey: string) => set({ customAiApiKey }),
       setCustomAiProvider: (customAiProvider: 'gemini' | 'groq' | 'openrouter') =>
         set({ customAiProvider }),
@@ -115,10 +118,31 @@ export const useSettingsStore = create<SettingsState>()(
           sessionQuotaUsed: 0,
           useAiQualification: true,
           aiTopNCount: 30,
+          autoTranslateVacancies: true,
         }),
     }),
     {
       name: 'leadhunter_settings',
+      version: 2,
+      migrate: (persistedState: any, version: number) => {
+        if (persistedState && version < 2) {
+          const p = persistedState.profile || {};
+          if (p.telegram === '@editor_timur') p.telegram = DEFAULT_PROFILE.telegram;
+          if (p.email === 'editor.timur@gmail.com') p.email = DEFAULT_PROFILE.email;
+          if (p.sampleUrl === 'https://youtu.be/sample_edit') p.sampleUrl = DEFAULT_PROFILE.sampleUrl;
+          if (p.portfolioUrl === 'https://fleur-editor.netlify.app/ru/') p.portfolioUrl = DEFAULT_PROFILE.portfolioUrl;
+          if (p.name === 'Тимур') p.name = DEFAULT_PROFILE.name;
+          if (p.minRate === 3000 && p.minRateCurrency === 'RUB') {
+            p.minRate = DEFAULT_PROFILE.minRate;
+            p.minRateCurrency = DEFAULT_PROFILE.minRateCurrency;
+          }
+          persistedState.profile = { ...DEFAULT_PROFILE, ...p };
+          if (persistedState.autoTranslateVacancies === undefined) {
+            persistedState.autoTranslateVacancies = true;
+          }
+        }
+        return persistedState;
+      },
     }
   )
 );

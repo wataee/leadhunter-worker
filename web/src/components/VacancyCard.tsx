@@ -1,12 +1,15 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Vacancy } from '../types';
 import { formatRelativeTime } from '../lib/time';
 import { BudgetBadge } from './BudgetBadge';
 import { getProfileFitLevel } from '../lib/profileFit';
 import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
-import { rewritePitchWithAi } from '../lib/api';
+import { rewritePitchWithAi, translateTextWithAi } from '../lib/api';
+import { extractDirectContactHandle } from '../lib/templates';
 import { parseStructuredVacancy } from '../shared/vacancyParser';
+import { detectVacancyRegion } from '../shared/regions.js';
+import { detectTextLanguage, needsRussianTranslation, LANG_LABELS } from '../shared/translate.js';
 import { RateCalculatorModal } from './RateCalculatorModal';
 import { ClientBriefModal } from './ClientBriefModal';
 import { VacancyActionMenu } from './vacancies/VacancyActionMenu';
@@ -21,6 +24,7 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  Languages,
 } from 'lucide-react';
 
 interface VacancyCardProps {
@@ -40,22 +44,110 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   onHideChannel,
 }) => {
   const profile = useSettingsStore((s) => s.profile);
+  const autoTranslate = useSettingsStore((s) => s.autoTranslateVacancies ?? true);
   const addToast = useToastStore((s) => s.addToast);
+
   const [showRateCalculator, setShowRateCalculator] = useState(false);
   const [showClientBrief, setShowClientBrief] = useState(false);
   const [isExpandedText, setIsExpandedText] = useState(false);
 
-  // Структурированный парсинг вакансии (софт, дедлайн, хронометраж)
-  const structured = useMemo(() => parseStructuredVacancy(vacancy.text), [vacancy.text]);
+  // Translation state
+  const detectedLang = useMemo(
+    () => (vacancy.detectedLang as any) || detectTextLanguage(vacancy.text),
+    [vacancy.detectedLang, vacancy.text]
+  );
+  const shouldOfferTranslation = useMemo(
+    () => needsRussianTranslation(vacancy.text),
+    [vacancy.text]
+  );
+  const [translatedRu, setTranslatedRu] = useState<string | null>(
+    vacancy.translatedText || null
+  );
+  const [translationProvider, setTranslationProvider] = useState<string>('');
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [showOriginalText, setShowOriginalText] = useState(false);
 
-  // Расчёт понятного уровня соответствия (Подходит / Возможно / Мимо)
+  // Synchronize prop-backed translation or run automatic free translation when enabled
+  useEffect(() => {
+    setTranslatedRu(vacancy.translatedText || null);
+    setShowOriginalText(false);
+  }, [vacancy.id, vacancy.translatedText]);
+
+  useEffect(() => {
+    if (!autoTranslate || !shouldOfferTranslation || translatedRu) return;
+
+    let cancelled = false;
+    setIsTranslating(true);
+    translateTextWithAi({
+      text: vacancy.text,
+      targetLang: 'ru',
+      sourceLang: detectedLang,
+      mode: 'vacancy',
+    })
+      .then((res) => {
+        if (!cancelled && res.translatedText) {
+          setTranslatedRu(res.translatedText);
+          setTranslationProvider(res.provider || 'free');
+        }
+      })
+      .catch(() => {
+        // Silent fail on background auto-translate; user can trigger manually
+      })
+      .finally(() => {
+        if (!cancelled) setIsTranslating(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [autoTranslate, shouldOfferTranslation, translatedRu, vacancy.text, detectedLang]);
+
+  const handleManualTranslate = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (translatedRu) {
+      setShowOriginalText((prev) => !prev);
+      return;
+    }
+    setIsTranslating(true);
+    try {
+      const res = await translateTextWithAi({
+        text: vacancy.text,
+        targetLang: 'ru',
+        sourceLang: detectedLang,
+        mode: 'vacancy',
+      });
+      if (res.translatedText) {
+        setTranslatedRu(res.translatedText);
+        setTranslationProvider(res.provider || 'free');
+        setShowOriginalText(false);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Ошибка перевода';
+      addToast({ type: 'error', message: msg });
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  // Structured info & region
+  const structured = useMemo(() => parseStructuredVacancy(vacancy.text), [vacancy.text]);
+  const region = useMemo(() => {
+    const r = vacancy.region || detectVacancyRegion(vacancy.text, vacancy.channel);
+    return r === 'RU' ? 'US' : r;
+  }, [vacancy.region, vacancy.text, vacancy.channel]);
+
   const fit = useMemo(() => getProfileFitLevel(vacancy, profile), [vacancy, profile]);
 
   const diffMs = Date.now() - new Date(vacancy.postedAt).getTime();
   const isHot = !structured.isClosed && diffMs < 20 * 60 * 1000;
   const isNew = !isHot && diffMs < 2 * 60 * 60 * 1000;
 
-  // Черновик отклика
+  // Quick draft & handle extraction
+  const directHandle = useMemo(
+    () => extractDirectContactHandle(vacancy.text, vacancy.channel),
+    [vacancy.text, vacancy.channel]
+  );
+
   const [copied, setCopied] = useState(false);
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [customDraft, setCustomDraft] = useState<string | null>(null);
@@ -63,10 +155,18 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
 
   const initialDraft = useMemo(() => {
     const ch = vacancy.channel.startsWith('@') ? vacancy.channel : `@${vacancy.channel}`;
-    const skillsPart = profile.skills?.length ? `Работаю в ${profile.skills.slice(0, 2).join(', ')}.` : '';
-    const portfolio = profile.portfolioUrl || 'https://fleur-editor.netlify.app';
-    return `Здравствуйте! Увидел вакансию в ${ch}. Занимаюсь ${profile.specialization || 'видеомонтажом'}. ${skillsPart} Моё портфолио: ${portfolio}. Готов обсудить детали!`;
-  }, [vacancy.channel, profile]);
+    const basePortfolio = (profile.portfolioUrl || 'https://fleur-editor.netlify.app/').replace(/\/$/, '');
+    const isForeignPost = region === 'EU' || region === 'US' || (detectedLang !== 'ru' && detectedLang !== 'kk');
+
+    if (isForeignPost) {
+      const skillsPartEn = profile.skills?.length ? ` (${profile.skills.slice(0, 3).join(', ')})` : '';
+      return `Hi! Saw your post in ${ch} for a video editor. I specialize in retention-focused ${profile.specialization || 'YouTube & Shorts editing'}${skillsPartEn}. Portfolio: ${basePortfolio}/. Happy to cut a quick 30-sec sample — are you still hiring?`;
+    }
+
+    const localePortfolio = detectedLang === 'kk' ? `${basePortfolio}/kz/` : `${basePortfolio}/ru/`;
+    const skillsPart = profile.skills?.length ? `Работаю в ${profile.skills.slice(0, 3).join(', ')}.` : '';
+    return `Привет! Увидел заказ в ${ch}. Специализируюсь на ${profile.specialization || 'динамичном видеомонтаже'}. ${skillsPart} Портфолио: ${localePortfolio}. Готов сделать тестовый 30-сек фрагмент — ещё актуально?`;
+  }, [vacancy.channel, profile, region, detectedLang]);
 
   const activeDraft = customDraft ?? initialDraft;
 
@@ -85,7 +185,16 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   const handleCopyAndOpen = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
     await handleCopyDraft();
-    window.open(vacancy.url, '_blank', 'noopener,noreferrer');
+    if (directHandle) {
+      const targetUrl = `https://t.me/${directHandle}?text=${encodeURIComponent(activeDraft)}`;
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      addToast({
+        type: 'info',
+        message: 'Текст скопирован — откройте пост и напишите автору в комментарии или ЛС.',
+      });
+      window.open(vacancy.url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const handleGenerateAiDraft = async (e?: React.MouseEvent) => {
@@ -95,9 +204,9 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
       const res = await rewritePitchWithAi({
         text: activeDraft,
         leadContext: {
-          name: vacancy.channel,
+          name: directHandle ? `@${directHandle}` : vacancy.channel,
           channel: vacancy.channel,
-          niche: `Telegram-вакансия (${vacancy.matchedKeywords?.join(', ') || 'монтаж'})`,
+          niche: `Telegram (${vacancy.matchedKeywords?.join(', ') || 'video editing'})`,
         },
       });
       if (res.rewritten) {
@@ -113,6 +222,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   };
 
   const cleanChannel = vacancy.channel.replace(/^@/, '');
+  const langLabel = LANG_LABELS[detectedLang as keyof typeof LANG_LABELS] || detectedLang?.toUpperCase();
 
   return (
     <div
@@ -137,10 +247,61 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
             {formatRelativeTime(vacancy.postedAt)}
           </span>
           <BudgetBadge budget={vacancy.budget} />
+
+          {/* Region Badge */}
+          {region === 'EU' ? (
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-400 bg-indigo-400/10 px-1.5 py-0.2 rounded border border-indigo-400/30"
+              title="Европа / UK"
+            >
+              <span>🇪🇺 EU</span>
+            </span>
+          ) : region === 'KZ' ? (
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-400/10 px-1.5 py-0.2 rounded border border-emerald-400/30"
+              title="Казахстан"
+            >
+              <span>🇰🇿 KZ</span>
+            </span>
+          ) : (
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400 bg-sky-400/10 px-1.5 py-0.2 rounded border border-sky-400/30"
+              title="США / Международный"
+            >
+              <span>🇺🇸 US</span>
+            </span>
+          )}
+
+          {/* Language Pill + Manual Translate Trigger */}
+          {shouldOfferTranslation && (
+            <button
+              type="button"
+              onClick={handleManualTranslate}
+              disabled={isTranslating}
+              className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-300 bg-amber-400/10 hover:bg-amber-400/20 px-1.5 py-0.2 rounded border border-amber-400/30 transition-colors"
+              title={
+                translatedRu
+                  ? showOriginalText
+                    ? 'Показать перевод на русский'
+                    : 'Показать оригинал'
+                  : 'Перевести на русский бесплатно'
+              }
+            >
+              <Languages size={11} className={isTranslating ? 'animate-spin' : ''} />
+              <span>
+                {isTranslating
+                  ? 'Перевод...'
+                  : translatedRu
+                  ? showOriginalText
+                    ? `${langLabel} (Показать RU)`
+                    : `${langLabel} → RU`
+                  : `Перевести (${langLabel})`}
+              </span>
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {/* Single status badge: Hot OR New */}
           {isHot ? (
             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-danger bg-danger/15 px-2 py-0.5 rounded border border-danger/30">
               <Flame size={12} />
@@ -153,7 +314,6 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
             </span>
           ) : null}
 
-          {/* 3-level fit badge: Подходит / Возможно */}
           {fit.level === 'great' ? (
             <span
               className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/25 cursor-help"
@@ -172,7 +332,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         </div>
       </div>
 
-      {/* Structured info chips (if present) */}
+      {/* Structured info chips */}
       {(structured.isClosed || structured.deadline || structured.duration) && (
         <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
           {structured.isClosed && (
@@ -194,16 +354,56 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         </div>
       )}
 
-      {/* Post Text: 6 lines clamp with toggle */}
-      <div className="space-y-1">
-        <div
-          className={`text-xs text-text leading-relaxed whitespace-pre-wrap select-text font-sans ${
-            !isExpandedText ? 'line-clamp-6' : ''
-          }`}
-        >
-          {vacancy.text}
-        </div>
-        {vacancy.text.length > 250 && (
+      {/* Translated or Original Text */}
+      <div className="space-y-2">
+        {translatedRu && !showOriginalText ? (
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-[10px] text-accent font-semibold">
+              <span className="flex items-center gap-1">
+                <Languages size={12} />
+                <span>Перевод на русский ({translationProvider || 'AI / NMT'})</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowOriginalText(true)}
+                className="text-text-muted hover:text-text underline underline-offset-2 font-normal"
+              >
+                Показать оригинал ({langLabel})
+              </button>
+            </div>
+            <div
+              className={`text-xs text-text leading-relaxed whitespace-pre-wrap select-text font-sans ${
+                !isExpandedText ? 'line-clamp-6' : ''
+              }`}
+            >
+              {translatedRu}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {translatedRu && showOriginalText && (
+              <div className="flex items-center justify-between text-[10px] text-muted">
+                <span>Оригинал ({langLabel})</span>
+                <button
+                  type="button"
+                  onClick={() => setShowOriginalText(false)}
+                  className="text-accent hover:underline"
+                >
+                  Вернуть русский перевод
+                </button>
+              </div>
+            )}
+            <div
+              className={`text-xs text-text leading-relaxed whitespace-pre-wrap select-text font-sans ${
+                !isExpandedText ? 'line-clamp-6' : ''
+              }`}
+            >
+              {vacancy.text}
+            </div>
+          </div>
+        )}
+
+        {(translatedRu || vacancy.text).length > 250 && (
           <button
             type="button"
             onClick={() => setIsExpandedText(!isExpandedText)}
@@ -214,7 +414,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         )}
       </div>
 
-      {/* Useful Chips: Soft/Skills and Format only */}
+      {/* Skills and Format */}
       {(vacancy.skills && vacancy.skills.length > 0) || vacancy.formatTag ? (
         <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
           {vacancy.formatTag && (
@@ -237,13 +437,13 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         </div>
       ) : null}
 
-      {/* Quick Pitch Draft for Hot Vacancies (<20 min) */}
+      {/* Quick Pitch Draft for Hot Vacancies */}
       {isHot && (
         <div className="bg-surface-2/70 border border-danger/30 rounded-control p-3 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <span className="flex items-center gap-1.5 text-xs font-bold text-danger">
               <Flame size={14} className="animate-pulse" />
-              <span>Быстрый отклик</span>
+              <span>Быстрый отклик {directHandle ? `→ @${directHandle}` : ''}</span>
             </span>
             <div className="flex items-center gap-1">
               <button
@@ -286,7 +486,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
                   onClick={handleCopyAndOpen}
                   className="flex items-center gap-1 px-3 py-1 bg-accent hover:bg-accent-hover text-white rounded text-xs font-semibold transition-colors min-h-[30px]"
                 >
-                  <span>Скопировать и в чат</span>
+                  <span>{directHandle ? `Написать @${directHandle}` : 'Скопировать и открыть пост'}</span>
                   <ExternalLink size={12} />
                 </button>
               </div>
@@ -295,7 +495,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         </div>
       )}
 
-      {/* Action Footer: 1 Primary + 1 Secondary + ⋯ Menu */}
+      {/* Action Footer */}
       <div className="flex items-center justify-between pt-2 border-t border-border/60">
         <VacancyActionMenu
           channel={vacancy.channel}

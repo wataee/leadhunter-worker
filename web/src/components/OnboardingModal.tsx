@@ -32,12 +32,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Form state
-  const [name, setName] = useState(profile.name || '');
-  const [telegram, setTelegram] = useState(profile.telegram || '');
-  const [portfolioUrl, setPortfolioUrl] = useState(profile.portfolioUrl || '');
-  const [minRate, setMinRate] = useState(profile.minRate || 3000);
-  const [minRateCurrency, setMinRateCurrency] = useState<'RUB' | 'USD'>(
-    profile.minRateCurrency === 'USD' ? 'USD' : 'RUB'
+  const [name, setName] = useState(profile.name || 'Timur (.fleur)');
+  const [telegram, setTelegram] = useState(profile.telegram || '@ffluere');
+  const [portfolioUrl, setPortfolioUrl] = useState(profile.portfolioUrl || 'https://fleur-editor.netlify.app/');
+  const [minRate, setMinRate] = useState(profile.minRate || 80);
+  const [minRateCurrency, setMinRateCurrency] = useState<'RUB' | 'USD' | 'EUR' | 'KZT'>(
+    (profile.minRateCurrency as any) || 'USD'
   );
   const [selectedFormats, setSelectedFormats] = useState<Array<'YouTube' | 'Shorts/Reels' | 'Подкасты' | 'Реклама'>>(
     profile.formats && profile.formats.length > 0
@@ -147,19 +147,21 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                 <input
                   type="number"
                   min="0"
-                  step="500"
+                  step="10"
                   value={minRate}
                   onChange={(e) => setMinRate(Number(e.target.value) || 0)}
                   className="flex-1 bg-surface-2 text-text px-3 py-2 rounded-control border border-border text-sm focus:border-accent focus:outline-none"
-                  placeholder="3000"
+                  placeholder="80"
                 />
                 <select
                   value={minRateCurrency}
                   onChange={(e) => setMinRateCurrency(e.target.value as any)}
                   className="bg-surface-2 text-text px-3 py-2 rounded-control border border-border text-sm focus:border-accent focus:outline-none"
                 >
-                  <option value="RUB">₽ (RUB)</option>
                   <option value="USD">$ (USD)</option>
+                  <option value="EUR">€ (EUR)</option>
+                  <option value="KZT">₸ (KZT)</option>
+                  <option value="RUB">₽ (RUB)</option>
                 </select>
               </div>
               <p className="text-[11px] text-muted">
@@ -207,7 +209,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full bg-surface-2 text-text px-3 py-2 rounded-control border border-border text-xs focus:border-accent focus:outline-none"
-                  placeholder="Тимур"
+                  placeholder="Timur (.fleur)"
                 />
               </div>
 
@@ -218,7 +220,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                   value={telegram}
                   onChange={(e) => setTelegram(e.target.value)}
                   className="w-full bg-surface-2 text-text px-3 py-2 rounded-control border border-border text-xs focus:border-accent focus:outline-none"
-                  placeholder="@editor_timur"
+                  placeholder="@ffluere"
                 />
               </div>
 
@@ -229,7 +231,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                   value={portfolioUrl}
                   onChange={(e) => setPortfolioUrl(e.target.value)}
                   className="w-full bg-surface-2 text-text px-3 py-2 rounded-control border border-border text-xs focus:border-accent focus:outline-none"
-                  placeholder="https://fleur-editor.netlify.app/ru/"
+                  placeholder="https://fleur-editor.netlify.app/"
                 />
               </div>
             </div>

@@ -34,6 +34,7 @@ export const Dashboard: React.FC = () => {
 
   const [activePitchLead, setActivePitchLead] = useState<Lead | null>(null);
   const [activePitchVacancy, setActivePitchVacancy] = useState<Vacancy | null>(null);
+  const [activeStrategy, setActiveStrategy] = useState<string | undefined>(undefined);
   const [activeOpeningAngle, setActiveOpeningAngle] = useState<string | undefined>(undefined);
   const [showSystemHealth, setShowSystemHealth] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -56,8 +57,8 @@ export const Dashboard: React.FC = () => {
       (isOverdue(l.nextTouchAt) || isToday(l.nextTouchAt))
   );
 
-  // 2. Что нового сегодня (свежие нескрытые вакансии)
-  const freshVacancies = vacancies.filter((v) => !v.hidden).slice(0, 6);
+  // 2. Что нового сегодня (свежие нескрытые вакансии EU / US / KZ)
+  const freshVacancies = vacancies.filter((v) => !v.hidden && v.region !== 'RU').slice(0, 6);
 
   // 3. Что в работе
   const inProgressLeads = leads.filter((l) =>
@@ -167,7 +168,8 @@ export const Dashboard: React.FC = () => {
                       <button
                         onClick={() => {
                           setActivePitchLead(lead);
-                          setActiveOpeningAngle('followup_1');
+                          setActiveStrategy('followup_1');
+                          setActiveOpeningAngle(undefined);
                         }}
                         className="flex-1 py-1 px-2 text-xs text-white bg-accent hover:bg-accent-hover rounded font-semibold transition-colors flex items-center justify-center gap-1"
                       >
@@ -316,10 +318,12 @@ export const Dashboard: React.FC = () => {
         onClose={() => {
           setActivePitchLead(null);
           setActivePitchVacancy(null);
+          setActiveStrategy(undefined);
           setActiveOpeningAngle(undefined);
         }}
         lead={activePitchLead || undefined}
         vacancy={activePitchVacancy || undefined}
+        initialStrategy={activeStrategy}
         initialOpeningAngle={activeOpeningAngle}
       />
 

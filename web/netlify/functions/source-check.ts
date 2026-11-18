@@ -23,12 +23,22 @@ function cleanHtml(raw: string): string {
 }
 
 function parseSubscribers(raw: string): number {
-  const clean = raw.replace(/\s+/g, '').replace(/,/g, '.');
-  const kMatch = clean.match(/([\d.]+)K/i);
-  if (kMatch) return Math.round(parseFloat(kMatch[1]) * 1000);
-  const mMatch = clean.match(/([\d.]+)M/i);
-  if (mMatch) return Math.round(parseFloat(mMatch[1]) * 1000000);
-  const digits = clean.replace(/[^\d]/g, '');
+  const primaryPart = raw.split(',')[0].trim();
+  const abbrMatch = primaryPart.match(/^([\d\s.,]+)\s*([kmкм])(?:\s|$)/i);
+  if (abbrMatch) {
+    const val = parseFloat(abbrMatch[1].replace(/\s+/g, '').replace(',', '.'));
+    if (!Number.isNaN(val)) {
+      const unit = abbrMatch[2].toLowerCase();
+      if (unit === 'k' || unit === 'к') return Math.round(val * 1000);
+      if (unit === 'm' || unit === 'м') return Math.round(val * 1000000);
+    }
+  }
+  const plainMatch = primaryPart.match(/^([\d\s.,]+)(?:\s+(?:subscribers?|members?|подписчик|участник)|$)/i);
+  if (plainMatch) {
+    const digits = plainMatch[1].replace(/[^\d]/g, '');
+    return digits ? parseInt(digits, 10) : 0;
+  }
+  const digits = primaryPart.replace(/[^\d]/g, '');
   return digits ? parseInt(digits, 10) : 0;
 }
 

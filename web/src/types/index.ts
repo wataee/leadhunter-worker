@@ -54,7 +54,7 @@ export interface Lead {
   touchesCount?: number;
   touches: LeadTouch[];
   dealValue: number;
-  currency: 'USD' | 'RUB' | 'KZT';
+  currency: 'USD' | 'EUR' | 'GBP' | 'KZT' | 'RUB';
   tags: string[];
   notes: string;
   createdAt: string;
@@ -73,6 +73,7 @@ export interface Lead {
 
   // Feedback loop for few-shot learning
   outcome?: 'good' | 'bad' | null;
+  region?: 'EU' | 'US' | 'KZ' | 'RU';
 }
 
 export interface Vacancy {
@@ -90,12 +91,15 @@ export interface Vacancy {
   formatTag?: 'short' | 'long' | 'both';
   qualityTier?: 'great' | 'fair' | 'shady';
   statusBadge?: 'new' | 'hot' | 'shady';
+  region?: 'EU' | 'US' | 'KZ' | 'RU';
+  detectedLang?: string;
+  translatedText?: string;
   seen: boolean;
   hidden: boolean;
   budget?: {
     min: number | null;
     max: number | null;
-    currency: 'RUB' | 'USD' | 'EUR' | 'KZT' | 'UAH' | 'NEGOTIABLE';
+    currency: 'RUB' | 'USD' | 'EUR' | 'GBP' | 'KZT' | 'UAH' | 'NEGOTIABLE';
     unit?: 'per_video' | 'per_month' | 'per_hour' | 'per_minute' | 'project';
   } | null;
   fromWorker?: boolean;
@@ -128,7 +132,7 @@ export interface UserProfile {
   formats?: Array<'YouTube' | 'Shorts/Reels' | 'Подкасты' | 'Реклама'>;
   skills?: string[];
   minRate?: number;
-  minRateCurrency?: 'RUB' | 'USD';
+  minRateCurrency?: 'RUB' | 'USD' | 'EUR' | 'GBP' | 'KZT';
   telegram: string;
   portfolioUrl: string;
   email: string;
@@ -147,9 +151,10 @@ export interface UserSettings {
   notificationsEnabled: boolean;
   sessionQuotaUsed: number;
 
-  // AI Settings
+  // AI & Translation Settings
   useAiQualification: boolean;
   aiTopNCount: number; // Top N leads to qualify with AI (default 30)
+  autoTranslateVacancies?: boolean;
   customAiApiKey?: string;
   customAiProvider?: 'gemini' | 'groq' | 'openrouter';
 

@@ -22,9 +22,9 @@ export function buildWordBoundaryRegex(phrase) {
   // Split into words by spaces
   const words = escaped.split(/\\\s+|\s+/);
   const transformedWords = words.map((w) => {
-    // If the word ends with a Cyrillic letter, allow Russian case endings (0 to 4 letters)
-    if (/[а-яё]$/i.test(w)) {
-      return `${w}[а-яё]{0,4}`;
+    // If the word ends with a Cyrillic (Russian/Kazakh) letter, allow case endings
+    if (/[а-яёәғқңөұүһі]$/i.test(w)) {
+      return `${w}[а-яёәғқңөұүһі]{0,4}`;
     }
     // For English words, allow standard plural/verb forms
     if (/[a-z]$/i.test(w)) {
@@ -149,7 +149,7 @@ const HIRING_SIGNAL_REGEXES = KEYWORDS.hiringSignals.map((signal) => ({
 }));
 
 const EXPLICIT_VACANCY_HEADER =
-  /(?:^|[\r\n])\s*(?:#вакансия|#работа|#job|#hiring|вакансия\s*[:!-]|ищем\s+в\s+команду|работа\s*[:!-])/i;
+  /(?:^|[\r\n])\s*(?:#вакансия|#работа|#жұмыс|#job|#hiring|#wanted|#videoeditor|вакансия\s*[:!-]|ищем\s+в\s+команду|работа\s*[:!-]|hiring\s*[:!-]|looking\s+for\s*[:!-])/i;
 
 /**
  * Filters and validates if text is a genuine video editor job lead
@@ -273,31 +273,41 @@ export function detectVacancyRisks(text, budget = null, options = {}) {
     return { isRisky: false, reasons };
   }
 
-  // 1. "За опыт" / без оплаты
-  if (/(?:за\s+опыт|ради\s+опыта|в\s+портфолио|для\s+кейса|бесплатно|без\s+оплаты|на\s+энтузиазме)/iu.test(text)) {
-    reasons.push('Работа без оплаты («за опыт / для кейса / бесплатно»)');
+  // 1. "За опыт" / без оплаты (RU + EN)
+  if (/(?:за\s+опыт|ради\s+опыта|в\s+портфолио|для\s+кейса|бесплатно|без\s+оплаты|на\s+энтузиазме|for\s+free|unpaid\s+(?:role|work|position|edit)|for\s+exposure|for\s+portfolio\s+only)/iu.test(text)) {
+    reasons.push('Работа без оплаты («за опыт / unpaid / for exposure»)');
   }
 
-  // 2. Процент вместо фиксированной оплаты
-  if (/(?:процент\s+от\s+(?:прибыли|дохода|монетизации|продаж)|%?\s*от\s+монетизации|за\s+долю\s+в\s+проекте|доля\s+от\s+прибыли)/iu.test(text)) {
-    reasons.push('Процент от будущей монетизации/прибыли вместо оплаты');
+  // 2. Процент вместо фиксированной оплаты (RU + EN)
+  if (/(?:процент\s+от\s+(?:прибыли|дохода|монетизации|продаж)|%?\s*от\s+монетизации|за\s+долю\s+в\s+проекте|доля\s+от\s+прибыли|rev(?:enue)?\s*share|profit\s*share|commission\s+only)/iu.test(text)) {
+    reasons.push('Процент от будущей монетизации/прибыли вместо оплаты (rev-share)');
   }
 
-  // 3. Бесплатное тестовое на целый ролик
-  if (/(?:тестов(?:ое|ый)?\s*(?:на\s+полный|полный|целый|целиком|весь)\s*(?:ролик|видео)|бесплатн(?:ое|ый)\s+тестов(?:ое|ый)|тестов(?:ое|ый)\s+без\s+оплаты)/iu.test(text)) {
-    reasons.push('Требование сделать бесплатное тестовое задание на весь ролик');
+  // 3. Бесплатное тестовое на целый ролик (RU + EN)
+  if (/(?:тестов(?:ое|ый)?\s*(?:на\s+полный|полный|целый|целиком|весь)\s*(?:ролик|видео)|бесплатн(?:ое|ый)\s+тестов(?:ое|ый)|тестов(?:ое|ый)\s+без\s+оплаты|unpaid\s+test|free\s+test\s*(?:edit|video|task))/iu.test(text)) {
+    reasons.push('Требование сделать бесплатное тестовое задание (unpaid test)');
   }
 
   // 4. Подозрение на скам (страховой взнос, покупка софта/курса)
-  if (/(?:взнос\s+за\s+материалы|страховой\s+депозит|купить\s+обучение|оплатите\s+доступ|предоплата\s+с\s+вашей\s+стороны)/iu.test(text)) {
+  if (/(?:взнос\s+за\s+материалы|страховой\s+депозит|купить\s+обучение|оплатите\s+доступ|предоплата\s+с\s+вашей\s+стороны|application\s+fee|training\s+fee|buy\s+software)/iu.test(text)) {
     reasons.push('Подозрение на скам: требование взноса или покупки');
   }
 
   // 5. Символический / отсутствующий бюджет
-  if (/(?:бюджет(?:а)?\s*(?:нет|минимальн|скромн|чисто\s+символическ)|оплата\s+символическая)/iu.test(text)) {
+  if (/(?:бюджет(?:а)?\s*(?:нет|минимальн|скромн|чисто\s+символическ)|оплата\s+символическая|very\s+low\s+budget)/iu.test(text)) {
     reasons.push('Отсутствующий или символический бюджет');
-  } else if (budget && budget.max !== null && budget.max > 0 && budget.max < 500 && budget.currency === 'RUB') {
-    reasons.push(`Крайне низкая ставка (${budget.max} ₽)`);
+  } else if (budget && budget.max !== null && budget.max > 0) {
+    if (budget.currency === 'RUB' && budget.max < 500) {
+      reasons.push(`Крайне низкая ставка (${budget.max} ₽)`);
+    } else if (budget.currency === 'KZT' && budget.max < 5000) {
+      reasons.push(`Крайне низкая ставка (${budget.max} ₸)`);
+    } else if (budget.currency === 'USD' && budget.unit !== 'per_hour' && budget.max < 15) {
+      reasons.push(`Крайне низкая ставка ($${budget.max})`);
+    } else if (budget.currency === 'EUR' && budget.unit !== 'per_hour' && budget.max < 15) {
+      reasons.push(`Крайне низкая ставка (€${budget.max})`);
+    } else if (budget.currency === 'GBP' && budget.unit !== 'per_hour' && budget.max < 12) {
+      reasons.push(`Крайне низкая ставка (£${budget.max})`);
+    }
   }
 
   // 6. Одинаковый текст от разных аккаунтов / спам

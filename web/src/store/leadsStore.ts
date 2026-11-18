@@ -62,10 +62,10 @@ export const useLeadsStore = create<LeadsState>()(
       leads: [],
       blacklist: [],
       searchHistory: [
-        'инвестиции в недвижимость',
-        'ai автоматизация',
-        'криптовалюта',
-        'онлайн-школа',
+        'ai automation',
+        'saas marketing',
+        'uk business podcast',
+        'бизнес казахстан',
       ],
       selectedLeadId: null,
 

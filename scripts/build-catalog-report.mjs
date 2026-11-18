@@ -28,6 +28,13 @@ const channels = catalog.filter((s) => s.type !== 'group');
 const groups = catalog.filter((s) => s.type === 'group');
 const recommended = catalog.filter((s) => s.recommended);
 
+// Region stats
+const regions = { EU: 0, US: 0, KZ: 0, RU: 0 };
+for (const item of catalog) {
+  const r = item.region || 'US';
+  regions[r] = (regions[r] || 0) + 1;
+}
+
 // Category stats
 const categories = {};
 for (const item of catalog) {
@@ -62,7 +69,16 @@ const lines = [
   `| **Рекомендованные (Топ-15)** | ${recommended.length} |`,
   `| **Отсеяно / неактивно** | ${totalUnverified} |`,
   '',
-  '## 2. Распределение по категориям',
+  '## 2. Распределение по регионам (EU / US / KZ)',
+  '',
+  '| Регион | Источников | Доля |',
+  '|---|---|---|',
+  `| 🇪🇺 Европа / UK (\`EU\`) | **${regions.EU}** | ${Math.round((regions.EU / totalVerified) * 100)}% |`,
+  `| 🇺🇸 США / Global (\`US\`) | **${regions.US}** | ${Math.round((regions.US / totalVerified) * 100)}% |`,
+  `| 🇰🇿 Казахстан (\`KZ\`) | **${regions.KZ}** | ${Math.round((regions.KZ / totalVerified) * 100)}% |`,
+  `| 🇷🇺 Россия (\`RU\`, исключена) | **${regions.RU}** | 0% |`,
+  '',
+  '## 3. Распределение по категориям',
   '',
   '| Категория | Всего | Каналов | Групп | Реком. | Средний Quality Score |',
   '|---|---|---|---|---|---|',
@@ -75,7 +91,7 @@ for (const [catName, data] of Object.entries(categories)) {
 
 lines.push(
   '',
-  '## 3. Топ-20 источников по качеству (Quality Score)',
+  '## 4. Топ-20 источников по качеству (Quality Score)',
   '',
   '| № | Канал | Название | Категория | Тип | Подписчики | Постов/нед | Quality Score | Реком. |',
   '|---|---|---|---|---|---|---|---|---|'

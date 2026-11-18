@@ -5,7 +5,9 @@ import { useLeadsStore } from './leadsStore';
 import KEYWORDS from '../shared/keywords.js';
 import { parseBudget, BudgetResult } from '../shared/budget.js';
 import { matchesVacancy, detectVacancyRisks, buildWordBoundaryRegex } from '../shared/filter.js';
+import { detectVacancyRegion, RegionCode } from '../shared/regions.js';
 import { syncDisabledSourcesToApi } from '../lib/api';
+import rawCatalog from '../shared/sources.catalog.json';
 
 function notifyDisabledSync(sources: TelegramSource[]) {
   if (typeof window === 'undefined') return;
@@ -19,6 +21,7 @@ export interface TelegramSource {
   addedAt: string;
   title?: string;
   type?: 'channel' | 'group';
+  region?: RegionCode | 'RU';
 }
 
 interface VacanciesState {
@@ -41,6 +44,7 @@ interface VacanciesState {
   enableAllSources: () => void;
   enableChannelsOnly: () => void;
   enableRecommendedOnly: () => void;
+  enableRegionsOnly: (regions: RegionCode[]) => void;
   disableAllSources: () => void;
   syncWithCatalog: () => void;
 
@@ -67,22 +71,24 @@ interface VacanciesState {
 export const DEFAULT_INCLUDE_KEYWORDS: string[] = [];
 export const DEFAULT_EXCLUDE_KEYWORDS: string[] = [];
 
-import rawCatalog from '../shared/sources.catalog.json';
-
 interface RawCatalogItem {
   id?: string;
   username?: string;
   title?: string;
   type?: 'channel' | 'group';
+  region?: RegionCode | 'RU';
   recommended?: boolean;
 }
 
-const catalogData = rawCatalog as unknown as RawCatalogItem[];
+const catalogData = (rawCatalog as unknown as RawCatalogItem[]).filter(
+  (c) => c.region !== 'RU'
+);
 
 export const DEFAULT_SOURCES: TelegramSource[] = catalogData.map((c) => ({
   username: (c.username || c.id || '').toLowerCase().replace(/^@/, ''),
   title: c.title,
   type: c.type || 'channel',
+  region: (c.region as RegionCode) || 'US',
   enabled: true,
   addedAt: new Date().toISOString(),
 }));
@@ -92,7 +98,8 @@ export function computeVacancyRelevance(
   includeKeywords: string[],
   excludeKeywords: string[],
   isWorkerLead = false,
-  postedAt?: string
+  postedAt?: string,
+  channel?: string
 ): {
   relevance: number;
   matchedKeywords: string[];
@@ -103,11 +110,14 @@ export function computeVacancyRelevance(
   statusBadge?: 'new' | 'hot' | 'shady';
   budget?: BudgetResult | null;
   risks?: string[];
+  region: RegionCode | 'RU';
 } {
   const lower = text.toLowerCase();
+  const budget = parseBudget(text);
+  const detectedRegion = detectVacancyRegion(text, channel);
 
-  // Exclude check: user custom exclude keywords matching with word boundaries
-  const isExcluded =
+  // Exclude check: user custom exclude keywords
+  const isCustomExcluded =
     excludeKeywords.length > 0 &&
     excludeKeywords.some((kw) => {
       const clean = kw.trim();
@@ -119,7 +129,7 @@ export function computeVacancyRelevance(
       }
     });
 
-  if (isExcluded) {
+  if (isCustomExcluded) {
     return {
       relevance: 0,
       matchedKeywords: [],
@@ -129,7 +139,23 @@ export function computeVacancyRelevance(
       qualityTier: 'shady',
       statusBadge: 'shady',
       budget: null,
+      region: detectedRegion,
       risks: ['Текст содержит исключённые стоп-слова'],
+    };
+  }
+
+  // Exclude Russian-domestic / Ruble market posts
+  if (detectedRegion === 'RU' || budget?.currency === 'RUB') {
+    return {
+      relevance: 0,
+      matchedKeywords: [],
+      skills: [],
+      isExcluded: true,
+      formatTag: 'both',
+      qualityTier: 'fair',
+      budget,
+      region: 'RU',
+      risks: ['Исключён российский рынок / рубли'],
     };
   }
 
@@ -146,52 +172,61 @@ export function computeVacancyRelevance(
         formatTag: 'both',
         qualityTier: 'fair',
         budget: null,
+        region: detectedRegion,
       };
     }
-    matchedKeywords = ['видеомонтаж'];
+    matchedKeywords = ['video editor'];
   }
 
   // Format detection
-  const hasShort = /(reels|shorts|tiktok|рилс|шортс|вертикальн|сторис|capcut)/i.test(lower);
-  const hasLong = /(youtube|ютуб|подкаст|горизонтальн|хронометраж|выпуск|фильм|шоу)/i.test(lower);
+  const hasShort = /(reels|shorts|tiktok|short[- ]form|рилс|шортс|вертикальн|сторис|capcut)/i.test(lower);
+  const hasLong = /(youtube|ютуб|подкаст|podcast|documentary|talking\s+head|long[- ]form|горизонтальн|выпуск|фильм|шоу)/i.test(lower);
   const formatTag: 'short' | 'long' | 'both' = hasShort && hasLong ? 'both' : hasShort ? 'short' : 'long';
 
   // Skills / Software detection
   const skills: string[] = [];
   if (/(premiere|премьер|premiere pro)/i.test(lower)) skills.push('Premiere Pro');
   if (/(davinci|resolve|давинчи)/i.test(lower)) skills.push('DaVinci Resolve');
-  if (/(after effects|афтер|ae\b)/i.test(lower)) skills.push('After Effects');
+  if (/(after effects|афтер|\bae\b)/i.test(lower)) skills.push('After Effects');
   if (/capcut/i.test(lower)) skills.push('CapCut');
-  if (/(photoshop|фотошоп|ps\b)/i.test(lower)) skills.push('Photoshop');
-  if (/(звук|sound design|саунд|аудио)/i.test(lower)) skills.push('Sound Design');
+  if (/(photoshop|фотошоп|\bps\b)/i.test(lower)) skills.push('Photoshop');
+  if (/(звук|sound design|саунд|audio\s*mix|аудио)/i.test(lower)) skills.push('Sound Design');
   if (/(моушн|motion|анимаци)/i.test(lower)) skills.push('Motion');
   if (/(цветокор|грейдинг|color)/i.test(lower)) skills.push('Color Grading');
 
-  // Quality tier detection
-  let qualityTier: 'great' | 'fair' | 'shady' = 'fair';
-  const isGreat =
-    /(\$\s*1[\s,.]?000|\$\s*1[\s,.]?200|\$\s*1[\s,.]?500|\$\s*2[\s,.]?000|80\s*000|100\s*000|120\s*000|150\s*000|6\s*000\s*aed|международн|долларах)/i.test(
-      lower
-    );
-  const isShady =
-    /(бесплатно|за опыт|стажировка|без оплаты|на энтузиазме|до 8\s*000|до 5\s*000|150\s*₽|символическ|тестовое без оплаты)/i.test(
-      lower
-    );
-
-  const budget = parseBudget(text);
+  // Quality tier detection (tuned for EU/US/KZ currencies)
   const riskCheck = detectVacancyRisks(text, budget);
+  const maxVal = budget?.max ?? budget?.min ?? 0;
+  const isGreatCurrency =
+    Boolean(
+      budget &&
+        ((['USD', 'EUR', 'GBP'].includes(budget.currency) && maxVal >= 400) ||
+          (budget.currency === 'KZT' && maxVal >= 200000))
+    ) ||
+    /(\$\s*[5-9]\d{2}|\$\s*\d[\s,.]?\d{3}|€\s*[5-9]\d{2}|£\s*[4-9]\d{2}|\b[2-9]\d{2}[\s,.]?000\s*(?:₸|тенге|kzt))/i.test(
+      lower
+    );
 
-  if (isGreat) {
-    qualityTier = 'great';
-  } else if (isShady || riskCheck.isRisky) {
+  const isShadyText =
+    /(бесплатно|за опыт|без оплаты|на энтузиазме|for\s+free|unpaid|for\s+exposure|rev\s*share)/i.test(
+      lower
+    );
+
+  let qualityTier: 'great' | 'fair' | 'shady' = 'fair';
+  if (riskCheck.isRisky || isShadyText) {
     qualityTier = 'shady';
+  } else if (isGreatCurrency) {
+    qualityTier = 'great';
   }
 
   let score = isWorkerLead ? 60 : 40 + matchedKeywords.length * 8;
   score += Math.min(24, skills.length * 8);
 
   if (budget) {
-    if (budget.min && (budget.min >= 5000 || budget.currency === 'USD' || budget.currency === 'EUR')) {
+    if (
+      ['USD', 'EUR', 'GBP'].includes(budget.currency) ||
+      (budget.currency === 'KZT' && (budget.max ?? budget.min ?? 0) >= 50000)
+    ) {
       score += 20;
     } else {
       score += 12;
@@ -203,7 +238,6 @@ export function computeVacancyRelevance(
 
   const finalScore = Math.max(0, Math.min(100, Math.round(score)));
 
-  // Status badge
   let statusBadge: 'new' | 'hot' | 'shady' | undefined = undefined;
   if (qualityTier === 'shady') {
     statusBadge = 'shady';
@@ -223,6 +257,7 @@ export function computeVacancyRelevance(
     qualityTier,
     statusBadge,
     budget,
+    region: detectedRegion,
     risks: riskCheck.reasons,
   };
 }
@@ -260,6 +295,15 @@ const safeLocalStorage = {
   },
 };
 
+function isRuVacancy(v: any): boolean {
+  if (!v) return true;
+  if (v.region === 'RU' || v.budget?.currency === 'RUB') return true;
+  if (!v.region && v.text) {
+    return detectVacancyRegion(v.text, v.channel) === 'RU';
+  }
+  return false;
+}
+
 export const useVacanciesStore = create<VacanciesState>()(
   persist(
     (set, get) => ({
@@ -294,6 +338,7 @@ export const useVacanciesStore = create<VacanciesState>()(
               {
                 username: clean,
                 enabled: true,
+                region: 'US',
                 addedAt: new Date().toISOString(),
               },
             ],
@@ -356,6 +401,23 @@ export const useVacanciesStore = create<VacanciesState>()(
         });
       },
 
+      enableRegionsOnly: (regions) => {
+        const allowed = new Set(regions);
+        const targetUsernames = new Set(
+          catalogData
+            .filter((c) => c.region && allowed.has(c.region as RegionCode))
+            .map((c) => (c.username || c.id || '').toLowerCase().replace(/^@/, ''))
+        );
+        set((state) => {
+          const nextSources = state.sources.map((s) => ({
+            ...s,
+            enabled: targetUsernames.has(s.username.toLowerCase()),
+          }));
+          notifyDisabledSync(nextSources);
+          return { sources: nextSources };
+        });
+      },
+
       disableAllSources: () =>
         set((state) => {
           const nextSources = state.sources.map((s) => ({ ...s, enabled: false }));
@@ -368,15 +430,14 @@ export const useVacanciesStore = create<VacanciesState>()(
         const existingMap = new Map(
           currentSources.map((s) => [s.username.toLowerCase(), s.enabled])
         );
-        const synced = catalogData.map((c) => {
+        const synced: TelegramSource[] = catalogData.map((c) => {
           const uname = (c.username || c.id || '').toLowerCase().replace(/^@/, '');
-          const isEnabled = currentSources.length < 150
-            ? true
-            : (existingMap.has(uname) ? existingMap.get(uname)! : true);
+          const isEnabled = existingMap.has(uname) ? existingMap.get(uname)! : true;
           return {
             username: uname,
             title: c.title,
             type: c.type || 'channel',
+            region: (c.region as RegionCode) || 'US',
             enabled: isEnabled,
             addedAt: new Date().toISOString(),
           };
@@ -387,7 +448,11 @@ export const useVacanciesStore = create<VacanciesState>()(
       setVacancies: (vacancies) =>
         set({
           vacancies: vacancies
-            .filter((v) => Date.now() - new Date(v.postedAt).getTime() <= FOURTEEN_DAYS_MS)
+            .filter(
+              (v) =>
+                !isRuVacancy(v) &&
+                Date.now() - new Date(v.postedAt).getTime() <= FOURTEEN_DAYS_MS
+            )
             .slice(0, 500),
         }),
 
@@ -400,8 +465,8 @@ export const useVacanciesStore = create<VacanciesState>()(
         const twentyMinsAgo = now - 20 * 60 * 1000;
 
         for (const item of incoming) {
+          if (isRuVacancy(item)) continue;
           const itemTime = new Date(item.postedAt).getTime();
-          // TTL 14 дней
           if (now - itemTime > FOURTEEN_DAYS_MS) continue;
 
           if (!currentIds.has(item.id)) {
@@ -414,9 +479,13 @@ export const useVacanciesStore = create<VacanciesState>()(
 
         if (newOnes.length > 0) {
           const merged = [...newOnes, ...current]
-            .filter((v) => now - new Date(v.postedAt).getTime() <= FOURTEEN_DAYS_MS)
+            .filter(
+              (v) =>
+                !isRuVacancy(v) &&
+                now - new Date(v.postedAt).getTime() <= FOURTEEN_DAYS_MS
+            )
             .sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime())
-            .slice(0, 500); // Лимит не более 500 в кэше
+            .slice(0, 500);
           set({ vacancies: merged });
         }
 
@@ -483,11 +552,10 @@ export const useVacanciesStore = create<VacanciesState>()(
     }),
     {
       name: 'leadhunter_vacancies',
-      version: 7,
+      version: 8,
       storage: safeLocalStorage as any,
       migrate: (persistedState: any, version: number) => {
         if (persistedState) {
-          // A2: Clean legacy stopPhrases from persisted excludeKeywords
           if (version < 7) {
             const legacyStops = new Set([
               ...(KEYWORDS.hardStopPhrases || []),
@@ -512,7 +580,6 @@ export const useVacanciesStore = create<VacanciesState>()(
             }
           }
 
-          // 2.6 Migrate any old favorites directly to leads
           if (Array.isArray(persistedState.vacancies)) {
             const favorites = persistedState.vacancies.filter((v: any) => v && v.isFavorite);
             if (favorites.length > 0) {
@@ -531,7 +598,7 @@ export const useVacanciesStore = create<VacanciesState>()(
               }
             }
             persistedState.vacancies = persistedState.vacancies
-              .filter((v: any) => v && typeof v === 'object' && !v.id?.startsWith('demo_'))
+              .filter((v: any) => v && typeof v === 'object' && !v.id?.startsWith('demo_') && (version < 8 ? !isRuVacancy(v) : true))
               .map((v: any) => {
                 const { isFavorite: _fav, ...rest } = v;
                 return rest;
@@ -541,20 +608,19 @@ export const useVacanciesStore = create<VacanciesState>()(
           delete persistedState.savedPresets;
           delete persistedState.filterFavoritesOnly;
 
-          if (version < 5 || !persistedState.sources || persistedState.sources.length < 150) {
+          // Version 8+: strip legacy RU sources and sync with EU/US/KZ catalog
+          if (version < 8 || !Array.isArray(persistedState.sources) || persistedState.sources.length === 0) {
             const existingMap = new Map(
               (persistedState.sources || []).map((s: any) => [s.username?.toLowerCase(), s.enabled])
             );
-            const isSmallLegacyList = (persistedState.sources || []).length <= 15;
             persistedState.sources = catalogData.map((c) => {
               const uname = (c.username || c.id || '').toLowerCase().replace(/^@/, '');
-              const isEnabled = isSmallLegacyList
-                ? true
-                : (existingMap.has(uname) ? existingMap.get(uname) : true);
+              const isEnabled = existingMap.has(uname) ? existingMap.get(uname) : true;
               return {
                 username: uname,
                 title: c.title,
                 type: c.type || 'channel',
+                region: (c.region as RegionCode) || 'US',
                 enabled: isEnabled,
                 addedAt: new Date().toISOString(),
               };
@@ -571,14 +637,14 @@ export const useVacanciesStore = create<VacanciesState>()(
               .filter(
                 (v) =>
                   !v.id?.startsWith('demo_') &&
+                  !isRuVacancy(v) &&
                   now - new Date(v.postedAt).getTime() <= FOURTEEN_DAYS_MS
               )
               .slice(0, 300);
           }
-          const enabledCount = (state.sources || []).filter((s) => s.enabled).length;
-          if (!state.sources || state.sources.length < 150 || enabledCount < 50) {
+          const hasLegacyRu = (state.sources || []).some((s) => s.region === 'RU');
+          if (!state.sources || state.sources.length === 0 || hasLegacyRu) {
             setTimeout(() => {
-              useVacanciesStore.getState().enableAllSources();
               useVacanciesStore.getState().syncWithCatalog();
             }, 0);
           }

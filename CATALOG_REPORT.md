@@ -1,49 +1,58 @@
 # LeadHunter — Отчёт по каталогу источников Telegram
 
-> Сгенерировано: 2026-11-15 15:50:44 UTC
+> Сгенерировано: 2026-11-18 02:53:07 UTC
 
 ## 1. Сводная статистика
 
 | Метрика | Значение |
 |---|---|
-| **Всего проверено кандидатов** | 220 |
-| **Прошли проверку (в каталоге)** | **152** |
-| **Публичные каналы** | 84 |
-| **Группы / чаты** | 68 |
+| **Всего проверено кандидатов** | 291 |
+| **Прошли проверку (в каталоге)** | **223** |
+| **Публичные каналы** | 154 |
+| **Группы / чаты** | 69 |
 | **Рекомендованные (Топ-15)** | 15 |
 | **Отсеяно / неактивно** | 68 |
 
-## 2. Распределение по категориям
+## 2. Распределение по регионам (EU / US / KZ)
+
+| Регион | Источников | Доля |
+|---|---|---|
+| 🇪🇺 Европа / UK (`EU`) | **91** | 41% |
+| 🇺🇸 США / Global (`US`) | **55** | 25% |
+| 🇰🇿 Казахстан (`KZ`) | **77** | 35% |
+| 🇷🇺 Россия (`RU`, исключена) | **0** | 0% |
+
+## 3. Распределение по категориям
 
 | Категория | Всего | Каналов | Групп | Реком. | Средний Quality Score |
 |---|---|---|---|---|---|
-| `jobs_video` | 42 | 30 | 12 | 14 | **66/100** |
-| `jobs_remote_freelance` | 44 | 36 | 8 | 1 | **63/100** |
-| `editors_community` | 26 | 4 | 22 | 0 | **72/100** |
-| `clients_entrepreneurs` | 27 | 3 | 24 | 0 | **71/100** |
-| `international_en` | 13 | 11 | 2 | 0 | **65/100** |
+| `editors_community` | 30 | 20 | 10 | 4 | **64/100** |
+| `jobs_video` | 30 | 24 | 6 | 7 | **65/100** |
+| `clients_entrepreneurs` | 51 | 35 | 16 | 1 | **50/100** |
+| `jobs_remote_freelance` | 61 | 41 | 20 | 2 | **57/100** |
+| `international_en` | 51 | 34 | 17 | 1 | **53/100** |
 
-## 3. Топ-20 источников по качеству (Quality Score)
+## 4. Топ-20 источников по качеству (Quality Score)
 
 | № | Канал | Название | Категория | Тип | Подписчики | Постов/нед | Quality Score | Реком. |
 |---|---|---|---|---|---|---|---|---|
-| 1 | [@editors_video](https://t.me/editors_video) | Ищу монтажера/рилс-мейкера - заказы и вакансии | `jobs_video` | channel | 12 403 | 67 | **90** | ⭐ Да |
-| 2 | [@vakansii_reelsmaker](https://t.me/vakansii_reelsmaker) | 🎬 Таверна Монтажеров и РилсМейкеров - Работа | `jobs_video` | channel | 26 762 | 46 | **85** | ⭐ Да |
-| 3 | [@reelsmakervacancy](https://t.me/reelsmakervacancy) | Рилс Вакансии | `jobs_video` | channel | 6 013 | 140 | **75** | ⭐ Да |
-| 4 | [@reels_jobs](https://t.me/reels_jobs) | Видеомонтаж вакансии Reels / Shorts / TikTok (Вертикальный контент) | `jobs_video` | group | 3 000 000 | — | **75** | ⭐ Да |
-| 5 | [@sounddesign](https://t.me/sounddesign) | Sounddesign | `jobs_video` | group | 24 000 000 | — | **75** | ⭐ Да |
-| 6 | [@aftereffects](https://t.me/aftereffects) | .: Ae®-C4D™ :. | `jobs_video` | group | 272 000 000 | — | **75** | ⭐ Да |
-| 7 | [@capcut_video](https://t.me/capcut_video) | Cap Cut Video Tayorlemiz | `jobs_video` | group | 6 000 000 | — | **75** | ⭐ Да |
-| 8 | [@youtube_creators](https://t.me/youtube_creators) | YouTube creators | `jobs_video` | group | 141 000 000 | — | **75** | ⭐ Да |
-| 9 | [@colorpost](https://t.me/colorpost) | Монтаж. Цвет и postproduction Pro® | `jobs_video` | group | 4 153 000 000 | — | **75** | ⭐ Да |
-| 10 | [@cinema4dchat](https://t.me/cinema4dchat) | Cinema 4D Chat | `jobs_video` | group | 3 068 000 000 | — | **75** | ⭐ Да |
-| 11 | [@blender_ru_talks](https://t.me/blender_ru_talks) | Добрый Полигон им. Тона Розендаля ❤️ 2.0 | `jobs_video` | group | 3 513 000 000 | — | **75** | ⭐ Да |
-| 12 | [@frilans](https://t.me/frilans) | Фриланс - Удаленная работа | `jobs_video` | channel | 13 370 | 70 | **75** | ⭐ Да |
-| 13 | [@motion_design_chat](https://t.me/motion_design_chat) | Motion design • ЧАТ | `jobs_video` | group | 44 000 000 | — | **75** | ⭐ Да |
-| 14 | [@vfx_job](https://t.me/vfx_job) | vfx_job | `jobs_video` | group | 10 000 000 | — | **75** | ⭐ Да |
-| 15 | [@tgwork](https://t.me/tgwork) | Работа в Telegram | `jobs_remote_freelance` | group | 1 027 000 000 | — | **75** | ⭐ Да |
-| 16 | [@digital_vacancies](https://t.me/digital_vacancies) | Digital вакансии | `jobs_remote_freelance` | group | 26 000 000 | — | **75** | — |
-| 17 | [@designer_jobs](https://t.me/designer_jobs) | Вакансии и заказы на дизайн. Работа и фриланс подработка для дизайнеров. | `jobs_remote_freelance` | group | 18 768 000 000 | — | **75** | — |
-| 18 | [@motiontut](https://t.me/motiontut) | Motion Chat | `editors_community` | group | 4 916 000 000 | — | **75** | — |
-| 19 | [@premierepro_chat](https://t.me/premierepro_chat) | Premiere Pro Chat | `editors_community` | group | 401 000 000 | — | **75** | — |
-| 20 | [@aftereffects_chat](https://t.me/aftereffects_chat) | After Effects Chat | `editors_community` | group | 128 000 000 | — | **75** | — |
+| 1 | [@premiere_pro](https://t.me/premiere_pro) | Premiere Pro - Motion Design | `editors_community` | channel | 63 712 | 8 | **96** | ⭐ Да |
+| 2 | [@digital_iskra](https://t.me/digital_iskra) | DIGITAL ВАКАНСИИ KZ - СММ - ДИЗАЙН - ТАРГЕТ - МОБИЛОГРАФИЯ - КАЗАХСТАН - Iskra Station | `jobs_video` | channel | 8 458 | 8 | **91** | ⭐ Да |
+| 3 | [@digitalbussinesskz](https://t.me/digitalbussinesskz) | DigitalBusiness.kz | `clients_entrepreneurs` | channel | 10 847 | 8 | **83** | ⭐ Да |
+| 4 | [@cresume](https://t.me/cresume) | Крезюме Вакансії | `jobs_video` | channel | 52 241 | 8 | **83** | ⭐ Да |
+| 5 | [@almaty_rabotao](https://t.me/almaty_rabotao) | Алматы — Вакансии Работа | `jobs_remote_freelance` | channel | 100 846 | 8 | **80** | ⭐ Да |
+| 6 | [@almaty_rabota_v](https://t.me/almaty_rabota_v) | Алматы Работа | `jobs_video` | channel | 72 745 | 8 | **79** | ⭐ Да |
+| 7 | [@remotejobss](https://t.me/remotejobss) | Remote Jobs | `international_en` | channel | 162 321 | 8 | **78** | ⭐ Да |
+| 8 | [@skwanggur](https://t.me/skwanggur) | @kzcleve - preset&#33; | `editors_community` | channel | 1 026 | 8 | **78** | ⭐ Да |
+| 9 | [@designervsekz](https://t.me/designervsekz) | ПРОЕКТИРОВЩИКИ/KZ | `jobs_video` | group | 5 217 | 14 | **77** | — |
+| 10 | [@jobforukrainians](https://t.me/jobforukrainians) | JOB for Ukrainians | `editors_community` | channel | 44 802 | 8 | **77** | ⭐ Да |
+| 11 | [@jobs_in_european_countries](https://t.me/jobs_in_european_countries) | Jobs in Europe | `jobs_video` | channel | 10 063 | 8 | **76** | ⭐ Да |
+| 12 | [@product_jobs](https://t.me/product_jobs) | Вакансии для продактов и проджектов | `jobs_remote_freelance` | channel | 37 002 | 8 | **76** | ⭐ Да |
+| 13 | [@bluescreenkz](https://t.me/bluescreenkz) | bluescreen.kz | `jobs_video` | channel | 24 202 | 8 | **74** | — |
+| 14 | [@cryptojobslist](https://t.me/cryptojobslist) | CryptoJobsList - Web3 Jobs | `editors_community` | channel | 62 074 | 8 | **74** | ⭐ Да |
+| 15 | [@workersinlondon](https://t.me/workersinlondon) | Chat №1 JOBS in LONDON/ London's Chats | `jobs_video` | group | 2 529 | 14 | **74** | ⭐ Да |
+| 16 | [@smartrecruit_deutschland](https://t.me/smartrecruit_deutschland) | Работа в Германии / Arbeit in Deutschland | `jobs_video` | channel | 27 468 | 8 | **74** | ⭐ Да |
+| 17 | [@rabota_astanau](https://t.me/rabota_astanau) | Вакансии в Астане | `jobs_remote_freelance` | group | 84 721 | 14 | **73** | — |
+| 18 | [@zhumys_astana_kz](https://t.me/zhumys_astana_kz) | Работа в Астане - Жұмыс | `editors_community` | channel | 18 727 | 8 | **73** | — |
+| 19 | [@devjobs](https://t.me/devjobs) | Game Development Jobs | `jobs_video` | channel | 44 459 | 8 | **72** | ⭐ Да |
+| 20 | [@almaty_rabota_vq](https://t.me/almaty_rabota_vq) | Вакансии Алматы - Работа | `jobs_video` | group | 69 692 | 14 | **72** | — |

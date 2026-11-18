@@ -22,6 +22,8 @@ export function formatBudgetDisplay(budget: BudgetResult | null | undefined): st
       ? '$'
       : budget.currency === 'EUR'
       ? '€'
+      : budget.currency === 'GBP'
+      ? '£'
       : budget.currency === 'KZT'
       ? '₸'
       : budget.currency === 'UAH'

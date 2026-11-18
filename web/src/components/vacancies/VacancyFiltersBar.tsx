@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Languages } from 'lucide-react';
 
 export type FormatFilter = 'all' | 'reels' | 'youtube' | 'podcast' | 'other';
 
@@ -9,6 +10,9 @@ interface VacancyFiltersBarProps {
   formatFilter: FormatFilter;
   onChangeFormatFilter: (format: FormatFilter) => void;
   activeSourcesCount: number;
+  totalSourcesCount: number;
+  autoTranslate?: boolean;
+  onToggleAutoTranslate?: (val: boolean) => void;
 }
 
 export const VacancyFiltersBar: React.FC<VacancyFiltersBarProps> = ({
@@ -17,10 +21,13 @@ export const VacancyFiltersBar: React.FC<VacancyFiltersBarProps> = ({
   formatFilter,
   onChangeFormatFilter,
   activeSourcesCount,
+  totalSourcesCount,
+  autoTranslate = true,
+  onToggleAutoTranslate,
 }) => {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 py-1">
-      {/* 2 Filters: Hot toggle + Format dropdown */}
+      {/* Filters: Hot toggle + Format dropdown + Auto-translate toggle */}
       <div className="flex flex-wrap items-center gap-2">
         {/* All / Hot Toggle */}
         <div className="inline-flex p-0.5 bg-surface-2 rounded-control border border-border text-xs">
@@ -62,6 +69,23 @@ export const VacancyFiltersBar: React.FC<VacancyFiltersBarProps> = ({
           <option value="podcast">Подкасты</option>
           <option value="other">Другое</option>
         </select>
+
+        {/* Free AI/Neural Translation toggle */}
+        {onToggleAutoTranslate && (
+          <button
+            type="button"
+            onClick={() => onToggleAutoTranslate(!autoTranslate)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-control border text-xs font-medium transition-colors min-h-[36px] ${
+              autoTranslate
+                ? 'bg-accent/15 text-accent border-accent/40 font-semibold'
+                : 'bg-surface-2 text-text-muted border-border hover:text-text'
+            }`}
+            title="Бесплатный автоперевод иностранных и казахских объявлений на русский"
+          >
+            <Languages size={14} />
+            <span>Перевод: {autoTranslate ? 'ВКЛ' : 'ВЫКЛ'}</span>
+          </button>
+        )}
       </div>
 
       {/* Right Link to Sources */}
@@ -71,7 +95,9 @@ export const VacancyFiltersBar: React.FC<VacancyFiltersBarProps> = ({
         title="Перейти к списку источников и настроить каналы"
       >
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span>Мониторинг: {activeSourcesCount} из 152 каналов →</span>
+        <span>
+          Мониторинг: {activeSourcesCount} из {totalSourcesCount} каналов →
+        </span>
       </Link>
     </div>
   );

@@ -1,24 +1,28 @@
 /**
  * Shared budget parser for LeadHunter
- * Parses salary / rate mentions in Russian and English freelance job posts.
+ * Parses salary / rate mentions in English, Kazakh, European, and Russian freelance job posts.
  */
 
 /**
- * @typedef {'RUB' | 'USD' | 'EUR' | 'KZT' | 'UAH' | 'NEGOTIABLE'} Currency
+ * @typedef {'RUB' | 'USD' | 'EUR' | 'GBP' | 'KZT' | 'UAH' | 'NEGOTIABLE'} Currency
  * @typedef {'per_video' | 'per_month' | 'per_hour' | 'per_minute' | 'project'} BudgetUnit
  * @typedef {{ min: number | null; max: number | null; currency: Currency; unit?: BudgetUnit }} BudgetResult
  */
 
 const CURRENCY_SYMBOLS = [
   { regex: /[$]|usd|доллар|дол|бакс|bucks/iu, currency: 'USD' },
-  { regex: /[€]|eur|евро/iu, currency: 'EUR' },
-  { regex: /[₸]|kzt|тенге|тг/iu, currency: 'KZT' },
-  { regex: /[₴]|uah|грн|гривн/iu, currency: 'UAH' },
-  { regex: /(?:[₽]|руб|rub|росс|(?<![\p{L}\d])р(?![\p{L}\d])|(?<=\d)\s*р(?![а-яёa-z]))/iu, currency: 'RUB' },
+  { regex: /[€]|eur|евро|euros?/iu, currency: 'EUR' },
+  { regex: /[£]|(?<!\p{L})(?:gbp|pounds?|фунт(?:ов|а|ы)?)(?!\p{L})/iu, currency: 'GBP' },
+  { regex: /[₸]|(?<!\p{L})(?:kzt|тенге|тг)(?!\p{L})/iu, currency: 'KZT' },
+  { regex: /[₴]|(?<!\p{L})(?:uah|грн|гривн[а-я]*)(?!\p{L})/iu, currency: 'UAH' },
+  {
+    regex: /(?:[₽]|(?<!\p{L})(?:руб|рубл[ейя]|rub|росс)(?!\p{L})|(?<![\p{L}\d])р(?![\p{L}\d])|(?<=\d)\s*р(?![а-яёa-z]))/iu,
+    currency: 'RUB',
+  },
 ];
 
 const NEGOTIABLE_REGEX =
-  /(?:по\s+договор[её]нности|договорная|договорной|договоримся|обсуждаем|negotiable|по\s+итогам\s+собеседования|в\s+зависимости\s+от\s+опыта)/i;
+  /(?:по\s+договор[её]нности|договорная|договорной|договоримся|обсуждаем|negotiable|competitive\s+pay|open\s+to\s+discuss|flexible\s+rate|по\s+итогам\s+собеседования|в\s+зависимости\s+от\s+опыта|based\s+on\s+experience)/i;
 
 // Отрицательные контексты (часы работы, графики, даты, опыт, телефон)
 const FALSE_POSITIVE_CONTEXTS = [
@@ -40,7 +44,13 @@ const FALSE_POSITIVE_CONTEXTS = [
  */
 export function parseNumberWithMultiplier(numStr, multiplierStr = '') {
   if (!numStr) return null;
-  const cleaned = numStr.replace(/\s+/g, '').replace(',', '.');
+  let cleaned = numStr.replace(/\s+/g, '');
+  // Treat comma as thousands separator if matching US 1,500 / 12,000 pattern
+  if (/^\d{1,3}(?:,\d{3})+$/.test(cleaned)) {
+    cleaned = cleaned.replace(/,/g, '');
+  } else {
+    cleaned = cleaned.replace(',', '.');
+  }
   let num = parseFloat(cleaned);
   if (isNaN(num)) return null;
 
@@ -67,8 +77,10 @@ export function detectAdjacentCurrency(before = '', after = '', hasMultiplier = 
       return currency;
     }
   }
-  // Если рядом есть множитель (к, тыс) и контекст зарплаты/ставки
-  if (hasMultiplier && /(?:ставка|зп|зарплата|оплата|бюджет|гонорар|salary|rate)/i.test(combined)) {
+  if (hasMultiplier && /(?:salary|rate|budget)/i.test(combined) && !/[а-яё]/i.test(combined)) {
+    return 'USD';
+  }
+  if (hasMultiplier && /(?:ставка|зп|зарплата|оплата|бюджет|гонорар)/i.test(combined)) {
     return 'RUB';
   }
   return null;
@@ -81,19 +93,19 @@ export function detectAdjacentCurrency(before = '', after = '', hasMultiplier = 
  */
 export function detectBudgetUnit(text) {
   if (!text) return undefined;
-  if (/(?:за\s+(?:ролик|видео|шортс|рилс|shorts|reels|выпуск|видеоролик)|\/\s*(?:ролик|видео|рилс|shorts|reels|video)|per\s+(?:video|clip|episode|reel|short))/i.test(text)) {
+  if (/(?:за\s+(?:ролик|видео|шортс|рилс|shorts|reels|выпуск|видеоролик)|\/\s*(?:ролик|видео|рилс|shorts|reels|video|vid|short|reel)|per\s+(?:video|clip|episode|reel|short))/i.test(text)) {
     return 'per_video';
   }
-  if (/(?:в\s+(?:месяц|мес)|\/\s*(?:месяц|мес|month)|month|monthly|оклад|ежемесячно|salary|в\s+мес|per\s+month)/i.test(text)) {
+  if (/(?:в\s+(?:месяц|мес)|\/\s*(?:месяц|мес|month|mo\b)|monthly|оклад|ежемесячно|per\s+month|\bmonth\b|\bsalary\b)/i.test(text)) {
     return 'per_month';
   }
-  if (/(?:в\s+час|\/\s*час|почасовая|ставка\s+в\s+час|hour|hourly|per\s+hour)/i.test(text)) {
+  if (/(?:в\s+час|\/\s*(?:час|hr\b|h\b|hour)|почасовая|ставка\s+в\s+час|hourly|per\s+hour)/i.test(text)) {
     return 'per_hour';
   }
-  if (/(?:за\s+минуту|\/\s*минута|поминутно|per\s+minute)/i.test(text)) {
+  if (/(?:за\s+минуту|\/\s*(?:минута|min\b)|поминутно|per\s+minute|per\s+min\b)/i.test(text)) {
     return 'per_minute';
   }
-  if (/(?:за\s+проект|на\s+проект|фикс\s+за\s+проект|project|per\s+project)/i.test(text)) {
+  if (/(?:за\s+проект|на\s+проект|фикс\s+за\s+проект|per\s+project|\bproject\b)/i.test(text)) {
     return 'project';
   }
   return undefined;
@@ -142,9 +154,9 @@ export function parseBudget(text) {
 
   const unit = detectBudgetUnit(text);
 
-  // 2. Pattern: range with currency adjacent (e.g. "$1500 - $2000", "50 000 - 80 000 ₽", "от 50к до 80к руб", "5-10 тыс руб")
+  // 2. Pattern: range with currency adjacent (e.g. "$1500 - $2000", "£500-£800", "150k - 250k тенге")
   const rangeRegex =
-    /(?:(?:бюджет|оплата|ставка|зп|зарплата|цена|стоимость|rate|salary)\s*[:=~-]?\s*)?(?:от\s*)?([$€₽₸₴])?\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*(?:-|—|–|до)\s*([$€₽₸₴])?\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*([₽$€₸₴]|руб|rub|usd|eur|kzt|uah|тенге|гривн|р(?![а-яёa-z]))?/giu;
+    /(?:(?:бюджет|оплата|ставка|зп|зарплата|цена|стоимость|rate|salary|budget|pay)\s*[:=~-]?\s*)?(?:от|(?<!\p{L})from(?!\p{L})\s*)?([$€£₽₸₴])?\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*(?:-|—|–|(?<!\p{L})(?:до|to)(?!\p{L}))\s*([$€£₽₸₴])?\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*([₽$€£₸₴]|руб|rub|usd|eur|gbp|pounds?|kzt|uah|тенге|тг|гривн|р(?![а-яёa-z]))?/giu;
 
   let match;
   while ((match = rangeRegex.exec(text)) !== null) {
@@ -160,7 +172,6 @@ export function parseBudget(text) {
     const multMax = match[6];
     const signAfter = match[7];
 
-    // Контекст вокруг совпадения (15 символов)
     const beforeCtx = text.slice(Math.max(0, match.index - 15), match.index);
     const afterCtx = text.slice(match.index + match[0].length, match.index + match[0].length + 15);
     const hasMultiplier = Boolean(multMin || multMax);
@@ -170,7 +181,6 @@ export function parseBudget(text) {
       detectAdjacentCurrency('', signAfter, hasMultiplier, match[0]) ||
       detectAdjacentCurrency(beforeCtx, afterCtx, hasMultiplier, match[0]);
 
-    // Валюта ОБЯЗАТЕЛЬНО должна быть рядом с числом!
     if (!currency) {
       continue;
     }
@@ -183,7 +193,6 @@ export function parseBudget(text) {
     const max = parseNumberWithMultiplier(rawMax, multMax);
 
     if (min !== null || max !== null) {
-      // Исключаем нереалистичные или слишком мелкие числа если это не почасовая
       if (min !== null && min > 10000000) continue;
       if (max !== null && max > 10000000) continue;
       if (min !== null && max !== null && min > max) continue;
@@ -197,9 +206,9 @@ export function parseBudget(text) {
     }
   }
 
-  // 3. Pattern: "от X" / "до X" с прилегающей валютой
+  // 3. Pattern: "от X" / "до X" / "from X" / "up to X" с прилегающей валютой
   const directionalRegex =
-    /(?:(?:бюджет|оплата|ставка|зп|зарплата|цена|стоимость|rate|salary)\s*[:=~-]?\s*)?(от|до|ставка\s*от|бюджет\s*от|зп\s*от|бюджет\s*до)\s*([$€₽₸₴])?\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*([₽$€₸₴]|руб|rub|usd|eur|kzt|uah|тенге|гривн|\bр\b)?/gi;
+    /(?:(?:бюджет|оплата|ставка|зп|зарплата|цена|стоимость|rate|salary|budget|pay)\s*[:=~-]?\s*)?(от|до|from|up\s+to|starting\s+at|ставка\s*от|бюджет\s*от|зп\s*от|бюджет\s*до)\s*([$€£₽₸₴])?\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*([₽$€£₸₴]|руб|rub|usd|eur|gbp|pounds?|kzt|uah|тенге|тг|гривн|\bр\b)?/giu;
 
   while ((match = directionalRegex.exec(text)) !== null) {
     if (isFalsePositive(text, match.index, match[0].length)) {
@@ -224,16 +233,16 @@ export function parseBudget(text) {
     const val = parseNumberWithMultiplier(rawNum, mult);
     if (val === null || val < 10 || val > 10000000) continue;
 
-    if (direction.includes('до')) {
+    if (direction.includes('до') || direction.includes('up to')) {
       return { min: null, max: val, currency, ...(unit ? { unit } : {}) };
     } else {
       return { min: val, max: null, currency, ...(unit ? { unit } : {}) };
     }
   }
 
-  // 4. Pattern: одиночная сумма с валютой рядом ("5000 руб", "$500", "150 000 ₽", "1000 грн")
+  // 4. Pattern: одиночная сумма с валютой рядом ("$500", "£300", "400€", "35000 kzt")
   const singleRegex =
-    /(?:(?:бюджет|оплата|ставка|зп|зарплата|цена|стоимость|гонорар|rate|salary|фикс)\s*[:=~-]?\s*)?(?:([$€₽₸₴])\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?|(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*([₽$€₸₴]|руб|rub|usd|eur|kzt|uah|тенге|грн|гривн|р(?![а-яёa-z])))/giu;
+    /(?:(?:бюджет|оплата|ставка|зп|зарплата|цена|стоимость|гонорар|rate|salary|budget|pay|фикс)\s*[:=~-]?\s*)?(?:([$€£₽₸₴])\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?|(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*([₽$€£₸₴]|руб|rub|usd|eur|gbp|pounds?|kzt|uah|тенге|тг|грн|гривн|р(?![а-яёa-z])))/giu;
 
   while ((match = singleRegex.exec(text)) !== null) {
     if (isFalsePositive(text, match.index, match[0].length)) {
@@ -242,12 +251,10 @@ export function parseBudget(text) {
 
     let rawNum, mult, currency;
     if (match[1]) {
-      // Префиксный знак ($500)
       currency = detectAdjacentCurrency(match[1], '');
       rawNum = match[2];
       mult = match[3];
     } else {
-      // Постфиксная валюта (5000 руб)
       rawNum = match[4];
       mult = match[5];
       currency = detectAdjacentCurrency('', match[6]);

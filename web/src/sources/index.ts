@@ -2,13 +2,13 @@ import { RawSourceItem, NormalizedSourceResult } from './types';
 import { Vacancy } from '../types';
 import { matchesVacancy, detectVacancyRisks, computeTextHash } from '../shared/filter.js';
 import { parseBudget } from '../shared/budget.js';
+import { detectVacancyRegion } from '../shared/regions.js';
 
 export * from './types';
 export * from './TelegramSource';
-export * from './HabrFreelanceSource';
 
 /**
- * 5.10 Unified Normalizer & Deduplicator for all lead sources
+ * 5.10 Unified Normalizer & Deduplicator for all EU / US / KZ lead sources
  */
 export function normalizeAndFilterItems(
   items: RawSourceItem[],
@@ -42,7 +42,15 @@ export function normalizeAndFilterItems(
       continue;
     }
 
-    // 3. Deduplication via FNV-1a text hash
+    // 3. Budget & region exclusion (skip RU domestic / RUB posts)
+    const budget = parseBudget(text);
+    const region = detectVacancyRegion(text, item.channelOrAuthor);
+    if (region === 'RU' || budget?.currency === 'RUB') {
+      filteredCount++;
+      continue;
+    }
+
+    // 4. Deduplication via FNV-1a text hash
     const hash = computeTextHash(text);
     if (seenHashes.has(hash)) {
       duplicateCount++;
@@ -50,17 +58,25 @@ export function normalizeAndFilterItems(
     }
     seenHashes.add(hash);
 
-    // 4. Budget & Risks detection
-    const budget = parseBudget(text);
+    // 5. Risks detection
     const risks = detectVacancyRisks(text, budget);
 
     const hasShort = /(reels|shorts|tiktok|рилс|шортс|вертикальн)/i.test(lower);
     const hasLong = /(youtube|ютуб|подкаст|выпуск|горизонтальн)/i.test(lower);
     const formatTag: 'short' | 'long' | 'both' = hasShort && hasLong ? 'both' : hasShort ? 'short' : 'long';
 
+    const maxAmount = budget?.max ?? budget?.min ?? 0;
+    const isGreatBudget = Boolean(
+      budget &&
+        ((['USD', 'EUR', 'GBP'].includes(budget.currency) && maxAmount >= 150) ||
+          (budget.currency === 'KZT' && maxAmount >= 80000))
+    );
+
     const qualityTier: 'great' | 'fair' | 'shady' = risks.isRisky
       ? 'shady'
-      : (budget && budget.max && budget.max >= 10000 ? 'great' : 'fair');
+      : isGreatBudget
+      ? 'great'
+      : 'fair';
 
     vacancies.push({
       id: item.id,
@@ -70,10 +86,11 @@ export function normalizeAndFilterItems(
       postedAt: item.publishedAt,
       views: item.views || '',
       matchedKeywords: match.matched,
-      relevance: qualityTier === 'great' ? 85 : (qualityTier === 'shady' ? 35 : 65),
+      relevance: qualityTier === 'great' ? 85 : qualityTier === 'shady' ? 35 : 65,
       formatTag,
       qualityTier,
       statusBadge: risks.isRisky ? 'shady' : 'new',
+      region,
       budget,
       risks: risks.reasons,
       seen: false,

@@ -1,79 +1,70 @@
 import { describe, it, expect } from 'vitest';
-import { HabrFreelanceSourceAdapter } from '../sources/HabrFreelanceSource';
 import { normalizeAndFilterItems, RawSourceItem } from '../sources';
 
-describe('5.10 Sources Adapter Architecture', () => {
-  it('HabrFreelanceSource parses RSS XML into unified RawSourceItems', () => {
-    const adapter = new HabrFreelanceSourceAdapter();
-    const mockRss = `
-      <rss version="2.0">
-        <channel>
-          <title>Заказы на Хабр Фриланс</title>
-          <item>
-            <title><![CDATA[Требуется монтажер для YouTube канала]]></title>
-            <link>https://freelance.habr.com/tasks/12345</link>
-            <description><![CDATA[Ищем монтажера видео в команду, ролики по 15 минут.]]></description>
-            <pubDate>Mon, 14 Nov 2026 12:00:00 GMT</pubDate>
-            <guid>habr_12345</guid>
-          </item>
-        </channel>
-      </rss>
-    `;
-
-    const items = adapter.parseRssXml(mockRss);
-    expect(items.length).toBe(1);
-    expect(items[0].id).toBe('habr_12345');
-    expect(items[0].source).toBe('habr_freelance');
-    expect(items[0].text).toContain('монтажер');
-  });
-
-  it('normalizes, deduplicates and filters multi-source raw items', () => {
+describe('5.10 Sources Adapter Architecture (EU / US / KZ)', () => {
+  it('normalizes, deduplicates, classifies regions, and excludes RU/seller posts', () => {
     const rawItems: RawSourceItem[] = [
       {
         id: '1',
         source: 'telegram',
-        channelOrAuthor: 'jobs_edit',
-        text: 'Ищем монтажера для Reels. Оплата 5000р за видео.',
-        url: 'https://t.me/jobs/1',
+        channelOrAuthor: 'videojobs_global',
+        text: 'Hiring a YouTube video editor for weekly episodes. Budget $200 per video. Remote worldwide.',
+        url: 'https://t.me/videojobs_global/1',
         publishedAt: new Date().toISOString(),
       },
       // Duplicate of 1
       {
         id: '2',
         source: 'telegram',
-        channelOrAuthor: 'other_channel',
-        text: 'Ищем монтажера для Reels. Оплата 5000р за видео.',
-        url: 'https://t.me/jobs/2',
+        channelOrAuthor: 'creators_jobs',
+        text: 'Hiring a YouTube video editor for weekly episodes. Budget $200 per video. Remote worldwide.',
+        url: 'https://t.me/creators_jobs/2',
         publishedAt: new Date().toISOString(),
       },
-      // Irrelevant (not a vacancy)
+      // Self-promo [For Hire] rejected by filter
       {
         id: '3',
-        source: 'habr_freelance',
-        channelOrAuthor: 'habr',
-        text: 'Привет, я монтажер с опытом 5 лет, ищу заказчиков.',
-        url: 'https://freelance.habr.com/tasks/3',
+        source: 'telegram',
+        channelOrAuthor: 'editors_chat',
+        text: '[For Hire] Video editor available for work, DM me for editing services.',
+        url: 'https://t.me/editors_chat/3',
         publishedAt: new Date().toISOString(),
       },
-      // Shady vacancy (unpaid test task on full video)
+      // Shady unpaid test task
       {
         id: '4',
         source: 'telegram',
-        channelOrAuthor: 'scam_channel',
-        text: 'Требуется монтажер. Сделайте бесплатное тестовое задание на весь ролик.',
-        url: 'https://t.me/jobs/4',
+        channelOrAuthor: 'london_jobs',
+        text: 'Looking for video editor in London (£300). Must complete unpaid test edit first.',
+        url: 'https://t.me/london_jobs/4',
+        publishedAt: new Date().toISOString(),
+      },
+      // Ruble / Moscow cross-post excluded automatically
+      {
+        id: '5',
+        source: 'telegram',
+        channelOrAuthor: 'vakankz',
+        text: 'Ищем видеомонтажера в Москве, оплата 60 000 ₽ в месяц.',
+        url: 'https://t.me/vakankz/5',
         publishedAt: new Date().toISOString(),
       },
     ];
 
     const result = normalizeAndFilterItems(rawItems);
-    expect(result.totalRaw).toBe(4);
+    expect(result.totalRaw).toBe(5);
     expect(result.duplicateCount).toBe(1);
-    expect(result.filteredCount).toBe(1); // Item 3 rejected by matchesVacancy (seller post)
+    expect(result.filteredCount).toBe(2); // Item 3 ([For Hire]) + Item 5 (Moscow / RUB)
     expect(result.vacancies.length).toBe(2); // Item 1 and Item 4
 
+    const usVac = result.vacancies.find((v) => v.id === '1');
+    expect(usVac?.region).toBe('US');
+    expect(usVac?.qualityTier).toBe('great');
+    expect(usVac?.budget?.currency).toBe('USD');
+
     const shadyVac = result.vacancies.find((v) => v.id === '4');
+    expect(shadyVac?.region).toBe('EU');
     expect(shadyVac?.qualityTier).toBe('shady');
     expect(shadyVac?.risks?.length).toBeGreaterThan(0);
+    expect(shadyVac?.budget?.currency).toBe('GBP');
   });
 });

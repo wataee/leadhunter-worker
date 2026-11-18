@@ -2,105 +2,100 @@ import { describe, it, expect } from 'vitest';
 import { computeVacancyRelevance } from '../store/vacanciesStore';
 import { Vacancy } from '../types';
 
-describe('Vacancies Relevance and Filters', () => {
-  const includeKeywords = ['видеомонтажер', 'монтажер', 'рилсмейкер'];
-  const excludeKeywords = ['строительный монтаж', 'ищу работу', 'резюме'];
+describe('Vacancies Relevance and Filters (EU / US / KZ)', () => {
+  const includeKeywords = ['видеомонтажер', 'video editor', 'reels editor'];
+  const excludeKeywords = ['строительный монтаж', 'for hire', 'ищу работу'];
 
-  it('computes high relevance and hot badge for recent vacancy with budget and skills', () => {
-    const text = 'Срочно ищем видеомонтажера для YouTube подкаста в Premiere Pro и DaVinci Resolve. Оплата 80 000 - 100 000 руб в месяц.';
+  it('computes high relevance and hot badge for recent US/EU vacancy with budget and skills', () => {
+    const text =
+      'Looking for a YouTube video editor for podcast episodes in Premiere Pro and DaVinci Resolve. Budget $1500 - $2000 per month.';
     const result = computeVacancyRelevance(
       text,
       includeKeywords,
       excludeKeywords,
       true,
-      new Date().toISOString()
+      new Date().toISOString(),
+      'videojobs_global'
     );
 
     expect(result.isExcluded).toBe(false);
+    expect(result.region).toBe('US');
     expect(result.relevance).toBeGreaterThanOrEqual(70);
     expect(result.skills).toContain('Premiere Pro');
     expect(result.skills).toContain('DaVinci Resolve');
     expect(result.statusBadge).toBe('hot');
     expect(result.qualityTier).toBe('great');
-    expect(result.budget).toBeDefined();
-    expect(result.budget?.min).toBe(80000);
+    expect(result.budget?.currency).toBe('USD');
+    expect(result.budget?.min).toBe(1500);
+  });
+
+  it('excludes RU / Ruble domestic vacancies automatically', () => {
+    const text = 'Ищем видеомонтажера в Москве, оплата 80 000 руб в месяц на Сбер.';
+    const result = computeVacancyRelevance(text, includeKeywords, excludeKeywords, true, undefined, 'vakankz');
+
+    expect(result.isExcluded).toBe(true);
+    expect(result.region).toBe('RU');
   });
 
   it('correctly tags format as short for reels / shorts', () => {
-    const text = 'Нужен рилсмейкер на reels и shorts каждый день.';
+    const text = 'Нужен рилсмейкер в Алматы на reels и shorts каждый день. Оплата 250 000 тенге.';
     const result = computeVacancyRelevance(text, includeKeywords, excludeKeywords, true);
     expect(result.formatTag).toBe('short');
+    expect(result.region).toBe('KZ');
   });
 
   it('correctly tags format as long for youtube podcasts', () => {
-    const text = 'Ищем монтажера длинных горизонтальных выпусков для ютуб канала.';
+    const text = 'Ищем монтажера длинных горизонтальных выпусков для ютуб канала в Астане, 300 000 ₸.';
     const result = computeVacancyRelevance(text, includeKeywords, excludeKeywords, true);
     expect(result.formatTag).toBe('long');
+    expect(result.region).toBe('KZ');
   });
 
-  it('excludes vacancies matching stop words', () => {
-    const text = 'Ищу работу видеомонтажером, смонтирую ваши ролики.';
+  it('excludes posts matching stop words', () => {
+    const text = '[For Hire] Video editor looking for clients, Premiere Pro';
     const result = computeVacancyRelevance(text, includeKeywords, excludeKeywords, false);
     expect(result.isExcluded).toBe(true);
     expect(result.relevance).toBe(0);
   });
 
-  it('filters vacancies by format and hot status', () => {
+  it('filters vacancies by region, format and hot status', () => {
     const mockVacancies: Vacancy[] = [
       {
         id: '1',
-        channel: 'channel_1',
-        text: 'Монтаж reels',
-        url: 'https://t.me/1',
+        channel: 'reels_editors_hub',
+        text: 'Hiring Reels video editor $40/video',
+        url: 'https://t.me/reels_editors_hub/1',
         postedAt: new Date().toISOString(),
         views: '100',
         seen: false,
         hidden: false,
-        matchedKeywords: ['монтаж'],
+        matchedKeywords: ['reels editor'],
         relevance: 80,
         qualityTier: 'great',
         formatTag: 'short',
+        region: 'US',
         statusBadge: 'hot',
       },
       {
         id: '2',
-        channel: 'channel_2',
-        text: 'Монтаж YouTube подкаста',
-        url: 'https://t.me/2',
+        channel: 'eurojobs',
+        text: 'London YouTube podcast video editor needed €1200/month',
+        url: 'https://t.me/eurojobs/2',
         postedAt: new Date(Date.now() - 3600000).toISOString(),
         views: '200',
         seen: false,
         hidden: false,
-        matchedKeywords: ['монтаж'],
-        relevance: 60,
-        qualityTier: 'fair',
+        matchedKeywords: ['video editor'],
+        relevance: 65,
+        qualityTier: 'great',
         formatTag: 'long',
+        region: 'EU',
         statusBadge: 'new',
       },
     ];
 
-    // Filter by format short
-    const shortList = mockVacancies.filter(v => v.formatTag === 'short');
-    expect(shortList.length).toBe(1);
-    expect(shortList[0].id).toBe('1');
-
-    // Filter by hot only
-    const hotList = mockVacancies.filter(v => v.statusBadge === 'hot');
-    expect(hotList.length).toBe(1);
-    expect(hotList[0].id).toBe('1');
-  });
-
-  it('D2: prevents duplicate leads when channelUrl already exists', () => {
-    const existingLeads = [
-      { id: 'lead_1', name: '@editors', channelUrl: 'https://t.me/editors/100', status: 'new' as const },
-    ];
-
-    const targetUrl1 = 'https://t.me/editors/100';
-    const isDup1 = existingLeads.some(l => Boolean(l.channelUrl && l.channelUrl.trim() === targetUrl1.trim()));
-    expect(isDup1).toBe(true);
-
-    const targetUrl2 = 'https://t.me/editors/101';
-    const isDup2 = existingLeads.some(l => Boolean(l.channelUrl && l.channelUrl.trim() === targetUrl2.trim()));
-    expect(isDup2).toBe(false);
+    expect(mockVacancies.filter((v) => v.formatTag === 'short').map((v) => v.id)).toEqual(['1']);
+    expect(mockVacancies.filter((v) => v.statusBadge === 'hot').map((v) => v.id)).toEqual(['1']);
+    expect(mockVacancies.filter((v) => v.region === 'EU').map((v) => v.id)).toEqual(['2']);
   });
 });

@@ -1,4 +1,5 @@
 import { useSettingsStore } from '../store/settingsStore';
+import { computeTextHash } from '../shared/filter.js';
 
 export interface HealthStatus {
   youtube: boolean;
@@ -255,11 +256,7 @@ export async function checkAuthStatus(): Promise<{ authenticated: boolean }> {
 
 export async function checkApiHealth(): Promise<HealthStatus> {
   try {
-    const res = await fetch('/api/health');
-    if (!res.ok) {
-      return { youtube: false, telegram: false, ai: false };
-    }
-    return await res.json();
+    return await fetchHealth();
   } catch {
     return { youtube: false, telegram: false, ai: false };
   }
@@ -404,5 +401,116 @@ export async function syncDisabledSourcesToApi(disabledSources: string[]): Promi
   } catch {
     return false;
   }
+}
+
+export interface TranslateApiResult {
+  translatedText: string;
+  provider: string;
+  model: string;
+  detectedSourceLang: string;
+}
+
+const TRANSLATION_CACHE_KEY = 'leadhunter_translations_v1';
+const TRANSLATION_CACHE_LIMIT = 250;
+const inflightTranslations = new Map<string, Promise<TranslateApiResult>>();
+let activeTranslationRequests = 0;
+const translationWaitQueue: Array<() => void> = [];
+const MAX_TRANSLATE_CONCURRENCY = 3;
+
+function acquireTranslateSlot(): Promise<void> {
+  if (activeTranslationRequests < MAX_TRANSLATE_CONCURRENCY) {
+    activeTranslationRequests++;
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    translationWaitQueue.push(() => {
+      activeTranslationRequests++;
+      resolve();
+    });
+  });
+}
+
+function releaseTranslateSlot(): void {
+  activeTranslationRequests = Math.max(0, activeTranslationRequests - 1);
+  const next = translationWaitQueue.shift();
+  if (next) next();
+}
+
+function readTranslationCache(cacheKey: string): TranslateApiResult | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(TRANSLATION_CACHE_KEY);
+    if (!raw) return null;
+    const entries = JSON.parse(raw) as Array<[string, TranslateApiResult]>;
+    if (!Array.isArray(entries)) return null;
+    const found = entries.find(([k]) => k === cacheKey);
+    return found ? found[1] : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeTranslationCache(cacheKey: string, val: TranslateApiResult): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = localStorage.getItem(TRANSLATION_CACHE_KEY);
+    let entries: Array<[string, TranslateApiResult]> = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(entries)) entries = [];
+    entries = entries.filter(([k]) => k !== cacheKey);
+    entries.push([cacheKey, val]);
+    if (entries.length > TRANSLATION_CACHE_LIMIT) {
+      entries = entries.slice(entries.length - TRANSLATION_CACHE_LIMIT);
+    }
+    localStorage.setItem(TRANSLATION_CACHE_KEY, JSON.stringify(entries));
+  } catch {
+    // ignore quota errors
+  }
+}
+
+export async function translateTextWithAi(params: {
+  text: string;
+  targetLang?: 'ru' | 'en';
+  sourceLang?: string;
+  mode?: 'vacancy' | 'pitch' | 'auto';
+}): Promise<TranslateApiResult> {
+  const cleanText = params.text.trim();
+  const targetLang = params.targetLang === 'en' ? 'en' : 'ru';
+  const cacheKey = `${targetLang}:${params.mode || 'auto'}:${computeTextHash(cleanText)}`;
+
+  const cached = readTranslationCache(cacheKey);
+  if (cached) return cached;
+
+  const existingInflight = inflightTranslations.get(cacheKey);
+  if (existingInflight) return existingInflight;
+
+  const promise = (async () => {
+    await acquireTranslateSlot();
+    try {
+      const { customAiApiKey, customAiProvider } = useSettingsStore.getState();
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: cleanText,
+          targetLang,
+          sourceLang: params.sourceLang || 'auto',
+          mode: params.mode || 'auto',
+          customAiApiKey: customAiApiKey?.trim() || undefined,
+          customAiProvider: customAiProvider || undefined,
+        }),
+      });
+      const data = await handleApiResponse<TranslateApiResult>(res);
+      if (data?.translatedText) {
+        writeTranslationCache(cacheKey, data);
+      }
+      return data;
+    } finally {
+      releaseTranslateSlot();
+      inflightTranslations.delete(cacheKey);
+    }
+  })();
+
+  inflightTranslations.set(cacheKey, promise);
+  return promise;
 }
 

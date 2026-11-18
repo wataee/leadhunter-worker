@@ -9,6 +9,8 @@ export type SourceType = 'channel' | 'group';
 
 export type SourceLanguage = 'ru' | 'en' | 'mixed';
 
+export type SourceRegion = 'EU' | 'US' | 'KZ';
+
 export type SourceStatus = 'ok' | 'stale' | 'dead' | 'no_preview' | 'group' | 'private';
 
 export interface SourceItem {
@@ -19,6 +21,7 @@ export interface SourceItem {
   type: SourceType;
   category: SourceCategory;
   language: SourceLanguage;
+  region?: SourceRegion;
   description: string; // short summary
   subscribers?: number;
   postsPerWeek?: number;
@@ -42,11 +45,11 @@ export interface CatalogValidationError {
 export const USERNAME_REGEX = /^[a-z][a-z0-9_]{4,31}$/;
 
 export const CATEGORY_MINIMUMS: Record<SourceCategory, number> = {
-  jobs_video: 40,
-  jobs_remote_freelance: 40,
-  editors_community: 25,
-  clients_entrepreneurs: 25,
-  international_en: 10,
+  jobs_video: 30,
+  jobs_remote_freelance: 50,
+  editors_community: 30,
+  clients_entrepreneurs: 40,
+  international_en: 45,
 };
 
 export function validateSourceItem(item: unknown, index = 0): CatalogValidationError[] {
@@ -116,6 +119,17 @@ export function validateSourceItem(item: unknown, index = 0): CatalogValidationE
       id,
       field: 'language',
       message: `language must be one of: ${validLanguages.join(', ')}`,
+    });
+  }
+
+  // region ('EU' | 'US' | 'KZ')
+  const validRegions: SourceRegion[] = ['EU', 'US', 'KZ'];
+  if (s.region !== undefined && !validRegions.includes(s.region as SourceRegion)) {
+    errors.push({
+      index,
+      id,
+      field: 'region',
+      message: `region must be one of: ${validRegions.join(', ')}`,
     });
   }
 
@@ -237,11 +251,11 @@ export function validateCatalog(catalog: unknown[]): {
   });
 
   const validCount = okCount + groupCount;
-  if (validCount < 150) {
+  if (validCount < 200) {
     errors.push({
       index: -1,
       field: 'catalog',
-      message: `Catalog must have at least 150 valid sources with status 'ok' or 'group' (currently ${validCount})`,
+      message: `Catalog must have at least 200 valid sources with status 'ok' or 'group' (currently ${validCount})`,
     });
   }
 

@@ -35,8 +35,10 @@ export const Settings: React.FC = () => {
     quietHoursEnd,
     useAiQualification,
     aiTopNCount,
+    autoTranslateVacancies,
     customAiApiKey,
     customAiProvider,
+    setAutoTranslateVacancies,
     setCustomAiApiKey,
     setCustomAiProvider,
     setUseAiQualification,
@@ -237,7 +239,7 @@ export const Settings: React.FC = () => {
               value={profile.name}
               onChange={(e) => updateProfile({ name: e.target.value })}
               className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent"
-              placeholder="Тимур"
+              placeholder="Timur (.fleur)"
             />
           </div>
 
@@ -250,7 +252,7 @@ export const Settings: React.FC = () => {
               value={profile.specialization}
               onChange={(e) => updateProfile({ specialization: e.target.value })}
               className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent"
-              placeholder="Динамичный YouTube-монтаж (MrBeast / Vox style)"
+              placeholder="AI, Tech & Finance Video Editing (YouTube + Reels/Shorts)"
             />
           </div>
 
@@ -263,7 +265,7 @@ export const Settings: React.FC = () => {
               value={profile.telegram}
               onChange={(e) => updateProfile({ telegram: e.target.value })}
               className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text font-mono focus:outline-none focus:border-accent"
-              placeholder="@editor_timur"
+              placeholder="@ffluere"
             />
           </div>
 
@@ -276,7 +278,7 @@ export const Settings: React.FC = () => {
               value={profile.portfolioUrl}
               onChange={(e) => updateProfile({ portfolioUrl: e.target.value })}
               className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text font-mono focus:outline-none focus:border-accent"
-              placeholder="https://fleur-editor.netlify.app/ru/"
+              placeholder="https://fleur-editor.netlify.app/"
             />
           </div>
 
@@ -289,7 +291,7 @@ export const Settings: React.FC = () => {
               value={profile.email}
               onChange={(e) => updateProfile({ email: e.target.value })}
               className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text font-mono focus:outline-none focus:border-accent"
-              placeholder="editor.timur@gmail.com"
+              placeholder="fluere.work@gmail.com"
             />
           </div>
 
@@ -302,7 +304,7 @@ export const Settings: React.FC = () => {
               value={profile.sampleUrl}
               onChange={(e) => updateProfile({ sampleUrl: e.target.value })}
               className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text font-mono focus:outline-none focus:border-accent"
-              placeholder="https://youtu.be/sample_edit"
+              placeholder="https://youtu.be/cZZgi5xn930"
             />
           </div>
 
@@ -315,11 +317,11 @@ export const Settings: React.FC = () => {
               <input
                 type="number"
                 min="0"
-                step="500"
-                value={profile.minRate ?? 3000}
+                step="10"
+                value={profile.minRate ?? 80}
                 onChange={(e) => updateProfile({ minRate: Number(e.target.value) || 0 })}
                 className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent font-mono"
-                placeholder="3000"
+                placeholder="80"
               />
             </div>
             <div>
@@ -327,12 +329,16 @@ export const Settings: React.FC = () => {
                 Валюта ставки
               </label>
               <select
-                value={profile.minRateCurrency ?? 'RUB'}
-                onChange={(e) => updateProfile({ minRateCurrency: e.target.value as 'RUB' | 'USD' })}
+                value={profile.minRateCurrency ?? 'USD'}
+                onChange={(e) =>
+                  updateProfile({ minRateCurrency: e.target.value as 'USD' | 'EUR' | 'GBP' | 'KZT' | 'RUB' })
+                }
                 className="w-full bg-surface-2 border border-border rounded-control p-2.5 text-text focus:outline-none focus:border-accent"
               >
-                <option value="RUB">RUB (₽)</option>
                 <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="KZT">KZT (₸)</option>
+                <option value="RUB">RUB (₽)</option>
               </select>
             </div>
           </div>
@@ -527,17 +533,28 @@ export const Settings: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-text-muted">Использовать ИИ:</span>
-            <button
-              type="button"
-              onClick={() => setUseAiQualification(!useAiQualification)}
-              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
-                useAiQualification ? 'bg-accent justify-end' : 'bg-surface-2 border border-border justify-start'
-              }`}
-            >
-              <div className="w-4 h-4 rounded-full bg-white shadow" />
-            </button>
+          <div className="flex flex-wrap items-center gap-4">
+            <label className="flex items-center gap-2 text-xs text-text-muted cursor-pointer">
+              <input
+                type="checkbox"
+                checked={autoTranslateVacancies ?? true}
+                onChange={(e) => setAutoTranslateVacancies(e.target.checked)}
+                className="rounded bg-surface-2 border-border text-accent focus:ring-accent"
+              />
+              <span>Автоперевод зарубежных вакансий на RU (бесплатно)</span>
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-text-muted">Использовать ИИ:</span>
+              <button
+                type="button"
+                onClick={() => setUseAiQualification(!useAiQualification)}
+                className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
+                  useAiQualification ? 'bg-accent justify-end' : 'bg-surface-2 border border-border justify-start'
+                }`}
+              >
+                <div className="w-4 h-4 rounded-full bg-white shadow" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -677,7 +694,7 @@ export const Settings: React.FC = () => {
                 )}
               </div>
               <div className="text-[10px] text-muted font-mono truncate">
-                Модель: {health.models?.gemini || 'gemini-3.8-flash'}
+                Модель: {health.models?.gemini || 'gemini-2.5-flash'}
               </div>
             </div>
 
@@ -805,21 +822,21 @@ export const Settings: React.FC = () => {
             </div>
           </div>
 
-          {/* AI Rewrite */}
+          {/* AI Rewrite & Free Translation */}
           <div className="p-3.5 bg-surface-2/40 rounded-card border border-border space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-text">Claude AI Rewrite</span>
-              {health.ai ? (
-                <CheckCircle2 size={16} className="text-success" />
-              ) : (
-                <span className="w-2 h-2 rounded-full bg-muted" />
-              )}
+              <span className="font-semibold text-text">AI Rewrite & Free Translation</span>
+              <CheckCircle2 size={16} className="text-success" />
             </div>
             <div className="text-[11px] text-muted leading-relaxed">
-              {health.ai ? (
-                <span className="text-success font-medium">ANTHROPIC_API_KEY активен</span>
+              {health.providers?.gemini || health.providers?.groq || health.providers?.openrouter || customAiApiKey ? (
+                <span className="text-success font-medium">
+                  Gemini / Groq / OpenRouter + Free Neural MT активен
+                </span>
               ) : (
-                <span>Опционально (кнопка AI рерайтера)</span>
+                <span className="text-accent font-medium">
+                  Бесплатный Neural-перевод (Google GTX / MyMemory) активен без ключей
+                </span>
               )}
             </div>
           </div>

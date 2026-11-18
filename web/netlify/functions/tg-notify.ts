@@ -46,7 +46,16 @@ function formatBudget(budget: string | BudgetObject | null | undefined): string 
   if (typeof budget === 'string') return budget;
   if (typeof budget === 'object') {
     if (budget.currency === 'NEGOTIABLE') return '💰 По договорённости';
-    const cur = budget.currency === 'RUB' ? '₽' : budget.currency === 'USD' ? '$' : (budget.currency || '');
+    const cur =
+      budget.currency === 'RUB'
+        ? '₽'
+        : budget.currency === 'USD'
+        ? '$'
+        : budget.currency === 'EUR'
+        ? '€'
+        : budget.currency === 'KZT'
+        ? '₸'
+        : budget.currency || '';
     const unit = budget.unit === 'per_video' ? ' / ролик' : budget.unit === 'per_month' ? ' / мес' : budget.unit === 'project' ? ' за проект' : '';
     if (budget.min && budget.max) {
       return `💰 ${budget.min.toLocaleString('ru-RU')}–${budget.max.toLocaleString('ru-RU')} ${cur}${unit}`.trim();
@@ -201,8 +210,26 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     if (formattedBudget) {
       messageLines.push(`<b>${escapeHtml(formattedBudget)}</b>`);
     }
+    let translatedSnippetHtml = '';
+    try {
+      const { needsRussianTranslation, translateFreeNeural } = await import('../../src/shared/translate.js');
+      const sourceSnippet = body.text.slice(0, 550).trim();
+      if (needsRussianTranslation(sourceSnippet)) {
+        const tr = await translateFreeNeural(sourceSnippet, 'ru', 'auto');
+        if (tr?.translatedText && tr.translatedText.trim() !== sourceSnippet) {
+          translatedSnippetHtml = escapeHtml(tr.translatedText.slice(0, 550).trim());
+        }
+      }
+    } catch {
+      // Do not block notification delivery if free translation times out
+    }
+
     messageLines.push('');
     messageLines.push(cleanSnippet + (body.text.length > 500 ? '...' : ''));
+    if (translatedSnippetHtml) {
+      messageLines.push('');
+      messageLines.push(`🌐 <b>Перевод (RU):</b>\n<i>${translatedSnippetHtml}</i>`);
+    }
     messageLines.push('');
     messageLines.push(`🔗 <a href="${cleanUrl}">Открыть пост в Telegram</a>`);
     message = messageLines.join('\n');
