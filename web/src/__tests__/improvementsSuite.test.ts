@@ -13,18 +13,27 @@ import {
   handler as redditFeedHandler,
   resetRedditFeedCacheForTests,
 } from '../../netlify/functions/reddit-feed';
+import { signSessionToken } from '../../netlify/functions/_shared/auth';
 import { RedditSource } from '../sources/RedditSource';
 
 const WEBHOOK_SECRET = 'test_webhook_secret_at_least_32_chars_long';
+const TEST_APP_PASSWORD = 'test_admin_password_123';
+const TEST_SESSION_SECRET = 'test_session_secret_at_least_32_chars_long';
 
 describe('Cloud CRM Sync, Upwork Ingest, Reddit Feed & Chrome Extension Suite', () => {
   const prevSecret = process.env.WEBHOOK_SECRET;
   const prevNodeEnv = process.env.NODE_ENV;
+  const prevAppPassword = process.env.APP_PASSWORD;
+  const prevSessionSecret = process.env.APP_SESSION_SECRET;
   const originalFetch = globalThis.fetch;
+  let authCookie = '';
 
   beforeEach(() => {
     process.env.NODE_ENV = 'test';
     process.env.WEBHOOK_SECRET = WEBHOOK_SECRET;
+    process.env.APP_PASSWORD = TEST_APP_PASSWORD;
+    process.env.APP_SESSION_SECRET = TEST_SESSION_SECRET;
+    authCookie = `lh_session=${encodeURIComponent(signSessionToken().token)}`;
     resetMemoryCrmStateForTests();
     resetMemoryUpworkJobsForTests();
     resetRedditFeedCacheForTests();
@@ -33,15 +42,24 @@ describe('Cloud CRM Sync, Upwork Ingest, Reddit Feed & Chrome Extension Suite', 
   afterEach(() => {
     process.env.WEBHOOK_SECRET = prevSecret;
     process.env.NODE_ENV = prevNodeEnv;
+    process.env.APP_PASSWORD = prevAppPassword;
+    process.env.APP_SESSION_SECRET = prevSessionSecret;
     globalThis.fetch = originalFetch;
     vi.restoreAllMocks();
   });
 
-  it('crm-sync merges desktop & mobile leads by newest updatedAt and respects deletions', async () => {
+  it('crm-sync enforces auth and merges desktop & mobile leads by newest updatedAt', async () => {
+    const unauthRes = await crmSyncHandler({
+      httpMethod: 'GET',
+      headers: { host: 'localhost:8888' },
+      body: null,
+    });
+    expect(unauthRes.statusCode).toBe(401);
+
     // Device 1 pushes lead A and lead B
     const res1 = await crmSyncHandler({
       httpMethod: 'POST',
-      headers: { host: 'localhost:8888' },
+      headers: { host: 'localhost:8888', cookie: authCookie },
       body: JSON.stringify({
         leads: [
           {
@@ -75,7 +93,7 @@ describe('Cloud CRM Sync, Upwork Ingest, Reddit Feed & Chrome Extension Suite', 
     // Device 2 updates lead_1 on mobile and deletes lead_2
     const res2 = await crmSyncHandler({
       httpMethod: 'POST',
-      headers: { host: 'localhost:8888' },
+      headers: { host: 'localhost:8888', cookie: authCookie },
       body: JSON.stringify({
         leads: [
           {
@@ -99,7 +117,7 @@ describe('Cloud CRM Sync, Upwork Ingest, Reddit Feed & Chrome Extension Suite', 
     // GET retrieves synced cloud snapshot
     const res3 = await crmSyncHandler({
       httpMethod: 'GET',
-      headers: { host: 'localhost:8888' },
+      headers: { host: 'localhost:8888', cookie: authCookie },
       body: null,
     });
     const data3 = JSON.parse(res3.body);
@@ -139,7 +157,7 @@ describe('Cloud CRM Sync, Upwork Ingest, Reddit Feed & Chrome Extension Suite', 
 
     const getRes = await upworkIngestHandler({
       httpMethod: 'GET',
-      headers: { host: 'localhost:8888' },
+      headers: { host: 'localhost:8888', cookie: authCookie },
       body: null,
     });
     const listData = JSON.parse(getRes.body);
@@ -177,7 +195,7 @@ describe('Cloud CRM Sync, Upwork Ingest, Reddit Feed & Chrome Extension Suite', 
 
     const feedRes = await redditFeedHandler({
       httpMethod: 'GET',
-      headers: { host: 'localhost:8888' },
+      headers: { host: 'localhost:8888', cookie: authCookie },
     });
     expect(feedRes.statusCode).toBe(200);
     const data = JSON.parse(feedRes.body);
