@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Sidebar } from './components/Sidebar';
 import { Topbar } from './components/Topbar';
 import { ToastContainer } from './components/ToastContainer';
@@ -110,9 +110,12 @@ const AppContent: React.FC = () => {
     };
   }, [addLead, addToast]);
 
+  const location = useLocation();
+  const isLoginPage = location.pathname === '/login';
+
   // Автоматическая облачная синхронизация CRM между ПК и телефоном
   useEffect(() => {
-    if (window.location.pathname === '/login') return;
+    if (location.pathname === '/login') return;
     syncCrmWithCloud();
     const syncTimer = setInterval(() => {
       if (document.visibilityState === 'visible') {
@@ -127,17 +130,13 @@ const AppContent: React.FC = () => {
       clearInterval(syncTimer);
       window.removeEventListener('focus', onFocus);
     };
-  }, []);
-
-  const isLoginPage = window.location.pathname === '/login';
+  }, [location.pathname]);
 
   if (isLoginPage) {
     return (
       <div className="min-h-screen bg-bg text-text antialiased">
         <Suspense fallback={<PageLoadingFallback />}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-          </Routes>
+          <Login />
         </Suspense>
         <ToastContainer />
       </div>
