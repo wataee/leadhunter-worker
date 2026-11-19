@@ -196,12 +196,18 @@ function loadAllowedChats() {
   }
 }
 
-// Initial load
+const activeIntervals = [];
+function trackInterval(fn, ms) {
+  const id = setInterval(fn, ms);
+  activeIntervals.push(id);
+  return id;
+}
+
 loadAllowedChats();
 updateChannelPriorityFromCatalog();
 
 if (ALLOWED_CHATS_FILE) {
-  setInterval(loadAllowedChats, 10 * 60 * 1000);
+  trackInterval(loadAllowedChats, 10 * 60 * 1000);
 }
 
 // B5: Периодическая синхронизация источников с обработкой ошибок и rate-limit логов
@@ -255,7 +261,7 @@ async function syncEnabledSourcesFromApi() {
 }
 
 setTimeout(syncEnabledSourcesFromApi, 15000);
-setInterval(syncEnabledSourcesFromApi, 5 * 60 * 1000);
+trackInterval(syncEnabledSourcesFromApi, 5 * 60 * 1000);
 
 // 2. Хранилище (File or Upstash Redis)
 const storage = createStorage();
@@ -541,7 +547,7 @@ async function checkScheduledDigests() {
   }
 }
 
-setInterval(checkScheduledDigests, 60 * 1000);
+trackInterval(checkScheduledDigests, 60 * 1000);
 
 // 6. Проверка секрета для защищённых эндпоинтов
 function verifySecret(provided) {
@@ -850,7 +856,7 @@ async function runPollingCycle() {
   }
 }
 
-setInterval(runPollingCycle, 3 * 60 * 1000);
+trackInterval(runPollingCycle, 3 * 60 * 1000);
 setTimeout(runPollingCycle, 30 * 1000);
 
 // 8. Встроенный Health-check HTTP сервер
@@ -956,7 +962,7 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`[Health-Check] HTTP-сервер запущен на 0.0.0.0:${PORT}`);
 
-  setInterval(() => {
+  trackInterval(() => {
     processFailedQueue().catch((err) => console.warn('[Очередь] Ошибка фоновой очистки:', err.message));
   }, 2 * 60 * 1000);
 
@@ -966,9 +972,9 @@ server.listen(PORT, '0.0.0.0', () => {
 
   if (selfUrl) {
     console.log(`[Keep-Alive] Автоматический самопинг активен для ${selfUrl}`);
-    setInterval(async () => {
+    trackInterval(async () => {
       try {
-        await fetch(`${selfUrl}/`);
+        await fetch(`${selfUrl}/`, { signal: AbortSignal.timeout(5000) });
       } catch (err) {
         console.warn(`[Keep-Alive] Ошибка самопинга: ${err.message}`);
       }
@@ -1015,8 +1021,7 @@ function scheduleReconnect(customDelayMs) {
   }, delay);
 }
 
-// B3: Watchdog проверки зависания сокета (каждые 60 сек)
-setInterval(() => {
+trackInterval(() => {
   if (telegramConnected && !isConnecting) {
     const lastActivity = Math.max(
       new Date(lastMessageAt || 0).getTime(),
@@ -1169,17 +1174,24 @@ async function connectTelegram() {
 
 connectTelegram();
 
-// 10. Глобальный перехват ошибок и Graceful Shutdown (B3)
 async function handleShutdown(signal, exitCode = 0) {
   if (isShuttingDown) return;
   isShuttingDown = true;
 
   if (reconnectTimer) clearTimeout(reconnectTimer);
+  activeIntervals.forEach(clearInterval);
+  activeIntervals.length = 0;
 
   console.log(`\n[Shutdown] Получен сигнал ${signal}. Завершение работы...`);
   try {
     storage.flush();
+    if (typeof storage?.close === 'function') {
+      storage.close();
+    }
     if (server) {
+      if (typeof server.closeAllConnections === 'function') {
+        server.closeAllConnections();
+      }
       server.close(() => console.log('[Shutdown] HTTP-сервер остановлен'));
     }
     await cleanupOldClient();

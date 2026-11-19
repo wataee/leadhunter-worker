@@ -66,7 +66,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
         .filter(Boolean);
 
       if (redisUrl && redisToken) {
-        const pipeline: any[] = [['DEL', 'leadhunter:disabled_sources']];
+        const pipeline: string[][] = [['DEL', 'leadhunter:disabled_sources']];
         if (cleanList.length > 0) {
           pipeline.push(['SADD', 'leadhunter:disabled_sources', ...cleanList]);
         }

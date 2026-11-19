@@ -1005,7 +1005,7 @@ export const Finder: React.FC = () => {
               <span>Сортировка:</span>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as 'score' | 'subs' | 'date')}
                 className="bg-surface-2 border border-border rounded-control px-2 py-1 text-text text-xs"
               >
                 <option value="score">По рейтингу клиента</option>

@@ -27,7 +27,7 @@ export const VacancyFiltersBar: React.FC<VacancyFiltersBarProps> = ({
   onChangeSeenFilter,
   unseenCount,
   seenCount,
-  totalCount,
+  totalCount: _totalCount,
   onMarkAllSeen,
   hotOnly,
   onToggleHotOnly,

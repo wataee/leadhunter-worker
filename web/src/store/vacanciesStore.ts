@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { Vacancy } from '../types';
 import { useLeadsStore } from './leadsStore';
 import KEYWORDS from '../shared/keywords.js';
@@ -22,6 +22,7 @@ export interface TelegramSource {
   title?: string;
   type?: 'channel' | 'group';
   region?: RegionCode | 'RU';
+  recommended?: boolean;
 }
 
 interface VacanciesState {
@@ -566,7 +567,7 @@ export const useVacanciesStore = create<VacanciesState>()(
     {
       name: 'leadhunter_vacancies',
       version: 8,
-      storage: safeLocalStorage as any,
+      storage: createJSONStorage(() => safeLocalStorage),
       migrate: (persistedState: any, version: number) => {
         if (persistedState) {
           if (version < 7) {

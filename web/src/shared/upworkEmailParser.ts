@@ -15,7 +15,7 @@ function cleanHtml(html: string): string {
   return html
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<br\s*[\/]?>/gi, '\n')
+    .replace(/<br\s*[/]?>/gi, '\n')
     .replace(/<\/p>/gi, '\n\n')
     .replace(/<\/div>/gi, '\n')
     .replace(/<\/tr>/gi, '\n')
@@ -200,24 +200,4 @@ function extractConnectsNumber(text: string): number | undefined {
   return undefined;
 }
 
-function extractCountry(text: string): string | undefined {
-  const countries = [
-    'United States',
-    'United Kingdom',
-    'Canada',
-    'Australia',
-    'Germany',
-    'Netherlands',
-    'France',
-    'Switzerland',
-    'United Arab Emirates',
-    'Kazakhstan',
-    'Singapore',
-  ];
-  for (const c of countries) {
-    if (new RegExp(`\\b${c}\\b`, 'i').test(text)) {
-      return c;
-    }
-  }
-  return undefined;
-}
+

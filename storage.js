@@ -6,6 +6,26 @@ const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 export const MAX_QUEUE_ATTEMPTS = 10;
 
+function atomicWriteFileSync(filePath, content) {
+  const tmpPath = `${filePath}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`;
+  fs.writeFileSync(tmpPath, content, 'utf-8');
+  try {
+    fs.renameSync(tmpPath, filePath);
+  } catch {
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      fs.renameSync(tmpPath, filePath);
+    } catch {
+      fs.writeFileSync(filePath, content, 'utf-8');
+      if (fs.existsSync(tmpPath)) {
+        try { fs.unlinkSync(tmpPath); } catch {}
+      }
+    }
+  }
+}
+
 export class FileStorageDriver {
   constructor(dataDir = 'data') {
     this.dataDir = path.resolve(dataDir);
@@ -16,16 +36,21 @@ export class FileStorageDriver {
     this.recentLeads = [];
     this.failedQueue = [];
     this.lastPolledIds = new Map();
-    this.deduplicationCache = new Map(); // key -> timestamp
+    this.deduplicationCache = new Map();
 
     this.ensureDir();
     this.load();
 
-    // B8: Periodic cleanup once per minute instead of on every check
     this.cleanupTimer = setInterval(() => {
       this.cleanupOldCache();
     }, 60 * 1000);
     if (this.cleanupTimer.unref) this.cleanupTimer.unref();
+  }
+
+  close() {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+    }
   }
 
   ensureDir() {
@@ -101,20 +126,18 @@ export class FileStorageDriver {
 
   flush() {
     try {
-      fs.writeFileSync(
+      atomicWriteFileSync(
         this.recentFile,
-        JSON.stringify(this.recentLeads.slice(0, 500), null, 2),
-        'utf-8'
+        JSON.stringify(this.recentLeads.slice(0, 500), null, 2)
       );
     } catch (err) {
       console.warn('[FileStorage] Ошибка сохранения recent.json:', err.message);
     }
 
     try {
-      fs.writeFileSync(
+      atomicWriteFileSync(
         this.failedQueueFile,
-        JSON.stringify(this.failedQueue, null, 2),
-        'utf-8'
+        JSON.stringify(this.failedQueue, null, 2)
       );
     } catch (err) {
       console.warn('[FileStorage] Ошибка сохранения failed-queue.json:', err.message);
@@ -125,7 +148,7 @@ export class FileStorageDriver {
       for (const [ch, id] of this.lastPolledIds.entries()) {
         obj[ch] = id;
       }
-      fs.writeFileSync(this.lastPolledFile, JSON.stringify(obj, null, 2), 'utf-8');
+      atomicWriteFileSync(this.lastPolledFile, JSON.stringify(obj, null, 2));
     } catch (err) {
       console.warn('[FileStorage] Ошибка сохранения last-polled.json:', err.message);
     }
@@ -249,6 +272,7 @@ export class UpstashRedisDriver {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify([cmd, ...args]),
+        signal: AbortSignal.timeout(5000),
       });
       if (!res.ok) {
         throw new Error(`Upstash HTTP ${res.status}`);

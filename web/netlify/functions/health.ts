@@ -5,7 +5,63 @@ interface HandlerEvent {
   headers: Record<string, string | undefined>;
 }
 
-let cachedHealth: { data: any; expiresAt: number } | null = null;
+interface TelegramBotHealth {
+  status: 'ok' | 'error' | 'not_configured';
+  username?: string;
+  message?: string;
+}
+
+interface TelegramWebhookHealth {
+  status: 'ok' | 'not_set' | 'error' | 'not_configured';
+  url?: string | null;
+  pendingUpdates?: number;
+  lastError?: string | null;
+  message?: string;
+}
+
+interface RedisHealth {
+  status: 'ok' | 'error' | 'not_configured';
+  latencyMs?: number;
+  message?: string;
+}
+
+interface WorkerHealth {
+  status: 'ok' | 'error' | 'not_configured';
+  message?: string;
+  uptimeSeconds?: number;
+}
+
+interface HealthData {
+  status: 'ok' | 'degraded' | 'error';
+  youtube: boolean;
+  telegram: boolean;
+  ai: boolean;
+  providers: {
+    gemini: boolean;
+    groq: boolean;
+    openrouter: boolean;
+    anthropic: boolean;
+  };
+  models: {
+    gemini: string;
+    groq: string;
+    openrouter: string;
+  };
+  telegramBot: TelegramBotHealth;
+  telegramWebhook: TelegramWebhookHealth;
+  redis: RedisHealth;
+  worker: WorkerHealth;
+  config: {
+    authConfigured: boolean;
+    sessionSecretConfigured: boolean;
+    webhookSecretConfigured: boolean;
+    telegramChatIdConfigured: boolean;
+    youtubeConfigured: boolean;
+  };
+  timestamp: string;
+}
+
+let cachedHealth: { data: HealthData; expiresAt: number } | null = null;
 
 export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   const origin = event.headers?.origin || event.headers?.Origin;
@@ -14,7 +70,6 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     return handleOptions(origin);
   }
 
-  // Fast 15s in-memory cache to prevent transient timeouts and Telegram API rate-limiting
   if (cachedHealth && Date.now() < cachedHealth.expiresAt) {
     return jsonResponse(200, cachedHealth.data, origin);
   }
@@ -29,79 +84,69 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     ''
   ).trim();
 
-  // 1. Telegram Bot (getMe)
-  let telegramBot: { status: 'ok' | 'error' | 'not_configured'; username?: string; message?: string } = {
-    status: 'not_configured',
-    message: 'TELEGRAM_BOT_TOKEN не задан',
-  };
-
-  if (token) {
+  const checkTelegramBot = async (): Promise<TelegramBotHealth> => {
+    if (!token) {
+      return {
+        status: 'not_configured',
+        message: 'TELEGRAM_BOT_TOKEN не задан',
+      };
+    }
     try {
-      const res = await fetchWithTimeout(`https://api.telegram.org/bot${token}/getMe`, {}, 6000);
+      const res = await fetchWithTimeout(`https://api.telegram.org/bot${token}/getMe`, {}, 3500);
       const data = await res.json().catch(() => null);
       if (res.ok && data?.ok && data.result) {
-        telegramBot = {
+        return {
           status: 'ok',
           username: data.result.username ? `@${data.result.username}` : data.result.first_name,
         };
-      } else {
-        telegramBot = {
-          status: 'error',
-          message: data?.description || `HTTP ${res.status}`,
-        };
       }
-    } catch (err: unknown) {
-      telegramBot = {
+      return {
         status: 'error',
-        message: err instanceof Error ? err.message : 'Timeout 6s',
+        message: data?.description || `HTTP ${res.status}`,
+      };
+    } catch (err: unknown) {
+      return {
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Timeout 3.5s',
       };
     }
-  }
-
-  // 2. Telegram Webhook (getWebhookInfo)
-  let telegramWebhook: {
-    status: 'ok' | 'not_set' | 'error' | 'not_configured';
-    url?: string | null;
-    pendingUpdates?: number;
-    lastError?: string | null;
-    message?: string;
-  } = {
-    status: 'not_configured',
   };
 
-  if (token) {
+  const checkTelegramWebhook = async (): Promise<TelegramWebhookHealth> => {
+    if (!token) {
+      return { status: 'not_configured' };
+    }
     try {
-      const res = await fetchWithTimeout(`https://api.telegram.org/bot${token}/getWebhookInfo`, {}, 6000);
+      const res = await fetchWithTimeout(`https://api.telegram.org/bot${token}/getWebhookInfo`, {}, 3500);
       const data = await res.json().catch(() => null);
       if (res.ok && data?.ok && data.result) {
         const info = data.result;
-        telegramWebhook = {
+        return {
           status: info.url ? 'ok' : 'not_set',
           url: info.url || null,
           pendingUpdates: info.pending_update_count || 0,
           lastError: info.last_error_message || null,
         };
-      } else {
-        telegramWebhook = {
-          status: 'error',
-          message: data?.description || `HTTP ${res.status}`,
-        };
       }
-    } catch (err: unknown) {
-      telegramWebhook = {
+      return {
         status: 'error',
-        message: err instanceof Error ? err.message : 'Timeout 6s',
+        message: data?.description || `HTTP ${res.status}`,
+      };
+    } catch (err: unknown) {
+      return {
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Timeout 3.5s',
       };
     }
-  }
-
-  // 3. Upstash Redis (PING)
-  let redis: { status: 'ok' | 'error' | 'not_configured'; latencyMs?: number; message?: string } = {
-    status: 'not_configured',
-    message: 'UPSTASH_REDIS_REST_URL/TOKEN не настроены',
   };
 
-  if (redisUrl && redisToken) {
+  const checkRedis = async (): Promise<RedisHealth> => {
+    if (!redisUrl || !redisToken) {
+      return {
+        status: 'not_configured',
+        message: 'UPSTASH_REDIS_REST_URL/TOKEN не настроены',
+      };
+    }
     const t0 = Date.now();
     try {
       const res = await fetchWithTimeout(
@@ -114,57 +159,61 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
           },
           body: JSON.stringify(['PING']),
         },
-        5000
+        2500
       );
       if (res.ok) {
-        redis = {
+        return {
           status: 'ok',
           latencyMs: Date.now() - t0,
         };
-      } else {
-        redis = {
-          status: 'error',
-          message: `HTTP ${res.status}`,
-        };
       }
-    } catch (err: unknown) {
-      redis = {
+      return {
         status: 'error',
-        message: err instanceof Error ? err.message : 'Timeout 5s',
+        message: `HTTP ${res.status}`,
+      };
+    } catch (err: unknown) {
+      return {
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Timeout 2.5s',
       };
     }
-  }
-
-  // 4. Worker (health check ping)
-  let worker: { status: 'ok' | 'error' | 'not_configured'; message?: string; uptimeSeconds?: number } = {
-    status: 'not_configured',
-    message: 'TG_WORKER_URL не настроен',
   };
 
-  if (workerUrl) {
+  const checkWorker = async (): Promise<WorkerHealth> => {
+    if (!workerUrl) {
+      return {
+        status: 'not_configured',
+        message: 'TG_WORKER_URL не настроен',
+      };
+    }
     try {
-      const res = await fetchWithTimeout(`${workerUrl.replace(/\/$/, '')}/`, {}, 6000);
+      const res = await fetchWithTimeout(`${workerUrl.replace(/\/$/, '')}/`, {}, 3500);
       const data = await res.json().catch(() => null);
       if (res.ok) {
-        worker = {
+        return {
           status: 'ok',
           uptimeSeconds: data?.uptimeSeconds,
         };
-      } else {
-        worker = {
-          status: 'error',
-          message: `HTTP ${res.status}`,
-        };
       }
-    } catch (err: unknown) {
-      worker = {
+      return {
         status: 'error',
-        message: err instanceof Error ? err.message : 'Timeout 6s',
+        message: `HTTP ${res.status}`,
+      };
+    } catch (err: unknown) {
+      return {
+        status: 'error',
+        message: err instanceof Error ? err.message : 'Timeout 3.5s',
       };
     }
-  }
+  };
 
-  // 5. Конфигурация секретов (только boolean, без утечки значений)
+  const [telegramBot, telegramWebhook, redis, worker] = await Promise.all([
+    checkTelegramBot(),
+    checkTelegramWebhook(),
+    checkRedis(),
+    checkWorker(),
+  ]);
+
   const authConfigured = Boolean(process.env.APP_PASSWORD?.trim());
   const sessionSecretConfigured = Boolean(process.env.APP_SESSION_SECRET?.trim());
   const webhookSecretConfigured = Boolean(process.env.WEBHOOK_SECRET?.trim());
@@ -185,7 +234,6 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     providers.gemini || providers.groq || providers.openrouter || providers.anthropic
   );
 
-  // Общий статус системы
   let overallStatus: 'ok' | 'degraded' | 'error' = 'ok';
   if (telegramBot.status === 'error' || redis.status === 'error' || worker.status === 'error') {
     overallStatus = 'error';
@@ -199,7 +247,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     overallStatus = 'degraded';
   }
 
-  const resultData = {
+  const resultData: HealthData = {
     status: overallStatus,
     youtube: youtubeConfigured,
     telegram: telegramBot.status === 'ok',
@@ -222,7 +270,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   cachedHealth = {
     data: resultData,
-    expiresAt: Date.now() + 15_000,
+    expiresAt: Date.now() + 30_000,
   };
 
   return jsonResponse(200, resultData, origin);

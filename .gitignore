@@ -7,3 +7,5 @@ data/*
 !data/sources.candidates.json
 !data/candidates.unverified.json
 .netlify
+.agents
+graphify-out

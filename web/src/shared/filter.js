@@ -1,4 +1,3 @@
-import { KEYWORDS } from './keywords.js';
 import { FILTER_CONFIG } from './filter.config.js';
 import { parseBudget } from './budget.js';
 
@@ -153,10 +152,9 @@ const HARD_STOP_CATEGORIES = [
   { name: 'constructionMontage', label: 'spam', reason: 'Строительный/бытовой монтаж (окна/кондиционеры)', list: compileRegexList(FILTER_CONFIG.hardStops.constructionMontage) },
 ];
 
-// Дополнительные жесткие шаблоны регулярных выражений
 const EXTRA_HARD_STOP_PATTERNS = [
   {
-    regex: /(?:нужен\s+монтажер|ищете\s+монтажера|хочешь\s+стать\s+монтажером|освой\s+профессию)\s*[\?!\.]/iu,
+    regex: /(?:нужен\s+монтажер|ищете\s+монтажера|хочешь\s+стать\s+монтажером|освой\s+профессию)\s*[?!.]/iu,
     label: 'course',
     reason: 'Лид-магнит курса с вопросом о поиске монтажера',
   },
@@ -437,8 +435,7 @@ export function matchesVacancy(text, options = {}) {
     reasons.push(`Есть ссылка на ТЗ или референсы («${matchedBriefLinks[0]}»)`);
   }
 
-  // Бонус: Прямой контакт в ЛС (+10)
-  for (const { phrase, regex } of GIG_INDICATORS.directContacts) {
+  for (const { regex } of GIG_INDICATORS.directContacts) {
     if (regex.test(text)) {
       score += weights.contactBonus;
       reasons.push('Указан прямой контакт для связи в ЛС');

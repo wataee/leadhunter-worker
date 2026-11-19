@@ -99,14 +99,14 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   const customKey = (
     event.headers?.['x-custom-ai-key'] ||
-    (event.headers as any)?.['X-Custom-Ai-Key'] ||
+    event.headers?.['X-Custom-Ai-Key'] ||
     body.customApiKey ||
     ''
   ).trim();
 
   const customProvider = (
     event.headers?.['x-custom-ai-provider'] ||
-    (event.headers as any)?.['X-Custom-Ai-Provider'] ||
+    event.headers?.['X-Custom-Ai-Provider'] ||
     body.customProvider ||
     ''
   ).trim();

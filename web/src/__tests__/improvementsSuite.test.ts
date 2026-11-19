@@ -166,27 +166,31 @@ describe('Cloud CRM Sync, Upwork Ingest, Reddit Feed & Chrome Extension Suite', 
   });
 
   it('reddit-feed & RedditSource fetch and filter [Hiring] jobs cleanly without real network', async () => {
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        data: {
-          children: [
-            {
-              data: {
-                id: 'r99',
-                subreddit: 'forhire',
-                author: 'uk_agency',
-                title: '[Hiring] Reels & Shorts Video Editor (€1200/month)',
-                selftext: 'Looking for experienced Premiere Pro editor for vertical reels.',
-                permalink: '/r/forhire/comments/r99/hiring_reels_editor/',
-                created_utc: Math.floor(Date.now() / 1000) - 3600,
-                score: 8,
-              },
+    globalThis.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            data: {
+              children: [
+                {
+                  data: {
+                    id: 'r99',
+                    subreddit: 'forhire',
+                    author: 'uk_agency',
+                    title: '[Hiring] Reels & Shorts Video Editor (€1200/month)',
+                    selftext: 'Looking for experienced Premiere Pro editor for vertical reels.',
+                    permalink: '/r/forhire/comments/r99/hiring_reels_editor/',
+                    created_utc: Math.floor(Date.now() / 1000) - 3600,
+                    score: 8,
+                  },
+                },
+              ],
             },
-          ],
-        },
-      }),
-    } as any);
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      )
+    );
 
     const adapter = new RedditSource();
     const raw = await adapter.fetchItems();

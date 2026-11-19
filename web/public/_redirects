@@ -1,2 +1,3 @@
-/api/*  /.netlify/functions/:splat  200
-/*      /index.html                 200
+/api/inbox/ack  /.netlify/functions/inbox-ack  200
+/api/*          /.netlify/functions/:splat    200
+/*              /index.html                   200

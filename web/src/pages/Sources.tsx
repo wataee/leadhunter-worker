@@ -114,7 +114,7 @@ export const Sources: React.FC = () => {
 
     for (const s of allSources) {
       const lowerId = s.id.toLowerCase();
-      const count = map14d.get(lowerId) || (s as any).count7d || s.postsPerWeek || 0;
+      const count = map14d.get(lowerId) || s.count7d || s.postsPerWeek || 0;
       const isCurrentlyActive = activeSources.has(lowerId);
 
       if (count > 0 && !isCurrentlyActive) {
@@ -362,7 +362,7 @@ export const Sources: React.FC = () => {
           filteredSources.map((source) => {
             const lowerId = source.id.toLowerCase();
             const isEnabled = activeSources.has(lowerId);
-            const count7d = sourceStats.map7d.get(lowerId) ?? (source as any).count7d ?? 0;
+            const count7d = sourceStats.map7d.get(lowerId) ?? source.count7d ?? 0;
 
             return (
               <div

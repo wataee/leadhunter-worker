@@ -38,10 +38,12 @@ describe('Free neural translation & language detection', () => {
   });
 
   it('translates via Google GTX primary endpoint when available', async () => {
-    const mockFetch = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
-      ok: true,
-      json: async () => [[['Ищем видеомонтажёра для YouTube.', 'Looking for a YouTube video editor.', null, null]], null, 'en'],
-    } as any);
+    const mockFetch = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      new Response(JSON.stringify([[['Ищем видеомонтажёра для YouTube.', 'Looking for a YouTube video editor.', null, null]], null, 'en']), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    );
 
     const res = await translateFreeNeural('Looking for a YouTube video editor.', 'ru', 'en');
     expect(mockFetch).toHaveBeenCalledTimes(1);
@@ -53,14 +55,16 @@ describe('Free neural translation & language detection', () => {
   it('falls back seamlessly to MyMemory when Google GTX fails', async () => {
     const mockFetch = vi
       .spyOn(globalThis, 'fetch')
-      .mockResolvedValueOnce({ ok: false, status: 429 } as any)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          responseStatus: 200,
-          responseData: { translatedText: 'Нужен монтажер Reels за $50.' },
-        }),
-      } as any);
+      .mockResolvedValueOnce(new Response('', { status: 429 }))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            responseStatus: 200,
+            responseData: { translatedText: 'Нужен монтажер Reels за $50.' },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
 
     const res = await translateFreeNeural('Need a Reels editor for $50.', 'ru', 'en');
     expect(mockFetch).toHaveBeenCalledTimes(2);

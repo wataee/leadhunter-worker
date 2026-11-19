@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { handler as ingestHandler, resetMemoryUpworkJobsForTests } from '../../netlify/functions/upwork-ingest';
-import { handler as emailHandler, resetMemoryUpworkEmailJobsForTests } from '../../netlify/functions/upwork-email';
+import { handler as ingestHandler, resetMemoryUpworkJobsForTests, type HandlerEvent } from '../../netlify/functions/upwork-ingest';
+import { resetMemoryUpworkEmailJobsForTests } from '../../netlify/functions/upwork-email';
 import { calculateConnectsRoi } from '../shared/upwork.js';
 
 describe('Task 2: Reliable Upwork Ingest & Telegram Delivery Suite', () => {
@@ -26,7 +26,7 @@ describe('Task 2: Reliable Upwork Ingest & Telegram Delivery Suite', () => {
   describe('1. Security: isSecretAuthorized checks', () => {
     it('rejects requests with secret shorter than 16 chars', async () => {
       process.env.WEBHOOK_SECRET = 'short';
-      const event = {
+      const event: HandlerEvent = {
         httpMethod: 'POST',
         headers: { 'x-webhook-secret': 'short' },
         body: JSON.stringify({
@@ -35,12 +35,12 @@ describe('Task 2: Reliable Upwork Ingest & Telegram Delivery Suite', () => {
           skipTranslation: true,
         }),
       };
-      const res = await ingestHandler(event as any);
+      const res = await ingestHandler(event);
       expect(res.statusCode).toBe(401);
     });
 
     it('rejects secret passed in query parameter (forbidden for security)', async () => {
-      const event = {
+      const event: HandlerEvent = {
         httpMethod: 'POST',
         headers: {},
         queryStringParameters: { secret: VALID_SECRET },
@@ -50,12 +50,12 @@ describe('Task 2: Reliable Upwork Ingest & Telegram Delivery Suite', () => {
           skipTranslation: true,
         }),
       };
-      const res = await ingestHandler(event as any);
+      const res = await ingestHandler(event);
       expect(res.statusCode).toBe(401);
     });
 
     it('accepts valid secret via X-Webhook-Secret header', async () => {
-      const event = {
+      const event: HandlerEvent = {
         httpMethod: 'POST',
         headers: { 'x-webhook-secret': VALID_SECRET },
         body: JSON.stringify({
@@ -66,7 +66,7 @@ describe('Task 2: Reliable Upwork Ingest & Telegram Delivery Suite', () => {
           skipTranslation: true,
         }),
       };
-      const res = await ingestHandler(event as any);
+      const res = await ingestHandler(event);
       expect(res.statusCode).toBe(200);
       const data = JSON.parse(res.body);
       expect(data.ok).toBe(true);
@@ -75,7 +75,7 @@ describe('Task 2: Reliable Upwork Ingest & Telegram Delivery Suite', () => {
 
   describe('2. English filter on incoming Upwork jobs', () => {
     it('filters out full-time staff jobs with monthly salary', async () => {
-      const event = {
+      const event: HandlerEvent = {
         httpMethod: 'POST',
         headers: { 'x-webhook-secret': VALID_SECRET },
         body: JSON.stringify({
@@ -86,7 +86,7 @@ describe('Task 2: Reliable Upwork Ingest & Telegram Delivery Suite', () => {
           skipTranslation: true,
         }),
       };
-      const res = await ingestHandler(event as any);
+      const res = await ingestHandler(event);
       expect(res.statusCode).toBe(200);
       const data = JSON.parse(res.body);
       expect(data.filtered).toBe(true);
@@ -94,7 +94,7 @@ describe('Task 2: Reliable Upwork Ingest & Telegram Delivery Suite', () => {
     });
 
     it('accepts genuine project-based gig jobs', async () => {
-      const event = {
+      const event: HandlerEvent = {
         httpMethod: 'POST',
         headers: { 'x-webhook-secret': VALID_SECRET },
         body: JSON.stringify({
@@ -105,7 +105,7 @@ describe('Task 2: Reliable Upwork Ingest & Telegram Delivery Suite', () => {
           skipTranslation: true,
         }),
       };
-      const res = await ingestHandler(event as any);
+      const res = await ingestHandler(event);
       expect(res.statusCode).toBe(200);
       const data = JSON.parse(res.body);
       expect(data.ok).toBe(true);
@@ -138,7 +138,7 @@ describe('Task 2: Reliable Upwork Ingest & Telegram Delivery Suite', () => {
       delete process.env.TELEGRAM_BOT_TOKEN;
       delete process.env.TELEGRAM_CHAT_ID;
 
-      const event = {
+      const event: HandlerEvent = {
         httpMethod: 'POST',
         headers: { 'x-webhook-secret': VALID_SECRET },
         body: JSON.stringify({
@@ -150,7 +150,7 @@ describe('Task 2: Reliable Upwork Ingest & Telegram Delivery Suite', () => {
         }),
       };
 
-      const res = await ingestHandler(event as any);
+      const res = await ingestHandler(event);
       expect(res.statusCode).toBe(200);
       const data = JSON.parse(res.body);
       expect(data.telegram.sent).toBe(false);

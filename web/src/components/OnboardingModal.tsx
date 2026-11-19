@@ -29,15 +29,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
   const { profile, updateProfile } = useSettingsStore();
   const addToast = useToastStore((s) => s.addToast);
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<number>(1);
 
-  // Form state
   const [name, setName] = useState(profile.name || 'Timur (.fleur)');
   const [telegram, setTelegram] = useState(profile.telegram || '@ffluere');
   const [portfolioUrl, setPortfolioUrl] = useState(profile.portfolioUrl || 'https://fleur-editor.netlify.app/');
   const [minRate, setMinRate] = useState(profile.minRate || 80);
-  const [minRateCurrency, setMinRateCurrency] = useState<'RUB' | 'USD' | 'EUR' | 'KZT'>(
-    (profile.minRateCurrency as any) || 'USD'
+  const [minRateCurrency, setMinRateCurrency] = useState<'RUB' | 'USD' | 'EUR' | 'GBP' | 'KZT'>(
+    profile.minRateCurrency || 'USD'
   );
   const [selectedFormats, setSelectedFormats] = useState<Array<'YouTube' | 'Shorts/Reels' | 'Подкасты' | 'Реклама'>>(
     profile.formats && profile.formats.length > 0
@@ -155,7 +154,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                 />
                 <select
                   value={minRateCurrency}
-                  onChange={(e) => setMinRateCurrency(e.target.value as any)}
+                  onChange={(e) => setMinRateCurrency(e.target.value as 'RUB' | 'USD' | 'EUR' | 'KZT')}
                   className="bg-surface-2 text-text px-3 py-2 rounded-control border border-border text-sm focus:border-accent focus:outline-none"
                 >
                   <option value="USD">$ (USD)</option>
@@ -238,12 +237,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="flex items-center justify-between pt-3 border-t border-border">
           {step > 1 ? (
             <button
               type="button"
-              onClick={() => setStep((prev) => (prev - 1) as any)}
+              onClick={() => setStep((prev) => Math.max(1, prev - 1))}
               className="px-4 py-2 bg-surface-2 hover:bg-surface-3 text-text text-xs font-medium rounded-control flex items-center gap-1.5 transition-colors"
             >
               <ArrowLeft size={14} />
@@ -262,7 +260,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           {step < 3 ? (
             <button
               type="button"
-              onClick={() => setStep((prev) => (prev + 1) as any)}
+              onClick={() => setStep((prev) => Math.min(3, prev + 1))}
               className="px-5 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-control flex items-center gap-1.5 transition-colors"
             >
               Далее

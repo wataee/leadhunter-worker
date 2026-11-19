@@ -38,6 +38,7 @@ interface VacancyCardProps {
   onHide: () => void;
   onHideChannel?: (channel: string) => void;
   onToggleSeen?: () => void;
+  onMarkSeen?: () => void;
   highlightWords?: string[];
 }
 
@@ -48,6 +49,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   onHide,
   onHideChannel,
   onToggleSeen,
+  onMarkSeen,
 }) => {
   const profile = useSettingsStore((s) => s.profile);
   const autoTranslate = useSettingsStore((s) => s.autoTranslateVacancies ?? true);
@@ -57,9 +59,8 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   const [showClientBrief, setShowClientBrief] = useState(false);
   const [isExpandedText, setIsExpandedText] = useState(false);
 
-  // Translation state
   const detectedLang = useMemo(
-    () => (vacancy.detectedLang as any) || detectTextLanguage(vacancy.text),
+    () => vacancy.detectedLang || detectTextLanguage(vacancy.text),
     [vacancy.detectedLang, vacancy.text]
   );
   const shouldOfferTranslation = useMemo(
@@ -269,6 +270,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
             href={vacancy.url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => onMarkSeen?.()}
             className="text-xs font-bold text-accent hover:underline flex items-center gap-1 truncate"
           >
             <span>{displaySourceLabel}</span>
@@ -442,7 +444,11 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         {(translatedRu || vacancy.text).length > 250 && (
           <button
             type="button"
-            onClick={() => setIsExpandedText(!isExpandedText)}
+            onClick={() => {
+              const next = !isExpandedText;
+              setIsExpandedText(next);
+              if (next) onMarkSeen?.();
+            }}
             className="text-[11px] text-accent hover:underline font-medium pt-0.5"
           >
             {isExpandedText ? 'Свернуть' : 'Показать полностью'}

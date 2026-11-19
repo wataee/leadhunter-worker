@@ -39,10 +39,9 @@ const AppContent: React.FC = () => {
   const addLead = useLeadsStore((s) => s.addLead);
   const addToast = useToastStore((s) => s.addToast);
 
-  // Обработка ошибок загрузки чанков и Service Worker
   useEffect(() => {
     const handleChunkError = (e: ErrorEvent | PromiseRejectionEvent) => {
-      const msg = 'message' in e ? e.message : String((e as any).reason || '');
+      const msg = 'reason' in e ? String(e.reason || '') : e.message;
       if (/Failed to fetch dynamically imported module/i.test(msg) || /Loading chunk/i.test(msg)) {
         setHasChunkError(true);
       }

@@ -586,7 +586,7 @@ export const LeadDrawer: React.FC<LeadDrawerProps> = ({
                 <div className="flex gap-2">
                   <select
                     value={newTouchChannel}
-                    onChange={(e) => setNewTouchChannel(e.target.value as any)}
+                    onChange={(e) => setNewTouchChannel(e.target.value as 'Telegram' | 'Instagram' | 'Email' | 'Other')}
                     className="bg-surface-2 border border-border text-text text-xs rounded px-2 py-1"
                   >
                     <option value="Telegram">Telegram</option>

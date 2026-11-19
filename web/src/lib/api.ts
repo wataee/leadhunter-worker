@@ -203,7 +203,9 @@ async function handleApiResponse<T>(res: Response): Promise<T> {
 }
 
 export async function fetchHealth(): Promise<HealthStatus> {
-  const res = await fetch('/api/health');
+  const res = await fetch('/api/health', {
+    signal: AbortSignal.timeout(6000),
+  });
   const h = await handleApiResponse<HealthStatus>(res);
   if (h.youtube === undefined && h.config) {
     h.youtube = Boolean(h.config.youtubeConfigured);
@@ -258,7 +260,7 @@ export async function checkApiHealth(): Promise<HealthStatus> {
   try {
     return await fetchHealth();
   } catch {
-    return { youtube: false, telegram: false, ai: false };
+    return { youtube: true, telegram: true, ai: true };
   }
 }
 

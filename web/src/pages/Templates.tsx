@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTemplatesStore } from '../store/templatesStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
-import { TemplateType } from '../types';
+import { TemplateType, Lead } from '../types';
 import {
   substituteVariables,
   analyzePitchQuality,
@@ -40,8 +40,7 @@ export const Templates: React.FC = () => {
   const activeTemplate =
     templates.find((t) => t.id === selectedTemplateId) || templates[0];
 
-  // Dummy lead for live preview
-  const dummyLead = {
+  const dummyLead: Partial<Lead> = {
     name: 'Алексей Смирнов',
     channelUrl: 'https://youtube.com/@smirnov_realty',
     lastVideo: {
@@ -55,7 +54,7 @@ export const Templates: React.FC = () => {
   };
 
   const previewText = activeTemplate
-    ? substituteVariables(activeTemplate.body, dummyLead as any, profile)
+    ? substituteVariables(activeTemplate.body, dummyLead, profile)
     : '';
 
   const quality = analyzePitchQuality(previewText);

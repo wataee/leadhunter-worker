@@ -72,13 +72,12 @@ export const RateCalculatorModal: React.FC<RateCalculatorModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Калькулятор рентабельной ставки">
       <div className="space-y-5 text-text">
-        {/* Format & Duration */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-xs text-muted block mb-1">Формат видео</label>
             <select
               value={format}
-              onChange={(e) => setFormat(e.target.value as any)}
+              onChange={(e) => setFormat(e.target.value as 'reels' | 'youtube' | 'podcast')}
               className="w-full bg-surface-2 text-text px-3 py-2 rounded-control border border-border text-xs focus:border-accent focus:outline-none"
             >
               <option value="reels">Reels / Shorts / TikTok (&lt;60 сек)</option>
@@ -100,13 +99,12 @@ export const RateCalculatorModal: React.FC<RateCalculatorModalProps> = ({
           </div>
         </div>
 
-        {/* Complexity: Motion & Sound */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-xs text-muted block mb-1">Моушн и анимация</label>
             <select
               value={motionLevel}
-              onChange={(e) => setMotionLevel(e.target.value as any)}
+              onChange={(e) => setMotionLevel(e.target.value as 'none' | 'light' | 'heavy')}
               className="w-full bg-surface-2 text-text px-3 py-2 rounded-control border border-border text-xs focus:border-accent focus:outline-none"
             >
               <option value="none">Без моушна (нарезка + титры)</option>
@@ -119,7 +117,7 @@ export const RateCalculatorModal: React.FC<RateCalculatorModalProps> = ({
             <label className="text-xs text-muted block mb-1">Саунд-дизайн</label>
             <select
               value={soundDesign}
-              onChange={(e) => setSoundDesign(e.target.value as any)}
+              onChange={(e) => setSoundDesign(e.target.value as 'basic' | 'advanced')}
               className="w-full bg-surface-2 text-text px-3 py-2 rounded-control border border-border text-xs focus:border-accent focus:outline-none"
             >
               <option value="basic">Базовый (фоновая музыка + чистка голоса)</option>

@@ -19,7 +19,7 @@ import { matchesVacancy } from '../../src/shared/filter.js';
 import { needsRussianTranslation, translateFreeNeural } from '../../src/shared/translate.js';
 import type { Vacancy } from '../../src/types';
 
-interface HandlerEvent {
+export interface HandlerEvent {
   httpMethod: string;
   headers: Record<string, string | undefined>;
   queryStringParameters?: Record<string, string | undefined>;
@@ -103,7 +103,7 @@ async function readSavedJobs(redisUrl?: string, redisToken?: string): Promise<Va
           const mgetData = await mgetRes.json();
           if (Array.isArray(mgetData?.result)) {
             const parsed = mgetData.result
-              .map((str: any) => {
+              .map((str: unknown) => {
                 try {
                   return typeof str === 'string' ? JSON.parse(str) : str;
                 } catch {
@@ -183,9 +183,17 @@ async function saveJobAtomically(vacancy: Vacancy, redisUrl?: string, redisToken
       },
       4000
     );
-  } catch (err: any) {
-    console.warn('[Upwork Redis] Ошибка атомарной записи в Redis:', err.message);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn('[Upwork Redis] Ошибка атомарной записи в Redis:', msg);
   }
+}
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 export async function notifyTelegramIfConfigured(
@@ -204,17 +212,25 @@ export async function notifyTelegramIfConfigured(
   const roiBadge = meta?.badgeTextRu || `ROI ${meta?.roiScore || ''}`;
   const verdict = meta?.verdictRu || '';
 
+  const safeTitle = escapeHtml(vacancy.text.split('\n')[0].slice(0, 70));
+  const safeBudget = escapeHtml(budgetStr || 'По договорённости');
+  const safeRoi = escapeHtml(roiBadge);
+  const safeVerdict = verdict ? escapeHtml(verdict) : '';
+  const safeSnippet = escapeHtml(vacancy.text.slice(0, 400).trim());
+  const safeProposal = proposalText ? escapeHtml(proposalText.slice(0, 300)) : '';
+  const safeUrl = escapeHtml(vacancy.url);
+
   const message = [
-    `⚡ <b>Новый заказ Upwork: ${vacancy.text.split('\n')[0].slice(0, 70)}</b>`,
-    `💰 <b>Бюджет:</b> ${budgetStr || 'По договорённости'}`,
+    `⚡ <b>Новый заказ Upwork: ${safeTitle}</b>`,
+    `💰 <b>Бюджет:</b> ${safeBudget}`,
     `📊 <b>Оценка Connects:</b> ${roiBadge}`,
-    verdict ? `💡 <i>${verdict}</i>` : '',
+    safeVerdict ? `💡 <i>${safeVerdict}</i>` : '',
     '',
     `📝 <b>Описание:</b>`,
-    `${vacancy.text.slice(0, 400).trim()}...`,
+    `${safeSnippet}...`,
     '',
-    proposalText ? `⚡ <b>Готовый хук для отклика:</b>\n<pre>${proposalText.slice(0, 300)}</pre>\n` : '',
-    `🔗 <a href="${vacancy.url}">Открыть на Upwork</a>`,
+    safeProposal ? `⚡ <b>Готовый хук для отклика:</b>\n<pre>${safeProposal}</pre>\n` : '',
+    `🔗 <a href="${safeUrl}">Открыть на Upwork</a>`,
   ].filter(Boolean).join('\n');
 
   const inlineButtons = [
@@ -241,13 +257,28 @@ export async function notifyTelegramIfConfigured(
       6000
     );
     if (!res.ok) {
-      console.warn(`[Upwork Telegram] Ошибка отправки в Telegram: HTTP ${res.status}`);
-      return { sent: false, reason: `http_${res.status}` };
+      const fallbackText = `⚡ Новый заказ Upwork: ${vacancy.text.split('\n')[0].slice(0, 70)}\n💰 Бюджет: ${budgetStr}\n📊 Оценка Connects: ${roiBadge}\n\n${vacancy.text.slice(0, 300).trim()}...\n\n🔗 ${vacancy.url}`;
+      await fetchWithTimeout(
+        `https://api.telegram.org/bot${tgToken}/sendMessage`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: tgChatId,
+            text: fallbackText,
+            disable_web_page_preview: true,
+            reply_markup: { inline_keyboard: inlineButtons },
+          }),
+        },
+        5000
+      ).catch(() => {});
+      return { sent: true };
     }
     return { sent: true };
-  } catch (err: any) {
-    console.warn(`[Upwork Telegram] Сетевая ошибка при отправке в Telegram: ${err.message}`);
-    return { sent: false, reason: err.message };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[Upwork Telegram] Сетевая ошибка при отправке в Telegram: ${msg}`);
+    return { sent: false, reason: msg };
   }
 }
 

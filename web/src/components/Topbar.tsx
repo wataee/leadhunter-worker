@@ -12,36 +12,46 @@ export const Topbar: React.FC<TopbarProps> = ({ onToggleMobile }) => {
 
   useEffect(() => {
     let active = true;
-    checkApiHealth()
-      .then((h) => {
-        if (!active) return;
-        if (h && !h.telegram) {
-          // Quick retry before alarming user (eliminates cold-start timeouts)
-          setTimeout(() => {
-            if (!active) return;
-            checkApiHealth()
-              .then((retryH) => {
-                if (active) setHealth(retryH);
-              })
-              .catch(() => {
-                if (active) setHealth(h);
-              });
-          }, 2000);
-        } else {
-          setHealth(h);
-        }
-      })
-      .catch(() => {});
+
+    const verify = () => {
+      checkApiHealth()
+        .then((h) => {
+          if (!active) return;
+          if (h && h.telegram === false && h.telegramBot?.status === 'error') {
+            setTimeout(() => {
+              if (!active) return;
+              checkApiHealth()
+                .then((retryH) => {
+                  if (active) setHealth(retryH);
+                })
+                .catch(() => {
+                  if (active) setHealth(h);
+                });
+            }, 3000);
+          } else {
+            setHealth(h);
+          }
+        })
+        .catch(() => {});
+    };
+
+    verify();
+    const interval = setInterval(verify, 60_000);
+
     return () => {
       active = false;
+      clearInterval(interval);
     };
   }, []);
 
-  const hasTgIssue = health !== null && !health.telegram;
+  const hasTgIssue = Boolean(
+    health &&
+    health.telegram === false &&
+    health.telegramBot?.status === 'error'
+  );
 
   return (
     <>
-      {/* Mobile Topbar */}
       <header className="md:hidden h-14 bg-surface border-b border-border sticky top-0 z-20 flex items-center justify-between px-4">
         <button
           onClick={onToggleMobile}
@@ -73,7 +83,6 @@ export const Topbar: React.FC<TopbarProps> = ({ onToggleMobile }) => {
         )}
       </header>
 
-      {/* Desktop Alert: shown ONLY when there is a Telegram bot issue */}
       {hasTgIssue && (
         <div className="hidden md:flex fixed top-3 right-6 z-30">
           <Link

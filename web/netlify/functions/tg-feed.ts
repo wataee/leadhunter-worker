@@ -24,7 +24,7 @@ interface ParsedMessage {
   url: string;
   postedAt: string;
   views: string;
-  budget?: any;
+  budget?: { min: number | null; max: number | null; currency: string } | null;
   fromWorker?: boolean;
 }
 
@@ -257,7 +257,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   let channels: string[] = [];
   let before: string | undefined = undefined;
-  let parsedBody: any = {};
+  let parsedBody: { channels?: string[]; before?: string; action?: string } = {};
 
   if (event.httpMethod === 'POST') {
     try {

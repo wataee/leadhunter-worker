@@ -97,10 +97,12 @@ async function callGemini(
 
   try {
     return await Promise.any(models.map((m) => callModel(m)));
-  } catch (aggErr: any) {
-    const errorDetails = Array.isArray(aggErr?.errors)
-      ? aggErr.errors.map((e: any) => e.message).join(' | ')
-      : aggErr?.message || 'Все модели Gemini вернули ошибку';
+  } catch (aggErr: unknown) {
+    const errorDetails = aggErr instanceof AggregateError
+      ? aggErr.errors.map((e) => (e instanceof Error ? e.message : String(e))).join(' | ')
+      : aggErr instanceof Error
+      ? aggErr.message
+      : 'Все модели Gemini вернули ошибку';
     throw new Error(errorDetails);
   }
 }
@@ -271,24 +273,27 @@ export async function generateAiCompletion(
         const model = customConfig.model || GEMINI_DEFAULT_MODEL;
         const text = await callGemini(cleanSystem, cleanUser, key, model);
         return { text, provider: 'gemini', model };
-      } catch (err: any) {
-        attempts.push(`Пользовательский Gemini: ${err.message}`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        attempts.push(`Пользовательский Gemini: ${msg}`);
       }
     } else if (provider === 'groq') {
       try {
         const model = customConfig.model || GROQ_DEFAULT_MODEL;
         const text = await callGroq(cleanSystem, cleanUser, key, model);
         return { text, provider: 'groq', model };
-      } catch (err: any) {
-        attempts.push(`Пользовательский Groq: ${err.message}`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        attempts.push(`Пользовательский Groq: ${msg}`);
       }
     } else if (provider === 'openrouter') {
       try {
         const model = customConfig.model || OPENROUTER_DEFAULT_MODEL;
         const text = await callOpenRouter(cleanSystem, cleanUser, key, model);
         return { text, provider: 'openrouter', model };
-      } catch (err: any) {
-        attempts.push(`Пользовательский OpenRouter: ${err.message}`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        attempts.push(`Пользовательский OpenRouter: ${msg}`);
       }
     }
   }
@@ -298,51 +303,51 @@ export async function generateAiCompletion(
   const openRouterKey = process.env.OPENROUTER_API_KEY?.trim();
   const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim();
 
-  // 1. Gemini
   if (geminiKey) {
     const model = process.env.GEMINI_MODEL?.trim() || GEMINI_DEFAULT_MODEL;
     try {
       const text = await callGemini(cleanSystem, cleanUser, geminiKey, model);
       return { text, provider: 'gemini', model };
-    } catch (err: any) {
-      console.warn(`[AI Chain] Gemini (${model}) failed:`, err.message);
-      attempts.push(`Gemini: ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[AI Chain] Gemini (${model}) failed:`, msg);
+      attempts.push(`Gemini: ${msg}`);
     }
   }
 
-  // 2. Groq
   if (groqKey) {
     const model = process.env.GROQ_MODEL?.trim() || GROQ_DEFAULT_MODEL;
     try {
       const text = await callGroq(cleanSystem, cleanUser, groqKey, model);
       return { text, provider: 'groq', model };
-    } catch (err: any) {
-      console.warn(`[AI Chain] Groq (${model}) failed:`, err.message);
-      attempts.push(`Groq: ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[AI Chain] Groq (${model}) failed:`, msg);
+      attempts.push(`Groq: ${msg}`);
     }
   }
 
-  // 3. OpenRouter
   if (openRouterKey) {
     const model = process.env.OPENROUTER_MODEL?.trim() || OPENROUTER_DEFAULT_MODEL;
     try {
       const text = await callOpenRouter(cleanSystem, cleanUser, openRouterKey, model);
       return { text, provider: 'openrouter', model };
-    } catch (err: any) {
-      console.warn(`[AI Chain] OpenRouter (${model}) failed:`, err.message);
-      attempts.push(`OpenRouter: ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[AI Chain] OpenRouter (${model}) failed:`, msg);
+      attempts.push(`OpenRouter: ${msg}`);
     }
   }
 
-  // 4. Anthropic
   if (anthropicKey) {
     const model = process.env.ANTHROPIC_MODEL?.trim() || ANTHROPIC_DEFAULT_MODEL;
     try {
       const text = await callAnthropic(cleanSystem, cleanUser, anthropicKey, model);
       return { text, provider: 'anthropic', model };
-    } catch (err: any) {
-      console.warn(`[AI Chain] Anthropic (${model}) failed:`, err.message);
-      attempts.push(`Anthropic: ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[AI Chain] Anthropic (${model}) failed:`, msg);
+      attempts.push(`Anthropic: ${msg}`);
     }
   }
 

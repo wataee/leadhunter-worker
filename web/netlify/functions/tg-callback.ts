@@ -44,7 +44,11 @@ interface TelegramUpdate {
   callback_query?: TelegramCallbackQuery;
 }
 
-async function callRedisCommand(redisUrl: string, redisToken: string, command: any[]): Promise<{ ok: boolean; result?: any; error?: string }> {
+async function callRedisCommand(
+  redisUrl: string,
+  redisToken: string,
+  command: Array<string | number>
+): Promise<{ ok: boolean; result?: unknown; error?: string }> {
   try {
     const res = await fetchWithTimeout(
       redisUrl,
@@ -210,12 +214,11 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     } else if (data.startsWith('lead:')) {
       const leadId = data.slice(5).trim();
       if (leadId) {
-        let snapshot: any = null;
-        // 1. Пытаемся забрать сохранённый снимок
+        let snapshot: Record<string, unknown> | null = null;
         const snapRes = await callRedisCommand(redisUrl, redisToken, ['GET', `leadhunter:lead_snapshots:${leadId}`]);
         if (snapRes.ok && snapRes.result) {
           try {
-            snapshot = typeof snapRes.result === 'string' ? JSON.parse(snapRes.result) : snapRes.result;
+            snapshot = typeof snapRes.result === 'string' ? JSON.parse(snapRes.result) : (snapRes.result as Record<string, unknown>);
           } catch {}
         }
 
@@ -268,13 +271,13 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     } else if (data.startsWith('good:') || data.startsWith('bad:')) {
       const isGood = data.startsWith('good:');
       const leadId = isGood ? data.slice(5).trim() : data.slice(4).trim();
-      let snapshot: any = null;
+      let snapshot: Record<string, unknown> | null = null;
 
       if (leadId) {
         const snapRes = await callRedisCommand(redisUrl, redisToken, ['GET', `leadhunter:lead_snapshots:${leadId}`]);
         if (snapRes.ok && snapRes.result) {
           try {
-            snapshot = typeof snapRes.result === 'string' ? JSON.parse(snapRes.result) : snapRes.result;
+            snapshot = typeof snapRes.result === 'string' ? JSON.parse(snapRes.result) : (snapRes.result as Record<string, unknown>);
           } catch {}
         }
       }

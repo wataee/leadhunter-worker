@@ -31,12 +31,9 @@ export const Vacancies: React.FC = () => {
   const {
     sources,
     vacancies,
-    includeKeywords,
-    excludeKeywords,
     lastRefreshedAt,
     isLoading,
     lastError,
-    scrapeOffset,
     hiddenChannels,
     mergeNewVacancies,
     markSeen,
@@ -154,8 +151,8 @@ export const Vacancies: React.FC = () => {
     );
 
     eligibleChannels.sort((a, b) => {
-      const aScore = (a as any).recommended ? 2 : 1;
-      const bScore = (b as any).recommended ? 2 : 1;
+      const aScore = a.recommended ? 2 : 1;
+      const bScore = b.recommended ? 2 : 1;
       return bScore - aScore;
     });
 
@@ -188,7 +185,7 @@ export const Vacancies: React.FC = () => {
         const res = tgSettled.value;
         setLastError(null);
         for (const msg of res.allMessages) {
-          const isWorkerLead = Boolean((msg as any).fromWorker === true);
+          const isWorkerLead = Boolean(msg.fromWorker === true);
 
           const {
             relevance,
@@ -229,7 +226,7 @@ export const Vacancies: React.FC = () => {
               statusBadge,
               region,
               sourcePlatform: 'telegram',
-              budget: budget || (msg as any).budget || null,
+              budget: budget || msg.budget || null,
               fromWorker: isWorkerLead,
               seen: false,
               hidden: false,
@@ -754,6 +751,7 @@ export const Vacancies: React.FC = () => {
             <VacancyCard
               key={vac.id}
               vacancy={vac}
+              onMarkSeen={() => markSeen(vac.id)}
               onApply={() => {
                 markSeen(vac.id);
                 setActivePitchVacancy(vac);

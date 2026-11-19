@@ -45,23 +45,27 @@ describe('Zustand Persist Migration v6 -> v8', () => {
       sources: [{ username: 'moskva_rabota', region: 'RU', enabled: true }],
     };
 
-    const persistOptions = (useVacanciesStore as any).persist?.getOptions?.();
+    const persistOptions = useVacanciesStore.persist.getOptions();
     const migrateFn = persistOptions?.migrate;
 
     expect(typeof migrateFn).toBe('function');
+    if (!migrateFn) throw new Error('migrate function not defined');
 
-    const migrated = migrateFn(legacyState, 5);
+    const migrated = migrateFn(legacyState, 5) as {
+      savedPresets?: unknown;
+      filterFavoritesOnly?: unknown;
+      vacancies: Array<{ region?: string; isFavorite?: unknown }>;
+      sources: Array<{ region?: string }>;
+    };
 
     expect(migrated.savedPresets).toBeUndefined();
     expect(migrated.filterFavoritesOnly).toBeUndefined();
 
-    // RU vacancy removed, KZ & US preserved, isFavorite stripped
     expect(migrated.vacancies.length).toBe(2);
-    expect(migrated.vacancies.some((v: any) => v.region === 'RU')).toBe(false);
+    expect(migrated.vacancies.some((v) => v.region === 'RU')).toBe(false);
     expect(migrated.vacancies[0].isFavorite).toBeUndefined();
 
-    // RU legacy sources purged and replaced with EU/US/KZ catalog
-    expect(migrated.sources.some((s: any) => s.region === 'RU')).toBe(false);
+    expect(migrated.sources.some((s) => s.region === 'RU')).toBe(false);
     expect(migrated.sources.length).toBeGreaterThanOrEqual(200);
 
     // Favorite vacancy migrated to leadsStore
@@ -87,9 +91,10 @@ describe('Zustand Persist Migration v6 -> v8', () => {
       sources: [],
     };
 
-    const persistOptions = (useVacanciesStore as any).persist?.getOptions?.();
+    const persistOptions = useVacanciesStore.persist.getOptions();
     const migrateFn = persistOptions?.migrate;
-    const migrated = migrateFn(legacyV6State, 6);
+    if (!migrateFn) throw new Error('migrate function not defined');
+    const migrated = migrateFn(legacyV6State, 6) as { excludeKeywords: string[] };
 
     expect(migrated.excludeKeywords).toEqual(['моя_кастомная_стоп_фраза', 'крипта']);
   });

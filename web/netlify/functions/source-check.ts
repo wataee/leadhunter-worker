@@ -1,4 +1,4 @@
-import { jsonResponse, handleOptions, type NetlifyResponse } from './_shared/response';
+import { jsonResponse, handleOptions, fetchWithTimeout, type NetlifyResponse } from './_shared/response';
 import { requireAuth } from './_shared/auth';
 
 interface HandlerEvent {
@@ -79,12 +79,12 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   try {
     const previewUrl = `https://t.me/s/${username}`;
-    const previewRes = await fetch(previewUrl, {
+    const previewRes = await fetchWithTimeout(previewUrl, {
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       },
-    });
+    }, 5000);
 
     const previewHtml = await previewRes.text();
     const hasPreviewPosts = previewHtml.includes('tgme_widget_message');
@@ -151,12 +151,12 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
     // If no preview posts, check https://t.me/<username> to see if it's a group
     const infoUrl = `https://t.me/${username}`;
-    const infoRes = await fetch(infoUrl, {
+    const infoRes = await fetchWithTimeout(infoUrl, {
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       },
-    });
+    }, 5000);
 
     const infoHtml = await infoRes.text();
     const infoTitleMatch = infoHtml.match(
@@ -226,10 +226,11 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
       },
       origin
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
     return jsonResponse(
       500,
-      { error: `Ошибка при проверке источника: ${err.message}` },
+      { error: `Ошибка при проверке источника: ${msg}` },
       origin
     );
   }

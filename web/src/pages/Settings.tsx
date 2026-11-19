@@ -22,7 +22,6 @@ import {
   Mail,
   Copy,
   Check,
-  ExternalLink,
 } from 'lucide-react';
 
 export const Settings: React.FC = () => {
@@ -653,7 +652,7 @@ Client: Payment verified, United States, 4.95 Rating, over $25k spent. Requires 
               <label className="text-xs text-text-muted">Провайдер:</label>
               <select
                 value={customAiProvider || 'gemini'}
-                onChange={(e) => setCustomAiProvider(e.target.value as any)}
+                onChange={(e) => setCustomAiProvider(e.target.value as 'gemini' | 'groq' | 'openrouter')}
                 className="bg-surface border border-border rounded-control px-2.5 py-1 text-xs text-text focus:outline-none focus:border-accent"
               >
                 <option value="gemini">Google Gemini (AIzaSy...)</option>

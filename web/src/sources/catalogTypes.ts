@@ -25,6 +25,7 @@ export interface SourceItem {
   description: string; // short summary
   subscribers?: number;
   postsPerWeek?: number;
+  count7d?: number;
   lastPostAt?: string; // ISO 8601
   vacancyRate?: number; // 0..1
   qualityScore: number; // 0..100

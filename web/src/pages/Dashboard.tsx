@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLeadsStore } from '../store/leadsStore';
 import { useVacanciesStore } from '../store/vacanciesStore';
-import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
 import { Lead, Vacancy } from '../types';
 import { PitchGeneratorModal } from '../components/PitchGeneratorModal';
@@ -17,8 +16,6 @@ import {
   Send,
   ArrowRight,
   Activity,
-  Sparkles,
-  Flame,
   Zap,
   Cloud,
 } from 'lucide-react';
@@ -32,7 +29,6 @@ export const Dashboard: React.FC = () => {
 
   const vacancies = useVacanciesStore((s) => s.vacancies);
   const markSeen = useVacanciesStore((s) => s.markSeen);
-  const profile = useSettingsStore((s) => s.profile);
   const addToast = useToastStore((s) => s.addToast);
 
   const [activePitchLead, setActivePitchLead] = useState<Lead | null>(null);
