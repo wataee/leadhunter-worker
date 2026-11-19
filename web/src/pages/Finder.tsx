@@ -2,7 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useLeadsStore } from '../store/leadsStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { useToastStore } from '../store/toastStore';
-import { searchYouTubeChannels, YouTubeSearchResponse, scoreLeadsWithAi, checkApiHealth } from '../lib/api';
+import {
+  searchYouTubeChannels,
+  searchInstagramProfiles,
+  YouTubeSearchResponse,
+  scoreLeadsWithAi,
+  checkApiHealth,
+} from '../lib/api';
 import { formatDate } from '../lib/time';
 import { TierBadge } from '../components/TierBadge';
 import { ScoreBar } from '../components/ScoreBar';
@@ -78,6 +84,9 @@ export const Finder: React.FC = () => {
   const aiTopNCount = useSettingsStore((s) => s.aiTopNCount);
   const getAiExamples = useLeadsStore((s) => s.getAiExamples);
   const addToast = useToastStore((s) => s.addToast);
+
+  // Platform selector: YouTube or Instagram
+  const [platform, setPlatform] = useState<'youtube' | 'instagram'>('youtube');
 
   // Form states
   const [query, setQuery] = useState('недвижимость алматы');
@@ -328,7 +337,7 @@ export const Finder: React.FC = () => {
         tier: channel.tier,
         score: channel.score,
         ruleScore: channel.ruleScore ?? channel.score,
-        source: 'YouTube Search',
+        source: channel.source || (platform === 'instagram' ? 'Instagram' : 'YouTube Search'),
         email: channel.email,
         telegram: channel.telegram,
         instagram: channel.instagram,
@@ -381,12 +390,18 @@ export const Finder: React.FC = () => {
     setSelectedIds([]);
     addSearchHistory(cleanQuery);
 
-    setProgressStep('Ищу каналы на YouTube...');
+    const searchFn = platform === 'instagram' ? searchInstagramProfiles : searchYouTubeChannels;
+    setProgressStep(platform === 'instagram' ? 'Ищу экспертов и бизнес в Instagram...' : 'Ищу каналы на YouTube...');
     try {
-      setTimeout(() => setProgressStep('Проверяю статистику и подписчиков...'), 800);
-      setTimeout(() => setProgressStep('Анализирую последние видео и контакты...'), 1800);
+      if (platform === 'youtube') {
+        setTimeout(() => setProgressStep('Проверяю статистику и подписчиков...'), 800);
+        setTimeout(() => setProgressStep('Анализирую последние видео и контакты...'), 1800);
+      } else {
+        setTimeout(() => setProgressStep('Оцениваю Reels и частоту контента...'), 600);
+        setTimeout(() => setProgressStep('Генерирую персональные питчи и deep-link...'), 1200);
+      }
 
-      const res = await searchYouTubeChannels({
+      const res = await searchFn({
         query: cleanQuery,
         minSubs,
         maxSubs,
@@ -405,7 +420,7 @@ export const Finder: React.FC = () => {
       }));
       setResults(initialized);
 
-      if (res.channels.length > 0 && useAiQualification && aiEnabled) {
+      if (res.channels.length > 0 && useAiQualification && aiEnabled && platform === 'youtube') {
         triggerAiQualification(initialized);
       }
 
@@ -418,16 +433,18 @@ export const Finder: React.FC = () => {
       } else {
         addToast({
           type: 'success',
-          title: `Найдено ${res.channels.length} каналов`,
-          message: `Израсходовано ~${res.quotaUsed} единиц квоты YouTube API.`,
+          title: `Найдено ${res.channels.length} ${platform === 'instagram' ? 'профилей' : 'каналов'}`,
+          message: platform === 'instagram'
+            ? 'Профили оценены и готовы к персональному исходящему контакту.'
+            : `Израсходовано ~${res.quotaUsed} единиц квоты YouTube API.`,
         });
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Ошибка при поиске на YouTube';
+      const msg = err instanceof Error ? err.message : `Ошибка при поиске (${platform})`;
       setSearchError(msg);
       addToast({
         type: 'error',
-        title: 'Ошибка YouTube API',
+        title: `Ошибка API (${platform})`,
         message: msg,
       });
     } finally {
@@ -518,7 +535,7 @@ export const Finder: React.FC = () => {
         tier: c.tier,
         score: c.score,
         ruleScore: c.ruleScore ?? c.score,
-        source: 'YouTube Search',
+        source: c.source || (platform === 'instagram' ? 'Instagram' : 'YouTube Search'),
         email: c.email,
         telegram: c.telegram,
         instagram: c.instagram,
@@ -578,14 +595,52 @@ export const Finder: React.FC = () => {
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
+        <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-xl md:text-2xl font-bold text-text flex items-center gap-2">
             <Search size={22} className="text-accent" />
-            <span>Поиск каналов</span>
+            <span>{platform === 'instagram' ? 'Поиск клиентов в Instagram' : 'Поиск каналов на YouTube'}</span>
           </h1>
+
+          {/* Platform Toggle */}
+          <div className="inline-flex rounded-control border border-border p-0.5 bg-surface-2 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setPlatform('youtube');
+                if (region === 'KZ') setQuery(DEFAULT_CHIPS_KZ[0]);
+                else if (region === 'US') setQuery(DEFAULT_CHIPS_US[0]);
+                else setQuery(DEFAULT_CHIPS_EU[0]);
+              }}
+              className={`px-2.5 py-1 rounded-control flex items-center gap-1.5 transition-colors ${
+                platform === 'youtube'
+                  ? 'bg-surface text-text font-medium shadow-sm'
+                  : 'text-text-muted hover:text-text'
+              }`}
+            >
+              <Play size={13} className={platform === 'youtube' ? 'text-red-500 fill-current' : ''} />
+              <span>YouTube</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPlatform('instagram');
+                if (region === 'KZ') setQuery('недвижимость алматы');
+                else if (region === 'US') setQuery('saas founder');
+                else setQuery('fintech');
+              }}
+              className={`px-2.5 py-1 rounded-control flex items-center gap-1.5 transition-colors ${
+                platform === 'instagram'
+                  ? 'bg-surface text-text font-medium shadow-sm'
+                  : 'text-text-muted hover:text-text'
+              }`}
+            >
+              <Instagram size={13} className={platform === 'instagram' ? 'text-pink-500' : ''} />
+              <span>Instagram</span>
+            </button>
+          </div>
         </div>
 
-        {sessionQuotaUsed > 7000 && (
+        {platform === 'youtube' && sessionQuotaUsed > 7000 && (
           <div className="flex items-center gap-2 text-xs font-mono text-warning bg-warning/10 border border-warning/30 px-3 py-1.5 rounded-control">
             <span>Квота YouTube: {sessionQuotaUsed} / 10 000</span>
           </div>

@@ -272,6 +272,16 @@ export async function searchYouTubeChannels(params: YouTubeSearchParams): Promis
   return handleApiResponse<YouTubeSearchResponse>(res);
 }
 
+export async function searchInstagramProfiles(params: YouTubeSearchParams): Promise<YouTubeSearchResponse> {
+  const res = await fetch('/api/instagram-search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+
+  return handleApiResponse<YouTubeSearchResponse>(res);
+}
+
 export async function fetchTelegramFeed(channels: string[], before?: string): Promise<TgFeedResponse> {
   const res = await fetch('/api/tg-feed', {
     method: 'POST',
