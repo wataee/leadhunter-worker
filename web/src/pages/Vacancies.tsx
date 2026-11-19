@@ -18,6 +18,7 @@ import { FlagEU, FlagUS, FlagKZ } from '../components/RegionBadge';
 import {
   VacancyFiltersBar,
   FormatFilter,
+  SeenFilter,
 } from '../components/vacancies/VacancyFiltersBar';
 import { Zap } from 'lucide-react';
 
@@ -39,6 +40,8 @@ export const Vacancies: React.FC = () => {
     hiddenChannels,
     mergeNewVacancies,
     markSeen,
+    markUnseen,
+    markAllSeen,
     hideVacancy,
     hideChannel,
     setLoading,
@@ -96,6 +99,18 @@ export const Vacancies: React.FC = () => {
   // 2 URL Filters: Hot (<20 min) and Format
   const hotOnly = searchParams.get('hot') === '1';
   const formatFilter = (searchParams.get('format') || 'all') as FormatFilter;
+  const rawSeen = searchParams.get('seen');
+  const seenFilter: SeenFilter = rawSeen === 'seen' ? 'seen' : rawSeen === 'all' ? 'all' : 'unseen';
+
+  const setSeenFilter = (sf: SeenFilter) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (sf === 'seen') next.set('seen', 'seen');
+      else if (sf === 'all') next.set('seen', 'all');
+      else next.delete('seen');
+      return next;
+    });
+  };
 
   const setHotOnly = (val: boolean) => {
     setSearchParams((prev) => {
@@ -434,13 +449,37 @@ export const Vacancies: React.FC = () => {
     );
   }, [filteredVacancies]);
 
-  const normalVacancies = useMemo(
+  const normalClustered = useMemo(
     () => clusteredVacancies.filter((v) => v.qualityTier !== 'shady'),
     [clusteredVacancies]
   );
+
+  const unseenCount = useMemo(
+    () => normalClustered.filter((v) => !v.seen).length,
+    [normalClustered]
+  );
+  const seenCount = useMemo(
+    () => normalClustered.filter((v) => Boolean(v.seen)).length,
+    [normalClustered]
+  );
+
+  const seenFilteredVacancies = useMemo(() => {
+    if (seenFilter === 'unseen') {
+      return clusteredVacancies.filter((v) => !v.seen);
+    }
+    if (seenFilter === 'seen') {
+      return clusteredVacancies.filter((v) => Boolean(v.seen));
+    }
+    return clusteredVacancies;
+  }, [clusteredVacancies, seenFilter]);
+
+  const normalVacancies = useMemo(
+    () => seenFilteredVacancies.filter((v) => v.qualityTier !== 'shady'),
+    [seenFilteredVacancies]
+  );
   const shadyVacancies = useMemo(
-    () => clusteredVacancies.filter((v) => v.qualityTier === 'shady'),
-    [clusteredVacancies]
+    () => seenFilteredVacancies.filter((v) => v.qualityTier === 'shady'),
+    [seenFilteredVacancies]
   );
 
   const displayedList = showShady ? clusteredVacancies : normalVacancies;
@@ -610,6 +649,18 @@ export const Vacancies: React.FC = () => {
 
       {/* Filters & Translation Toggle */}
       <VacancyFiltersBar
+        seenFilter={seenFilter}
+        onChangeSeenFilter={setSeenFilter}
+        unseenCount={unseenCount}
+        seenCount={seenCount}
+        totalCount={normalClustered.length}
+        onMarkAllSeen={() => {
+          markAllSeen();
+          addToast({
+            type: 'success',
+            message: 'Все вакансии отмечены как просмотренные',
+          });
+        }}
         hotOnly={hotOnly}
         onToggleHotOnly={setHotOnly}
         formatFilter={formatFilter}
@@ -642,6 +693,36 @@ export const Vacancies: React.FC = () => {
                 >
                   Повторить запрос
                 </button>
+              </div>
+            ) : seenFilter === 'unseen' ? (
+              <div className="space-y-3">
+                <p className="text-sm text-text-muted">
+                  Все подходящие вакансии просмотрены. Новые появятся автоматически при поступлении из каналов.
+                </p>
+                {seenCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setSeenFilter('seen')}
+                    className="px-4 py-2 bg-surface-2 hover:bg-surface-3 text-text text-xs font-semibold rounded-control border border-border transition-colors"
+                  >
+                    Показать просмотренные ({seenCount})
+                  </button>
+                )}
+              </div>
+            ) : seenFilter === 'seen' ? (
+              <div className="space-y-3">
+                <p className="text-sm text-text-muted">
+                  Вы пока не отметили ни одной вакансии как просмотренной.
+                </p>
+                {unseenCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setSeenFilter('unseen')}
+                    className="px-4 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-semibold rounded-control transition-colors"
+                  >
+                    Вернуться к новым ({unseenCount})
+                  </button>
+                )}
               </div>
             ) : (
               <>
@@ -677,7 +758,25 @@ export const Vacancies: React.FC = () => {
                 markSeen(vac.id);
                 setActivePitchVacancy(vac);
               }}
-              onConvertToLead={() => handleConvertToLead(vac)}
+              onConvertToLead={() => {
+                markSeen(vac.id);
+                handleConvertToLead(vac);
+              }}
+              onToggleSeen={() => {
+                if (vac.seen) {
+                  markUnseen(vac.id);
+                  addToast({
+                    type: 'info',
+                    message: 'Вакансия возвращена в новые',
+                  });
+                } else {
+                  markSeen(vac.id);
+                  addToast({
+                    type: 'info',
+                    message: 'Вакансия перемещена в просмотренные',
+                  });
+                }
+              }}
               onHide={() => hideVacancy(vac.id)}
               onHideChannel={(ch) => {
                 hideChannel(ch);

@@ -5,11 +5,18 @@ interface HandlerEvent {
   headers: Record<string, string | undefined>;
 }
 
+let cachedHealth: { data: any; expiresAt: number } | null = null;
+
 export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
   const origin = event.headers?.origin || event.headers?.Origin;
 
   if (event.httpMethod === 'OPTIONS') {
     return handleOptions(origin);
+  }
+
+  // Fast 15s in-memory cache to prevent transient timeouts and Telegram API rate-limiting
+  if (cachedHealth && Date.now() < cachedHealth.expiresAt) {
+    return jsonResponse(200, cachedHealth.data, origin);
   }
 
   const token = process.env.TELEGRAM_BOT_TOKEN?.trim() || '';
@@ -30,7 +37,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   if (token) {
     try {
-      const res = await fetchWithTimeout(`https://api.telegram.org/bot${token}/getMe`, {}, 3000);
+      const res = await fetchWithTimeout(`https://api.telegram.org/bot${token}/getMe`, {}, 6000);
       const data = await res.json().catch(() => null);
       if (res.ok && data?.ok && data.result) {
         telegramBot = {
@@ -46,7 +53,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     } catch (err: unknown) {
       telegramBot = {
         status: 'error',
-        message: err instanceof Error ? err.message : 'Timeout 3s',
+        message: err instanceof Error ? err.message : 'Timeout 6s',
       };
     }
   }
@@ -64,7 +71,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   if (token) {
     try {
-      const res = await fetchWithTimeout(`https://api.telegram.org/bot${token}/getWebhookInfo`, {}, 3000);
+      const res = await fetchWithTimeout(`https://api.telegram.org/bot${token}/getWebhookInfo`, {}, 6000);
       const data = await res.json().catch(() => null);
       if (res.ok && data?.ok && data.result) {
         const info = data.result;
@@ -83,7 +90,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     } catch (err: unknown) {
       telegramWebhook = {
         status: 'error',
-        message: err instanceof Error ? err.message : 'Timeout 3s',
+        message: err instanceof Error ? err.message : 'Timeout 6s',
       };
     }
   }
@@ -107,7 +114,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
           },
           body: JSON.stringify(['PING']),
         },
-        3000
+        5000
       );
       if (res.ok) {
         redis = {
@@ -123,7 +130,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     } catch (err: unknown) {
       redis = {
         status: 'error',
-        message: err instanceof Error ? err.message : 'Timeout 3s',
+        message: err instanceof Error ? err.message : 'Timeout 5s',
       };
     }
   }
@@ -136,7 +143,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
 
   if (workerUrl) {
     try {
-      const res = await fetchWithTimeout(`${workerUrl.replace(/\/$/, '')}/`, {}, 3000);
+      const res = await fetchWithTimeout(`${workerUrl.replace(/\/$/, '')}/`, {}, 6000);
       const data = await res.json().catch(() => null);
       if (res.ok) {
         worker = {
@@ -152,7 +159,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     } catch (err: unknown) {
       worker = {
         status: 'error',
-        message: err instanceof Error ? err.message : 'Timeout 3s',
+        message: err instanceof Error ? err.message : 'Timeout 6s',
       };
     }
   }
@@ -192,28 +199,31 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     overallStatus = 'degraded';
   }
 
-  return jsonResponse(
-    200,
-    {
-      status: overallStatus,
-      youtube: youtubeConfigured,
-      telegram: telegramBot.status === 'ok',
-      ai: aiConfigured,
-      providers,
-      models,
-      telegramBot,
-      telegramWebhook,
-      redis,
-      worker,
-      config: {
-        authConfigured,
-        sessionSecretConfigured,
-        webhookSecretConfigured,
-        telegramChatIdConfigured,
-        youtubeConfigured,
-      },
-      timestamp: new Date().toISOString(),
+  const resultData = {
+    status: overallStatus,
+    youtube: youtubeConfigured,
+    telegram: telegramBot.status === 'ok',
+    ai: aiConfigured,
+    providers,
+    models,
+    telegramBot,
+    telegramWebhook,
+    redis,
+    worker,
+    config: {
+      authConfigured,
+      sessionSecretConfigured,
+      webhookSecretConfigured,
+      telegramChatIdConfigured,
+      youtubeConfigured,
     },
-    origin
-  );
+    timestamp: new Date().toISOString(),
+  };
+
+  cachedHealth = {
+    data: resultData,
+    expiresAt: Date.now() + 15_000,
+  };
+
+  return jsonResponse(200, resultData, origin);
 }

@@ -11,9 +11,30 @@ export const Topbar: React.FC<TopbarProps> = ({ onToggleMobile }) => {
   const [health, setHealth] = useState<HealthStatus | null>(null);
 
   useEffect(() => {
+    let active = true;
     checkApiHealth()
-      .then((h) => setHealth(h))
+      .then((h) => {
+        if (!active) return;
+        if (h && !h.telegram) {
+          // Quick retry before alarming user (eliminates cold-start timeouts)
+          setTimeout(() => {
+            if (!active) return;
+            checkApiHealth()
+              .then((retryH) => {
+                if (active) setHealth(retryH);
+              })
+              .catch(() => {
+                if (active) setHealth(h);
+              });
+          }, 2000);
+        } else {
+          setHealth(h);
+        }
+      })
       .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, []);
 
   const hasTgIssue = health !== null && !health.telegram;

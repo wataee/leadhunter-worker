@@ -369,11 +369,9 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     ingestedVacancies.push(vacancy);
     await saveJobAtomically(vacancy, redisUrl, redisToken);
 
-    // Send instant Telegram notification if high quality
-    if (roi.roiScore >= 45) {
-      const proposal = generateUpworkProposal(job, {});
-      await notifyTelegramIfConfigured(vacancy, proposal?.coverLetter || proposal?.previewAnalysis?.first200Chars || '');
-    }
+    // Send instant Telegram notification for all matching incoming Upwork jobs
+    const proposal = generateUpworkProposal(job, {});
+    await notifyTelegramIfConfigured(vacancy, proposal?.coverLetter || proposal?.previewAnalysis?.first200Chars || '');
   }
 
   return jsonResponse(

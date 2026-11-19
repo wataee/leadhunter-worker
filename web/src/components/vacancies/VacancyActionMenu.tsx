@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MoreVertical, EyeOff, Ban, Calculator, FileQuestion } from 'lucide-react';
+import { MoreVertical, EyeOff, Ban, Calculator, FileQuestion, CheckCircle2, RotateCcw } from 'lucide-react';
 
 interface VacancyActionMenuProps {
   channel: string;
+  isSeen?: boolean;
+  onToggleSeen?: () => void;
   onHide: () => void;
   onHideChannel?: () => void;
   onOpenCalculator: () => void;
@@ -11,6 +13,8 @@ interface VacancyActionMenuProps {
 
 export const VacancyActionMenu: React.FC<VacancyActionMenuProps> = ({
   channel,
+  isSeen = false,
+  onToggleSeen,
   onHide,
   onHideChannel,
   onOpenCalculator,
@@ -47,6 +51,29 @@ export const VacancyActionMenu: React.FC<VacancyActionMenuProps> = ({
 
       {isOpen && (
         <div className="absolute right-0 bottom-full mb-1 sm:bottom-auto sm:top-full sm:mt-1 w-52 bg-surface border border-border rounded-control shadow-xl z-30 py-1 text-xs">
+          {onToggleSeen && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                onToggleSeen();
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-text-muted hover:text-text hover:bg-surface-2 text-left transition-colors"
+            >
+              {isSeen ? (
+                <>
+                  <RotateCcw size={14} className="text-amber-400" />
+                  <span>Вернуть в непросмотренные</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={14} className="text-emerald-400" />
+                  <span>Отметить как просмотренное</span>
+                </>
+              )}
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => {

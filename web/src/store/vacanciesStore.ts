@@ -51,6 +51,8 @@ interface VacanciesState {
   setVacancies: (vacancies: Vacancy[]) => void;
   mergeNewVacancies: (incoming: Vacancy[]) => { newCount: number; hotCount: number };
   markSeen: (id: string) => void;
+  markUnseen: (id: string) => void;
+  markAllSeen: () => void;
   hideVacancy: (id: string) => void;
   hideChannel: (channel: string) => void;
   unhideChannel: (channel: string) => void;
@@ -496,6 +498,16 @@ export const useVacanciesStore = create<VacanciesState>()(
       markSeen: (id) =>
         set((state) => ({
           vacancies: state.vacancies.map((v) => (v.id === id ? { ...v, seen: true } : v)),
+        })),
+
+      markUnseen: (id) =>
+        set((state) => ({
+          vacancies: state.vacancies.map((v) => (v.id === id ? { ...v, seen: false } : v)),
+        })),
+
+      markAllSeen: () =>
+        set((state) => ({
+          vacancies: state.vacancies.map((v) => ({ ...v, seen: true })),
         })),
 
       hideVacancy: (id) =>
