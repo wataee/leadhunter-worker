@@ -106,6 +106,32 @@ if (!rawWebhookUrl) {
 
 const ALLOWED_CHATS_FILE = process.env.ALLOWED_CHATS_FILE?.trim() || '';
 let allowedChatsSet = null;
+const channelPriorityMap = new Map();
+
+function updateChannelPriorityFromCatalog() {
+  try {
+    const catalogPath = './web/src/shared/sources.catalog.json';
+    if (fs.existsSync(catalogPath)) {
+      const catalogData = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+      if (Array.isArray(catalogData)) {
+        catalogData.forEach((item) => {
+          if (item.username) {
+            const uname = item.username.toLowerCase().replace(/^@/, '');
+            const gigRate = typeof item.gigRate === 'number' ? item.gigRate : (item.recommended ? 0.2 : 0.02);
+            channelPriorityMap.set(uname, {
+              gigRate,
+              recommended: !!item.recommended,
+              qualityScore: item.qualityScore || 50,
+              enabled: item.enabled !== false && item.status !== 'stale' && item.status !== 'dead',
+            });
+          }
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[AllowedChats] Ошибка чтения метаданных каталога:', err.message);
+  }
+}
 
 // B2: Вывод размера и первых 10 каналов в лог при старте
 function logAllowedChatsSummary(chats) {
@@ -172,6 +198,7 @@ function loadAllowedChats() {
 
 // Initial load
 loadAllowedChats();
+updateChannelPriorityFromCatalog();
 
 if (ALLOWED_CHATS_FILE) {
   setInterval(loadAllowedChats, 10 * 60 * 1000);
@@ -679,8 +706,10 @@ async function processIncomingMessage(message, chatMeta = {}) {
   await dispatchLeadNotification(leadItem);
 }
 
-// B2: Fallback-поллинг каждые 3 минуты (round-robin по 20 каналов с задержкой 1.5с)
-let channelPollIndex = 0;
+// B2: Приоритетный Fallback-поллинг каждые 3 минуты (min_id + storage-прогресс + приоритет gigRate)
+let highPriorityIndex = 0;
+let mediumPriorityIndex = 0;
+let lowPriorityIndex = 0;
 const lastPolledIdMap = new Map();
 const disabledPollChannels = new Map();
 
@@ -697,25 +726,88 @@ async function runPollingCycle() {
   if (validChannels.length === 0) return;
 
   pollerLastRunAt = new Date().toISOString();
-  const batchSize = Math.min(20, validChannels.length);
-  const batch = [];
-  for (let i = 0; i < batchSize; i++) {
-    batch.push(validChannels[(channelPollIndex + i) % validChannels.length]);
+
+  // Приоритетная группировка каналов по gigRate и qualityScore
+  const highPriority = [];
+  const mediumPriority = [];
+  const lowPriority = [];
+
+  for (const ch of validChannels) {
+    const meta = channelPriorityMap.get(ch);
+    const gigRate = meta?.gigRate || 0;
+    if (meta?.recommended || gigRate >= 0.08) {
+      highPriority.push(ch);
+    } else if (gigRate > 0 || (meta?.qualityScore || 0) >= 60) {
+      mediumPriority.push(ch);
+    } else {
+      lowPriority.push(ch);
+    }
   }
-  channelPollIndex = (channelPollIndex + batchSize) % validChannels.length;
+
+  // Сборка батча до 20 каналов: 10 High, 6 Medium, 4 Low
+  const batch = [];
+  function pickFromGroup(group, count, getIndex, setIndex) {
+    if (group.length === 0) return;
+    const take = Math.min(count, group.length);
+    const idx = getIndex();
+    for (let i = 0; i < take; i++) {
+      const ch = group[(idx + i) % group.length];
+      if (!batch.includes(ch)) batch.push(ch);
+    }
+    setIndex((idx + take) % group.length);
+  }
+
+  pickFromGroup(highPriority, 10, () => highPriorityIndex, (v) => { highPriorityIndex = v; });
+  pickFromGroup(mediumPriority, 6, () => mediumPriorityIndex, (v) => { mediumPriorityIndex = v; });
+  pickFromGroup(lowPriority, 4, () => lowPriorityIndex, (v) => { lowPriorityIndex = v; });
+
+  // Добор до 20 каналов при наличии свободного места
+  if (batch.length < 20 && validChannels.length > batch.length) {
+    for (const ch of validChannels) {
+      if (!batch.includes(ch)) {
+        batch.push(ch);
+        if (batch.length >= 20) break;
+      }
+    }
+  }
 
   for (const username of batch) {
     if (!telegramConnected || !client) break;
     await new Promise((r) => setTimeout(r, 1500));
 
     try {
-      const msgs = await client.getMessages(username, { limit: 15 });
+      // Восстанавливаем сохранённый lastId из storage
+      let lastId = lastPolledIdMap.get(username);
+      if (lastId === undefined && storage?.getLastPolledId) {
+        lastId = (await storage.getLastPolledId(username)) || 0;
+        lastPolledIdMap.set(username, lastId);
+      }
+      lastId = lastId || 0;
+
+      // Опрос с minId: Telegram вернёт только свежие сообщения
+      const pollOpts = { limit: 25 };
+      if (lastId > 0) {
+        pollOpts.minId = lastId;
+      }
+
+      const msgs = await client.getMessages(username, pollOpts);
       pollerChannelsOk++;
-      const lastId = lastPolledIdMap.get(username) || 0;
       let maxId = lastId;
 
+      const maxPostAgeMs = MAX_POST_AGE_HOURS * 3600 * 1000;
+      const now = Date.now();
+
       const newMsgs = msgs
-        .filter((m) => m && m.id && m.text && m.id > lastId)
+        .filter((m) => {
+          if (!m || !m.id || !m.text) return false;
+          if (m.id <= lastId) return false;
+          // Если это первая загрузка канала (lastId === 0), проверяем возраст поста
+          if (lastId === 0 && m.date) {
+            const postTime = m.date * 1000;
+            if (now - postTime > maxPostAgeMs) return false;
+          }
+          return true;
+        })
         .reverse();
 
       for (const msg of newMsgs) {
@@ -727,8 +819,18 @@ async function runPollingCycle() {
         });
       }
 
+      // Если в выборке msgs были сообщения с id > maxId, обновляем прогресс
+      for (const m of msgs) {
+        if (m && m.id && m.id > maxId) {
+          maxId = m.id;
+        }
+      }
+
       if (maxId > lastId) {
         lastPolledIdMap.set(username, maxId);
+        if (storage?.setLastPolledId) {
+          await storage.setLastPolledId(username, maxId);
+        }
       }
     } catch (err) {
       pollerChannelsFailed++;

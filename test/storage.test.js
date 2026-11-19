@@ -81,3 +81,30 @@ test('E4 / C2: Permanent 4xx errors are not retried', async () => {
   assert.equal(result500, false);
   assert.equal(attempts, 3, 'HTTP 500 must be retried 3 times');
 });
+
+test('Task 3: storage persists and retrieves lastPolledId across restarts', async () => {
+  const testDir = 'data_test_poller_' + Date.now();
+  const fileDriver = new FileStorageDriver(testDir);
+
+  assert.equal(fileDriver.getLastPolledId('premiere_pro'), 0, 'Initial lastPolledId should be 0');
+
+  fileDriver.setLastPolledId('premiere_pro', 12345);
+  assert.equal(fileDriver.getLastPolledId('premiere_pro'), 12345, 'Updated lastPolledId should be 12345');
+
+  // Should not decrement
+  fileDriver.setLastPolledId('premiere_pro', 10000);
+  assert.equal(fileDriver.getLastPolledId('premiere_pro'), 12345, 'lastPolledId should not decrement');
+
+  // Case insensitivity
+  assert.equal(fileDriver.getLastPolledId('PREMIERE_PRO'), 12345, 'channel should be case-insensitive');
+
+  // New instance simulating restart from same directory
+  const reloadedDriver = new FileStorageDriver(testDir);
+  assert.equal(reloadedDriver.getLastPolledId('premiere_pro'), 12345, 'reloaded driver should preserve lastPolledId');
+
+  // Clean up test dir
+  try {
+    const fs = await import('fs');
+    fs.rmSync(testDir, { recursive: true, force: true });
+  } catch {}
+});

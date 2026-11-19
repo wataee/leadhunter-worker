@@ -48,6 +48,10 @@ test('6.5 Sources Catalog validation suite (EU / US / KZ, 0 RU)', () => {
     assert.ok(item.language, `Item #${index} missing language`);
     assert.ok(item.description, `Item #${index} missing description`);
     assert.ok(typeof item.qualityScore === 'number', `Item #${index} qualityScore must be number`);
+    assert.ok(typeof item.gigRate === 'number', `Item #${index} gigRate must be number`);
+    assert.ok(typeof item.gigsPerWeek === 'number', `Item #${index} gigsPerWeek must be number`);
+    assert.ok(typeof item.lastEvaluatedAt === 'string', `Item #${index} lastEvaluatedAt must be string`);
+    assert.ok(typeof item.statusReason === 'string', `Item #${index} statusReason must be string`);
     assert.ok(item.status, `Item #${index} missing status`);
     assert.ok(Array.isArray(item.tags) && item.tags.length > 0, `Item #${index} tags must be non-empty array`);
     assert.ok(typeof item.recommended === 'boolean', `Item #${index} recommended must be boolean`);

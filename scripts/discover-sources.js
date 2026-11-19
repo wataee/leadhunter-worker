@@ -27,10 +27,12 @@ if (!apiId || !apiHash || !sessionString) {
 
 const args = process.argv.slice(2);
 let query = 'видеомонтаж вакансии';
+let queriesFile = null;
 let limit = 20;
 
 args.forEach((arg) => {
   if (arg.startsWith('--query=')) query = arg.replace('--query=', '');
+  if (arg.startsWith('--queries-file=')) queriesFile = arg.replace('--queries-file=', '');
   if (arg.startsWith('--limit=')) limit = parseInt(arg.replace('--limit=', ''), 10) || 20;
 });
 
@@ -41,45 +43,78 @@ async function main() {
   });
 
   await client.connect();
-  console.log(`[Discover] Connected. Searching for: "${query}" (limit: ${limit})...`);
+
+  const queries = [];
+  if (queriesFile && fs.existsSync(queriesFile)) {
+    const raw = JSON.parse(fs.readFileSync(queriesFile, 'utf8'));
+    if (raw.categories) {
+      for (const [catName, qList] of Object.entries(raw.categories)) {
+        if (Array.isArray(qList)) {
+          qList.forEach((q) => queries.push({ query: q, category: catName }));
+        }
+      }
+    }
+    console.log(`[Discover] Loaded ${queries.length} queries from ${queriesFile}`);
+  } else {
+    queries.push({ query, category: 'manual' });
+  }
+
+  const allCandidates = [];
+  const seenUsernames = new Set();
 
   try {
-    const result = await client.invoke(
-      new Api.contacts.Search({
-        q: query,
-        limit,
-      })
-    );
+    for (const qItem of queries) {
+      console.log(`[Discover] Searching for "${qItem.query}" (limit: ${limit})...`);
+      try {
+        const result = await client.invoke(
+          new Api.contacts.Search({
+            q: qItem.query,
+            limit,
+          })
+        );
 
-    const candidates = [];
-    const chats = result.chats || [];
+        const chats = result.chats || [];
+        for (const chat of chats) {
+          if (chat.username) {
+            const username = chat.username.toLowerCase();
+            if (seenUsernames.has(username)) continue;
+            seenUsernames.add(username);
 
-    for (const chat of chats) {
-      if (chat.username) {
-        const username = chat.username.toLowerCase();
-        const isChannel = chat.broadcast === true;
-        const isGroup = chat.megagroup === true || (!chat.broadcast && chat.participantsCount > 0);
+            const isChannel = chat.broadcast === true;
+            const isGroup = chat.megagroup === true || (!chat.broadcast && chat.participantsCount > 0);
 
-        candidates.push({
-          id: username,
-          username,
-          title: chat.title || username,
-          url: `https://t.me/${username}`,
-          type: isChannel ? 'channel' : 'group',
-          subscribers: chat.participantsCount || undefined,
-          discoveredFrom: `tg:contacts.Search?q=${encodeURIComponent(query)}`,
-          discoveredAt: new Date().toISOString(),
-        });
+            allCandidates.push({
+              id: username,
+              username,
+              title: chat.title || username,
+              url: `https://t.me/${username}`,
+              type: isChannel ? 'channel' : 'group',
+              subscribers: chat.participantsCount || undefined,
+              discoveredFrom: `tg:contacts.Search?q=${encodeURIComponent(qItem.query)}`,
+              categoryHint: qItem.category,
+              discoveredAt: new Date().toISOString(),
+            });
+          }
+        }
+        // Polite delay between search invocations
+        await new Promise((r) => setTimeout(r, 2000));
+      } catch (err) {
+        console.warn(`[Discover] Warning on query "${qItem.query}":`, err.message);
+        if (/FLOOD_WAIT_(\d+)/i.test(err.message)) {
+          const waitSec = parseInt(err.message.match(/FLOOD_WAIT_(\d+)/i)[1], 10);
+          console.warn(`[Discover] Flood wait: sleeping ${waitSec}s`);
+          await new Promise((r) => setTimeout(r, (waitSec + 1) * 1000));
+        }
       }
     }
 
-    console.log(`[Discover] Found ${candidates.length} candidates with public usernames.`);
+    console.log(`[Discover] Found ${allCandidates.length} unique candidates with public usernames.`);
     const outDir = path.resolve('data');
     if (!fs.existsSync(outDir)) {
       fs.mkdirSync(outDir, { recursive: true });
     }
     const outFile = path.join(outDir, `discovered-${Date.now()}.json`);
-    fs.writeFileSync(outFile, JSON.stringify(candidates, null, 2), 'utf8');
+    fs.writeFileSync(outFile, JSON.stringify(allCandidates, null, 2), 'utf8');
     console.log(`[Discover] Saved to ${outFile}`);
   } catch (err) {
     console.error('[Discover] Error during contacts.Search:', err.message);
