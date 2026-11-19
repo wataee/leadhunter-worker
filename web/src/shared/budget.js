@@ -13,7 +13,7 @@ const CURRENCY_SYMBOLS = [
   { regex: /[$]|usd|доллар|дол|бакс|bucks/iu, currency: 'USD' },
   { regex: /[€]|eur|евро|euros?/iu, currency: 'EUR' },
   { regex: /[£]|(?<!\p{L})(?:gbp|pounds?|фунт(?:ов|а|ы)?)(?!\p{L})/iu, currency: 'GBP' },
-  { regex: /[₸]|(?<!\p{L})(?:kzt|тенге|тг)(?!\p{L})/iu, currency: 'KZT' },
+  { regex: /[₸]|(?<!\p{L})(?:kzt|тенге|теңге|тг)(?!\p{L})/iu, currency: 'KZT' },
   { regex: /[₴]|(?<!\p{L})(?:uah|грн|гривн[а-я]*)(?!\p{L})/iu, currency: 'UAH' },
   {
     regex: /(?:[₽]|(?<!\p{L})(?:руб|рубл[ейя]|rub|росс)(?!\p{L})|(?<![\p{L}\d])р(?![\p{L}\d])|(?<=\d)\s*р(?![а-яёa-z]))/iu,
@@ -93,7 +93,7 @@ export function detectAdjacentCurrency(before = '', after = '', hasMultiplier = 
  */
 export function detectBudgetUnit(text) {
   if (!text) return undefined;
-  if (/(?:за\s+(?:ролик|видео|шортс|рилс|shorts|reels|выпуск|видеоролик)|\/\s*(?:ролик|видео|рилс|shorts|reels|video|vid|short|reel)|per\s+(?:video|clip|episode|reel|short))/i.test(text)) {
+  if (/(?:за\s+(?:каждый\s+|один\s+|готовый\s+|смонтированный\s+)?(?:ролик|видео|шортс|рилс|shorts|reels|выпуск|видеоролик)|\/\s*(?:ролик|видео|рилс|shorts|reels|video|vid|short|reel)|per\s+(?:video|clip|episode|reel|short|finished\s+episode)|each|әр\s+(?:ролик|видео|бейне)|бір\s+(?:ролик|видео|бейне)\s+үшін|әрқайсыс)/i.test(text)) {
     return 'per_video';
   }
   if (/(?:в\s+(?:месяц|мес)|\/\s*(?:месяц|мес|month|mo\b)|monthly|оклад|ежемесячно|per\s+month|\bmonth\b|\bsalary\b)/i.test(text)) {
@@ -156,7 +156,7 @@ export function parseBudget(text) {
 
   // 2. Pattern: range with currency adjacent (e.g. "$1500 - $2000", "£500-£800", "150k - 250k тенге")
   const rangeRegex =
-    /(?:(?:бюджет|оплата|ставка|зп|зарплата|цена|стоимость|rate|salary|budget|pay)\s*[:=~-]?\s*)?(?:от|(?<!\p{L})from(?!\p{L})\s*)?([$€£₽₸₴])?\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*(?:-|—|–|(?<!\p{L})(?:до|to)(?!\p{L}))\s*([$€£₽₸₴])?\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*([₽$€£₸₴]|руб|rub|usd|eur|gbp|pounds?|kzt|uah|тенге|тг|гривн|р(?![а-яёa-z]))?/giu;
+    /(?:(?:бюджет|оплата|ставка|зп|зарплата|цена|стоимость|ақысы|төлемі|rate|salary|budget|pay)\s*[:=~-]?\s*)?(?:от|(?<!\p{L})from(?!\p{L})\s*)?([$€£₽₸₴])?\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*(?:-|—|–|(?<!\p{L})(?:до|to)(?!\p{L}))\s*([$€£₽₸₴])?\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*([₽$€£₸₴]|руб|rub|usd|eur|gbp|pounds?|kzt|uah|тенге|теңге|тг|гривн|р(?![а-яёa-z]))?/giu;
 
   let match;
   while ((match = rangeRegex.exec(text)) !== null) {
@@ -208,7 +208,7 @@ export function parseBudget(text) {
 
   // 3. Pattern: "от X" / "до X" / "from X" / "up to X" с прилегающей валютой
   const directionalRegex =
-    /(?:(?:бюджет|оплата|ставка|зп|зарплата|цена|стоимость|rate|salary|budget|pay)\s*[:=~-]?\s*)?(от|до|from|up\s+to|starting\s+at|ставка\s*от|бюджет\s*от|зп\s*от|бюджет\s*до)\s*([$€£₽₸₴])?\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*([₽$€£₸₴]|руб|rub|usd|eur|gbp|pounds?|kzt|uah|тенге|тг|гривн|\bр\b)?/giu;
+    /(?:(?:бюджет|оплата|ставка|зп|зарплата|цена|стоимость|ақысы|төлемі|rate|salary|budget|pay)\s*[:=~-]?\s*)?(от|до|from|up\s+to|starting\s+at|ставка\s*от|бюджет\s*от|зп\s*от|бюджет\s*до)\s*([$€£₽₸₴])?\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*([₽$€£₸₴]|руб|rub|usd|eur|gbp|pounds?|kzt|uah|тенге|теңге|тг|гривн|\bр\b)?/giu;
 
   while ((match = directionalRegex.exec(text)) !== null) {
     if (isFalsePositive(text, match.index, match[0].length)) {
@@ -242,7 +242,7 @@ export function parseBudget(text) {
 
   // 4. Pattern: одиночная сумма с валютой рядом ("$500", "£300", "400€", "35000 kzt")
   const singleRegex =
-    /(?:(?:бюджет|оплата|ставка|зп|зарплата|цена|стоимость|гонорар|rate|salary|budget|pay|фикс)\s*[:=~-]?\s*)?(?:([$€£₽₸₴])\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?|(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*([₽$€£₸₴]|руб|rub|usd|eur|gbp|pounds?|kzt|uah|тенге|тг|грн|гривн|р(?![а-яёa-z])))/giu;
+    /(?:(?:бюджет|оплата|ставка|зп|зарплата|цена|стоимость|гонорар|ақысы|төлемі|құны|rate|salary|budget|pay|фикс)\s*[:=~-]?\s*)?(?:([$€£₽₸₴])\s*(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?|(\d[\d\s,.]*)\s*(к|k|тыс|тысяч|млн)?\s*([₽$€£₸₴]|руб|rub|usd|eur|gbp|pounds?|kzt|uah|тенге|теңге|тг|грн|гривн|р(?![а-яёa-z])))/giu;
 
   while ((match = singleRegex.exec(text)) !== null) {
     if (isFalsePositive(text, match.index, match[0].length)) {

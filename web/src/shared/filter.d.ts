@@ -1,7 +1,10 @@
 export interface VacancyMatchResult {
   isMatch: boolean;
+  score: number;
+  label: string;
+  reasons: string[];
   matched: string[];
-  reason?: string;
+  reason: string;
 }
 
 export interface VacancyRiskResult {
@@ -19,7 +22,10 @@ export declare function buildPostUrl(
   chat: { username?: string | null; id?: string | number; chatId?: string | number } | string,
   messageId: string | number
 ): string;
-export declare function matchesVacancy(text: string): VacancyMatchResult;
+export declare function matchesVacancy(
+  text: string,
+  options?: { isWorkerLead?: boolean; minScore?: number; budget?: any }
+): VacancyMatchResult;
 export declare function detectVacancyRisks(
   text: string,
   budget?: object | null,

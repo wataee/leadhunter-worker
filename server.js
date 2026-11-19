@@ -383,6 +383,13 @@ async function dispatchLeadNotification(leadItem) {
     return;
   }
 
+  // Фильтр по скору для Telegram-уведомлений (по умолчанию >= 70, не спамить сомнительными)
+  const botMinScore = Number(process.env.BOT_MIN_SCORE || FILTER_CONFIG.thresholds.botNotifyMinScore || 70);
+  if (leadItem.score !== undefined && leadItem.score < botMinScore) {
+    console.log(`[Notification] Скор ${leadItem.score} < ${botMinScore}: лид сохранён в ленту, уведомление в бота пропущено`);
+    return;
+  }
+
   if (checkRateLimit()) {
     notificationTimestamps.push(Date.now());
     const payload = {
@@ -586,7 +593,20 @@ async function processIncomingMessage(message, chatMeta = {}) {
 
   stats.messagesProcessed++;
 
-  const matchResult = matchesVacancy(message.text);
+  // 1. Проверка возраста поста (по умолчанию 48 часов)
+  const maxPostAgeHours = Number(process.env.MAX_POST_AGE_HOURS || FILTER_CONFIG.thresholds.maxPostAgeHours || 48);
+  if (message.date) {
+    const postAgeMs = Date.now() - message.date * 1000;
+    if (postAgeMs > maxPostAgeHours * 3600 * 1000) {
+      filterStats.total++;
+      filterStats.reasons['post_too_old'] = (filterStats.reasons['post_too_old'] || 0) + 1;
+      return;
+    }
+  }
+
+  // 2. Трёхуровневый скоринг и фильтрация
+  const webMinScore = Number(process.env.WEB_MIN_SCORE || FILTER_CONFIG.thresholds.passMinScore || 45);
+  const matchResult = matchesVacancy(message.text, { minScore: webMinScore, isWorkerLead: true });
   if (!matchResult.isMatch) {
     filterStats.total++;
     const reason = matchResult.reason || 'no_core_keywords';
@@ -596,7 +616,16 @@ async function processIncomingMessage(message, chatMeta = {}) {
 
   const budget = parseBudget(message.text);
   const detectedRegion = detectVacancyRegion(message.text, chatUsername);
-  if (detectedRegion === 'RU' || budget?.currency === 'RUB') {
+
+  // 3. Настраиваемое отсечение региона RU и рублей
+  const excludeRu = process.env.EXCLUDE_RU_REGION !== undefined
+    ? process.env.EXCLUDE_RU_REGION === 'true'
+    : (FILTER_CONFIG.thresholds.excludeRuRegion ?? true);
+  const excludeRub = process.env.EXCLUDE_RUB_CURRENCY !== undefined
+    ? process.env.EXCLUDE_RUB_CURRENCY === 'true'
+    : (FILTER_CONFIG.thresholds.excludeRubCurrency ?? true);
+
+  if ((excludeRu && detectedRegion === 'RU') || (excludeRub && budget?.currency === 'RUB')) {
     filterStats.total++;
     filterStats.reasons['excluded_ru_region'] = (filterStats.reasons['excluded_ru_region'] || 0) + 1;
     return;
@@ -630,6 +659,9 @@ async function processIncomingMessage(message, chatMeta = {}) {
     text: message.text,
     url: postUrl,
     matchedKeywords: matchResult.matched || [],
+    score: matchResult.score,
+    label: matchResult.label,
+    reasons: matchResult.reasons || [],
     budget,
     region: detectedRegion,
     postedAt,

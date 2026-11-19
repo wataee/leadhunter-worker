@@ -219,22 +219,23 @@ export function computeVacancyRelevance(
     qualityTier = 'great';
   }
 
-  let score = isWorkerLead ? 60 : 40 + matchedKeywords.length * 8;
-  score += Math.min(24, skills.length * 8);
-
-  if (budget) {
-    if (
-      ['USD', 'EUR', 'GBP'].includes(budget.currency) ||
-      (budget.currency === 'KZT' && (budget.max ?? budget.min ?? 0) >= 50000)
-    ) {
-      score += 20;
-    } else {
-      score += 12;
-    }
+  // Синхронизированный скоринг на основе единого фильтра
+  let score = matchCheck.score || (isWorkerLead ? 60 : 40);
+  if (includeKeywords.length > 0) {
+    const hasCustomInclude = includeKeywords.some((kw) => {
+      const clean = kw.trim();
+      if (!clean) return false;
+      try {
+        return buildWordBoundaryRegex(clean).test(text);
+      } catch {
+        return lower.includes(clean.toLowerCase());
+      }
+    });
+    if (hasCustomInclude) score += 10;
   }
 
-  if (qualityTier === 'great') score += 20;
-  if (qualityTier === 'shady') score -= 35;
+  if (qualityTier === 'great') score += 15;
+  if (qualityTier === 'shady') score -= 30;
 
   const finalScore = Math.max(0, Math.min(100, Math.round(score)));
 
