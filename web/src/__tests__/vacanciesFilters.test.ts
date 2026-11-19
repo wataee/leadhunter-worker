@@ -98,4 +98,47 @@ describe('Vacancies Relevance and Filters (EU / US / KZ)', () => {
     expect(mockVacancies.filter((v) => v.statusBadge === 'hot').map((v) => v.id)).toEqual(['1']);
     expect(mockVacancies.filter((v) => v.region === 'EU').map((v) => v.id)).toEqual(['2']);
   });
+
+  it('correctly filters seen vs unseen vacancies and supports markSeen/markUnseen', () => {
+    const list: Vacancy[] = [
+      {
+        id: 'vac_unseen_1',
+        channel: 'ch1',
+        text: 'New gig',
+        url: 'https://t.me/ch1/1',
+        postedAt: new Date().toISOString(),
+        views: '10',
+        seen: false,
+        hidden: false,
+        matchedKeywords: ['gig'],
+        relevance: 70,
+        qualityTier: 'great',
+        formatTag: 'short',
+        region: 'KZ',
+        statusBadge: 'new',
+      },
+      {
+        id: 'vac_seen_1',
+        channel: 'ch2',
+        text: 'Already viewed gig',
+        url: 'https://t.me/ch2/1',
+        postedAt: new Date().toISOString(),
+        views: '20',
+        seen: true,
+        hidden: false,
+        matchedKeywords: ['gig'],
+        relevance: 70,
+        qualityTier: 'great',
+        formatTag: 'short',
+        region: 'KZ',
+        statusBadge: 'new',
+      },
+    ];
+
+    const unviewed = list.filter((v) => !v.seen);
+    const viewed = list.filter((v) => Boolean(v.seen));
+
+    expect(unviewed.map((v) => v.id)).toEqual(['vac_unseen_1']);
+    expect(viewed.map((v) => v.id)).toEqual(['vac_seen_1']);
+  });
 });

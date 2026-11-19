@@ -24,6 +24,8 @@ import {
   AlertTriangle,
   Copy,
   Check,
+  CheckCircle2,
+  RotateCcw,
   ChevronDown,
   ChevronUp,
   Languages,
@@ -35,6 +37,7 @@ interface VacancyCardProps {
   onConvertToLead: () => void;
   onHide: () => void;
   onHideChannel?: (channel: string) => void;
+  onToggleSeen?: () => void;
   highlightWords?: string[];
 }
 
@@ -44,6 +47,7 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   onConvertToLead,
   onHide,
   onHideChannel,
+  onToggleSeen,
 }) => {
   const profile = useSettingsStore((s) => s.profile);
   const autoTranslate = useSettingsStore((s) => s.autoTranslateVacancies ?? true);
@@ -197,6 +201,9 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
   const handleCopyAndOpen = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
     await handleCopyDraft();
+    if (onToggleSeen && !vacancy.seen) {
+      onToggleSeen();
+    }
     if (directHandle) {
       const targetUrl = `https://t.me/${directHandle}?text=${encodeURIComponent(activeDraft)}`;
       window.open(targetUrl, '_blank', 'noopener,noreferrer');
@@ -320,6 +327,12 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
               title={vacancy.upworkMeta.verdictRu}
             >
               ROI {vacancy.upworkMeta.roiScore}/100 · {vacancy.upworkMeta.connectsRequired || 0}C
+            </span>
+          )}
+
+          {vacancy.seen && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-text-muted bg-surface-2 px-1.5 py-0.5 rounded border border-border">
+              ✓ Просмотрено
             </span>
           )}
 
@@ -522,6 +535,8 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
       <div className="flex items-center justify-between pt-2 border-t border-border/60">
         <VacancyActionMenu
           channel={vacancy.channel}
+          isSeen={vacancy.seen}
+          onToggleSeen={onToggleSeen}
           onHide={onHide}
           onHideChannel={onHideChannel ? () => onHideChannel(vacancy.channel) : undefined}
           onOpenCalculator={() => setShowRateCalculator(true)}
@@ -529,6 +544,26 @@ export const VacancyCard: React.FC<VacancyCardProps> = ({
         />
 
         <div className="flex items-center gap-2">
+          {onToggleSeen && (
+            <button
+              type="button"
+              onClick={onToggleSeen}
+              title={vacancy.seen ? 'Вернуть в непросмотренные' : 'Пометить как просмотренное'}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-control border transition-colors min-h-[36px] ${
+                vacancy.seen
+                  ? 'text-text-muted hover:text-text bg-surface-2 hover:bg-surface-3 border-border'
+                  : 'text-text-muted hover:text-emerald-400 bg-surface-2 hover:bg-emerald-500/10 border-border hover:border-emerald-500/30'
+              }`}
+            >
+              {vacancy.seen ? (
+                <RotateCcw size={13} className="text-amber-400" />
+              ) : (
+                <CheckCircle2 size={13} className="text-emerald-400" />
+              )}
+              <span>{vacancy.seen ? 'В новые' : 'Просмотрено'}</span>
+            </button>
+          )}
+
           <button
             onClick={onConvertToLead}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-text bg-surface-2 hover:bg-surface-3 rounded-control border border-border transition-colors min-h-[36px]"

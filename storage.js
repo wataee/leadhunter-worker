@@ -11,9 +11,11 @@ export class FileStorageDriver {
     this.dataDir = path.resolve(dataDir);
     this.recentFile = path.join(this.dataDir, 'recent.json');
     this.failedQueueFile = path.join(this.dataDir, 'failed-queue.json');
+    this.lastPolledFile = path.join(this.dataDir, 'last-polled.json');
 
     this.recentLeads = [];
     this.failedQueue = [];
+    this.lastPolledIds = new Map();
     this.deduplicationCache = new Map(); // key -> timestamp
 
     this.ensureDir();
@@ -78,6 +80,23 @@ export class FileStorageDriver {
       console.warn('[FileStorage] Ошибка чтения failed-queue.json:', err.message);
       this.failedQueue = [];
     }
+
+    try {
+      if (fs.existsSync(this.lastPolledFile)) {
+        const raw = fs.readFileSync(this.lastPolledFile, 'utf-8');
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          for (const [ch, id] of Object.entries(parsed)) {
+            const numId = parseInt(id, 10);
+            if (!isNaN(numId) && numId > 0) {
+              this.lastPolledIds.set(ch.toLowerCase(), numId);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[FileStorage] Ошибка чтения last-polled.json:', err.message);
+    }
   }
 
   flush() {
@@ -99,6 +118,16 @@ export class FileStorageDriver {
       );
     } catch (err) {
       console.warn('[FileStorage] Ошибка сохранения failed-queue.json:', err.message);
+    }
+
+    try {
+      const obj = {};
+      for (const [ch, id] of this.lastPolledIds.entries()) {
+        obj[ch] = id;
+      }
+      fs.writeFileSync(this.lastPolledFile, JSON.stringify(obj, null, 2), 'utf-8');
+    } catch (err) {
+      console.warn('[FileStorage] Ошибка сохранения last-polled.json:', err.message);
     }
   }
 
@@ -176,6 +205,30 @@ export class FileStorageDriver {
   dequeueFailed(id) {
     this.failedQueue = this.failedQueue.filter((q) => q.id !== id);
     this.flush();
+  }
+
+  getLastPolledId(channel) {
+    if (!channel) return 0;
+    return this.lastPolledIds.get(channel.toLowerCase()) || 0;
+  }
+
+  setLastPolledId(channel, id) {
+    if (!channel) return;
+    const numId = parseInt(id, 10);
+    if (isNaN(numId)) return;
+    const current = this.lastPolledIds.get(channel.toLowerCase()) || 0;
+    if (numId > current) {
+      this.lastPolledIds.set(channel.toLowerCase(), numId);
+      this.flush();
+    }
+  }
+
+  getAllLastPolledIds() {
+    const obj = {};
+    for (const [ch, id] of this.lastPolledIds.entries()) {
+      obj[ch] = id;
+    }
+    return obj;
   }
 }
 
@@ -287,6 +340,35 @@ export class UpstashRedisDriver {
 
   dequeueFailed(id) {
     return this.fallback.dequeueFailed(id);
+  }
+
+  async getLastPolledId(channel) {
+    if (!channel) return 0;
+    const key = `leadhunter:poller:last_id:${channel.toLowerCase()}`;
+    try {
+      const val = await this.command('GET', key);
+      const num = parseInt(val, 10);
+      if (!isNaN(num) && num > 0) {
+        return num;
+      }
+    } catch {}
+    return this.fallback.getLastPolledId(channel);
+  }
+
+  async setLastPolledId(channel, id) {
+    if (!channel) return;
+    const numId = parseInt(id, 10);
+    if (isNaN(numId)) return;
+    this.fallback.setLastPolledId(channel, numId);
+    const key = `leadhunter:poller:last_id:${channel.toLowerCase()}`;
+    try {
+      // 30 days TTL so it stays persisted across worker idle/restarts
+      await this.command('SET', key, String(numId), 'EX', '2592000');
+    } catch {}
+  }
+
+  async getAllLastPolledIds() {
+    return this.fallback.getAllLastPolledIds();
   }
 
   flush() {

@@ -8,15 +8,15 @@ test('2.4 matchesVacancy - 60+ comprehensive test cases', () => {
   // 1. Direct hiring phrases
   assert.equal(matchesVacancy('Срочно ищем видеомонтажера для YouTube канала').isMatch, true);
   assert.equal(matchesVacancy('Ищем видеомонтажёра с опытом в Premiere Pro').isMatch, true);
-  assert.equal(matchesVacancy('Нужен монтажер на постоянную удаленную работу').isMatch, true);
+  assert.equal(matchesVacancy('Нужен монтажер на удаленный проект (YouTube)').isMatch, true);
   assert.equal(matchesVacancy('Требуется видеомонтажер в медиа агентство').isMatch, true);
   assert.equal(matchesVacancy('Ищу видеомонтажёра для reels и shorts').isMatch, true);
   assert.equal(matchesVacancy('Вакансия: монтажер роликов в продакшн').isMatch, true);
-  assert.equal(matchesVacancy('Ищем рилсмейкера на полный день').isMatch, true);
+  assert.equal(matchesVacancy('Ищем рилсмейкера на разовый проект').isMatch, true);
   assert.equal(matchesVacancy('Нужен рилсмейкер с навыками CapCut и Premiere').isMatch, true);
   assert.equal(matchesVacancy('Требуется рилсмейкер для экспертного блога').isMatch, true);
   assert.equal(matchesVacancy('Looking for a video editor for gaming channel').isMatch, true);
-  assert.equal(matchesVacancy('Hiring video editor full-time remote').isMatch, true);
+  assert.equal(matchesVacancy('Hiring video editor freelance per video').isMatch, true);
   assert.equal(matchesVacancy('Video editor wanted for tech reviews').isMatch, true);
 
   // 2. Explicit headers (#вакансия, ВАКАНСИЯ:, #работа, #job)
@@ -28,20 +28,20 @@ test('2.4 matchesVacancy - 60+ comprehensive test cases', () => {
   assert.equal(matchesVacancy('Ищем в команду: монтажёр роликов, ставка от 80к.').isMatch, true);
 
   // 3. Primary role + hiring signal in <= 40 chars
-  assert.equal(matchesVacancy('В команду требуется опытный видеомонтажер.').isMatch, true);
+  assert.equal(matchesVacancy('В команду на проект требуется опытный видеомонтажер (Reels).').isMatch, true);
   assert.equal(matchesVacancy('Для нового проекта нужен монтажер reels.').isMatch, true);
   assert.equal(matchesVacancy('Мы сейчас в поиске motion designer с крутым портфолио.').isMatch, true);
   assert.equal(matchesVacancy('На долгосрок нанимаем видеомонтажера на YouTube.').isMatch, true);
   assert.equal(matchesVacancy('Открыта вакансия: моушн-дизайнер 2D/3D.').isMatch, true);
   assert.equal(matchesVacancy('Команде нужен shorts maker с пониманием хуков и удержания.').isMatch, true);
-  assert.equal(matchesVacancy('Ищем в штат: reels maker для брендов.').isMatch, true);
+  assert.equal(matchesVacancy('Ищем на проект: reels maker для брендов.').isMatch, true);
   assert.equal(matchesVacancy('Нужна помощь: монтаж видео для коммерческого курса.').isMatch, true);
   assert.equal(matchesVacancy('На проект требуется монтаж подкастов под ключ.').isMatch, true);
   assert.equal(matchesVacancy('Нам нужен классный моушн дизайнер для заставок.').isMatch, true);
   assert.equal(matchesVacancy('В продакшн требуется монтажер shorts на поток.').isMatch, true);
   assert.equal(matchesVacancy('Ищу человека на монтаж роликов, от 3000р/видео.').isMatch, true);
   assert.equal(matchesVacancy('Нужен спец на видеомонтаж интервью.').isMatch, true);
-  assert.equal(matchesVacancy('Ищем толкового видеомонтажера, зп от 100 000 руб.').isMatch, true);
+  assert.equal(matchesVacancy('Ищем толкового видеомонтажера на проект, от 5000 руб за ролик.').isMatch, true);
   assert.equal(matchesVacancy('We are looking for motion designer skilled in After Effects.').isMatch, true);
   assert.equal(matchesVacancy('Need talented video editor for daily short-form content.').isMatch, true);
   assert.equal(matchesVacancy('В онлайн-школу открыта вакансия видеомонтажер уроков.').isMatch, true);
@@ -76,7 +76,15 @@ test('2.4 matchesVacancy - 60+ comprehensive test cases', () => {
   assert.equal(matchesVacancy('Бесплатный вебинар: как видеомонтажер может зарабатывать от $2000').isMatch, false);
   assert.equal(matchesVacancy('Марафон по Premiere Pro и After Effects').isMatch, false);
 
-  // 3. Construction / Non-video montage
+  // 3. Full-time / Staff / Office / Salary (HARD STOPS - MUST BE REJECTED)
+  assert.equal(matchesVacancy('Вакансия: видеомонтажёр в штат, полный день, 5/2, ТК, оклад').isMatch, false);
+  assert.equal(matchesVacancy('Ищем в команду, full-time, соцпакет').isMatch, false);
+  assert.equal(matchesVacancy('hiring a full-time video editor, salary $3000/month, 40 hours per week').isMatch, false);
+  assert.equal(matchesVacancy('Ищем рилсмейкера на полный день в офис').isMatch, false);
+  assert.equal(matchesVacancy('Нужен монтажер на оклад 150 000 руб в месяц, график 5/2').isMatch, false);
+  assert.equal(matchesVacancy('Официальное трудоустройство по ТК РФ, испытательный срок 3 месяца').isMatch, false);
+
+  // 4. Construction / Non-video montage
   assert.equal(matchesVacancy('Требуется строительный монтаж металлоконструкций на объекте').isMatch, false);
   assert.equal(matchesVacancy('Нужен монтаж кондиционеров в офис').isMatch, false);
   assert.equal(matchesVacancy('Срочно монтаж окон и балконных блоков').isMatch, false);
@@ -96,7 +104,7 @@ test('A1: two-level stop words and soft applicant phrases handling (12+ cases)',
   assert.equal(v1.isMatch, true, 'Vacancy with резюме and портфолио must pass');
 
   // Case 2: «CV» in genuine vacancy
-  const v2 = matchesVacancy('Требуется монтажёр reels, отправляйте CV в телеграм @hr_lead');
+  const v2 = matchesVacancy('Требуется монтажёр reels, отправляйте CV и кейсы в телеграм @lead_editor');
   assert.equal(v2.isMatch, true, 'Vacancy with CV must pass');
 
   // Case 3: «портфолио:» in genuine vacancy
@@ -104,7 +112,7 @@ test('A1: two-level stop words and soft applicant phrases handling (12+ cases)',
   assert.equal(v3.isMatch, true, 'Vacancy with портфолио: must pass');
 
   // Case 4: «Услуги монтажа не предлагать»
-  const v4 = matchesVacancy('Ищем видеомонтажёра в продакшн. Услуги монтажа от агентств не предлагать, только инхаус.');
+  const v4 = matchesVacancy('Ищем видеомонтажёра в продакшн на разовый проект. Услуги монтажа от агентств не предлагать.');
   assert.equal(v4.isMatch, true, 'Vacancy with "услуги монтажа не предлагать" must pass');
 
   // Case 5: «обо мне» in genuine vacancy

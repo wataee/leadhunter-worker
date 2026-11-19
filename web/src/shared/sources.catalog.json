@@ -11,15 +11,19 @@
     "description": "Заявки принимаются автоматически. Неофициальное сообщество. По всем вопросам: @kesh_keshh Ссылка на канал: https://t.me/+H-msBow3zlIzYTcy РКН: https://vk.cc/cHW",
     "subscribers": 63712,
     "postsPerWeek": 8,
-    "qualityScore": 96,
+    "qualityScore": 56,
     "status": "ok",
     "tags": [
       "usa-global",
       "motion"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.388Z"
+    "verifiedAt": "2026-11-18T02:49:32.388Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.142,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "digital_iskra",
@@ -33,16 +37,20 @@
     "description": "Для публикации или рекламы пишите @iskraassistant +5.5к специалистов 🏆 (маркетологи, проджекты, таргетологи, видеографы и др.) +2.5к заказчиков 📌 Алматы, Аста",
     "subscribers": 8458,
     "postsPerWeek": 8,
-    "qualityScore": 91,
+    "qualityScore": 49,
     "status": "ok",
     "tags": [
       "kazakhstan",
       "video",
       "marketing"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.392Z"
+    "verifiedAt": "2026-11-18T02:49:32.392Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.123,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "digitalbussinesskz",
@@ -56,15 +64,19 @@
     "description": "Простым языком о том, что происходит с деньгами казахстанцев, налогами и бизнесом. Cвязь с редакцией: editor@digitalbusiness.kz Instagram: https://www.instagram",
     "subscribers": 10847,
     "postsPerWeek": 8,
-    "qualityScore": 83,
+    "qualityScore": 41,
     "status": "ok",
     "tags": [
       "kazakhstan",
       "clients"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "tg-search:digital kz",
-    "verifiedAt": "2026-11-18T02:49:32.393Z"
+    "verifiedAt": "2026-11-18T02:49:32.393Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.046,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "cresume",
@@ -78,7 +90,7 @@
     "description": "Вакансії в креативних індустріях. Допомагаємо вам та роботі мрії знайти одне одного. 📲 Умови розміщення: https://cresume.platfor.ma/ 📬 З усіх питань пишіть на",
     "subscribers": 52241,
     "postsPerWeek": 8,
-    "qualityScore": 83,
+    "qualityScore": 66,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -86,7 +98,11 @@
     ],
     "recommended": true,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:50:59.062Z"
+    "verifiedAt": "2026-11-18T02:50:59.062Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.238,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "almaty_rabotao",
@@ -100,15 +116,19 @@
     "description": "Опубликовать вакансию или рекламу: t.me/m/upcz6VskMDgy (среднее время ответа 2 минуты) Если ссылка не открылась: @karrolinaEU",
     "subscribers": 100846,
     "postsPerWeek": 8,
-    "qualityScore": 80,
+    "qualityScore": 47,
     "status": "ok",
     "tags": [
       "kazakhstan",
       "jobs"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "tg-search:rabota almaty",
-    "verifiedAt": "2026-11-18T02:49:32.393Z"
+    "verifiedAt": "2026-11-18T02:49:32.393Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.056,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "almaty_rabota_v",
@@ -122,7 +142,7 @@
     "description": "Опубликовать вакансию или рекламу: t.me/m/TzyJF3hyOTky Если ссылка не открылась: @QuickHireEU (среднее время ответа 2 минуты)",
     "subscribers": 72745,
     "postsPerWeek": 8,
-    "qualityScore": 79,
+    "qualityScore": 67,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -130,7 +150,11 @@
     ],
     "recommended": true,
     "discoveredFrom": "tg-search:rabota almaty",
-    "verifiedAt": "2026-11-18T02:49:32.393Z"
+    "verifiedAt": "2026-11-18T02:49:32.393Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.236,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "remotejobss",
@@ -144,15 +168,19 @@
     "description": "Remote Jobs Only (English and Worldwide) #remote_jobs 👇🏻View Packages & Post Your Job: @PostRemoteJobs . .",
     "subscribers": 162321,
     "postsPerWeek": 8,
-    "qualityScore": 78,
+    "qualityScore": 58,
     "status": "ok",
     "tags": [
       "usa-global",
       "remote"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.393Z"
+    "verifiedAt": "2026-11-18T02:49:32.393Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.155,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "skwanggur",
@@ -166,15 +194,19 @@
     "description": "𖥧.. ★ anything what u need about editing @skwanggur click ▸ l @ki8en ◂ for paid promote purposes&#33; ⚠️ DISCLAIMER ⚠️ kalau sudah ambil preset di sini jangan ",
     "subscribers": 1026,
     "postsPerWeek": 8,
-    "qualityScore": 78,
+    "qualityScore": 52,
     "status": "ok",
     "tags": [
       "kazakhstan",
       "jobs"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "tg-search:pr kz",
-    "verifiedAt": "2026-11-18T02:49:32.393Z"
+    "verifiedAt": "2026-11-18T02:49:32.393Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.185,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "designervsekz",
@@ -188,15 +220,19 @@
     "description": "Сообщество проектировщиков Казахстана всё самое необходимое и лучшие :) - проектирование - поиск монтажных объёмов - геодезисты - архитектура и дизайн - констру",
     "subscribers": 5217,
     "postsPerWeek": 14,
-    "qualityScore": 77,
+    "qualityScore": 71,
     "status": "group",
     "tags": [
       "kazakhstan",
       "video"
     ],
-    "recommended": false,
+    "recommended": true,
     "discoveredFrom": "tg-search:design kz",
-    "verifiedAt": "2026-11-18T02:49:32.393Z"
+    "verifiedAt": "2026-11-18T02:49:32.393Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.216,
+    "gigsPerWeek": 3,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobforukrainians",
@@ -210,15 +246,19 @@
     "description": "Платне розміщення вакансій @Jobs_Khrystyna Бот для вiдправки вакансiй - @jobforukrainiansvacancy_bot Канал з найбільшою кількість найкращих вакансій 🇺🇦і🌎 Оно",
     "subscribers": 44802,
     "postsPerWeek": 8,
-    "qualityScore": 77,
+    "qualityScore": 54,
     "status": "ok",
     "tags": [
       "kazakhstan",
       "jobs"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:50:59.044Z"
+    "verifiedAt": "2026-11-18T02:50:59.044Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.135,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobs_in_european_countries",
@@ -232,15 +272,19 @@
     "description": "Boost your career with Jobs in Europe&#33; 🚀 Daily updates on new jobs Your success starts here&#33; 💼 #Jobs Admin - @aj605590 Buy ads: https://telega.io/c/jo",
     "subscribers": 10063,
     "postsPerWeek": 8,
-    "qualityScore": 76,
+    "qualityScore": 53,
     "status": "ok",
     "tags": [
       "europe",
       "jobs"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:50:59.031Z"
+    "verifiedAt": "2026-11-18T02:50:59.031Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.149,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "product_jobs",
@@ -254,15 +298,19 @@
     "description": "Как опубликовать вакансию: https://t.me/product_jobs/267 Вопросы: @max_xb",
     "subscribers": 37002,
     "postsPerWeek": 8,
-    "qualityScore": 76,
+    "qualityScore": 35,
     "status": "ok",
     "tags": [
       "usa-global",
       "jobs"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:05.881Z"
+    "verifiedAt": "2026-11-18T02:51:05.881Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0,
+    "gigsPerWeek": 0,
+    "statusReason": "zero_gig_rate_30d"
   },
   {
     "id": "bluescreenkz",
@@ -276,7 +324,7 @@
     "description": "making sense of technology Медиа технологической индустрии Казахстана Прайс 👉🏽 https://bluescreen.kz/rieklama/ Контакты: @melnikovaanya",
     "subscribers": 24202,
     "postsPerWeek": 8,
-    "qualityScore": 74,
+    "qualityScore": 63,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -284,7 +332,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.393Z"
+    "verifiedAt": "2026-11-18T02:49:32.393Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.224,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "cryptojobslist",
@@ -298,15 +350,19 @@
     "description": "Largest Web3 Job & Talent Community ✨ @CryptoJobsListBot ← chat with our AI bot about jobs and your resume ✅ https://cjl.ist/post-jobs ← post jobs 📝 https://Cr",
     "subscribers": 62074,
     "postsPerWeek": 8,
-    "qualityScore": 74,
+    "qualityScore": 60,
     "status": "ok",
     "tags": [
       "usa-global",
       "startups"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.394Z"
+    "verifiedAt": "2026-11-18T02:49:32.394Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.178,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "workersinlondon",
@@ -320,15 +376,19 @@
     "description": "✅A group only for VERIFIED and RELIABLE JOB OFFERS&#33; **Prohibited in the chats:** ❌️ Racism ❌️ Profanity, spam, or promotion of scammers ❌️ Political discuss",
     "subscribers": 2529,
     "postsPerWeek": 14,
-    "qualityScore": 74,
+    "qualityScore": 35,
     "status": "group",
     "tags": [
       "europe",
       "motion"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "tg-search:london jobs",
-    "verifiedAt": "2026-11-18T02:51:11.103Z"
+    "verifiedAt": "2026-11-18T02:51:11.103Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0,
+    "gigsPerWeek": 0,
+    "statusReason": "zero_gig_rate_30d"
   },
   {
     "id": "smartrecruit_deutschland",
@@ -342,15 +402,19 @@
     "description": "📌 Personalvermittlung 📌 Recruiting-Dienstleistungen 📌 Arbeitskräftevermittlung ✉️ Alle Fragen hier: @SmartRecruitDE 📝 https://smartrecruit24.de/blog",
     "subscribers": 27468,
     "postsPerWeek": 8,
-    "qualityScore": 74,
+    "qualityScore": 35,
     "status": "ok",
     "tags": [
       "europe",
       "jobs"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "tg-search:arbeit deutschland",
-    "verifiedAt": "2026-11-18T02:51:12.295Z"
+    "verifiedAt": "2026-11-18T02:51:12.295Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0,
+    "gigsPerWeek": 0,
+    "statusReason": "zero_gig_rate_30d"
   },
   {
     "id": "rabota_astanau",
@@ -364,7 +428,7 @@
     "description": "Лучшие вакансии — здесь. Подписывайтесь, не пропустите&#33; Менеджер: @karrolinaEU",
     "subscribers": 84721,
     "postsPerWeek": 14,
-    "qualityScore": 73,
+    "qualityScore": 58,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -372,7 +436,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota astana",
-    "verifiedAt": "2026-11-18T02:49:32.394Z"
+    "verifiedAt": "2026-11-18T02:49:32.394Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.048,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "zhumys_astana_kz",
@@ -386,7 +454,7 @@
     "description": "📲 Разместить объявление 👇🏻 https://wa.me/7075043376 ✅ Инстаграм: https://www.instagram.com/rabota_astana_zhumys ✅ 13 whats'Аpp групп: https://chat.whatsapp.c",
     "subscribers": 18727,
     "postsPerWeek": 8,
-    "qualityScore": 73,
+    "qualityScore": 56,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -394,7 +462,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:zhumys kz",
-    "verifiedAt": "2026-11-18T02:49:32.394Z"
+    "verifiedAt": "2026-11-18T02:49:32.394Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.17,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "devjobs",
@@ -408,15 +480,19 @@
     "description": "GameDev вакансии и не только. Размещение резюме и рекламы. Пиши @StetsMedia @unrealenginecis @UnrealEngine4 @ue_pub @Art2D @unityjobs_pub @DevJobs_Resume https:",
     "subscribers": 44459,
     "postsPerWeek": 8,
-    "qualityScore": 72,
+    "qualityScore": 35,
     "status": "ok",
     "tags": [
       "usa-global",
       "jobs"
     ],
-    "recommended": true,
+    "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.394Z"
+    "verifiedAt": "2026-11-18T02:49:32.394Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0,
+    "gigsPerWeek": 0,
+    "statusReason": "zero_gig_rate_30d"
   },
   {
     "id": "almaty_rabota_vq",
@@ -430,7 +506,7 @@
     "description": "Керекті жұмыс — дәл осында. Жазыл және тап&#33; Байланыс: t.me/m/TzyJF3hyOTky Сілтеме ашылмаса: @QuickHireEU",
     "subscribers": 69692,
     "postsPerWeek": 14,
-    "qualityScore": 72,
+    "qualityScore": 35,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -438,7 +514,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota almaty",
-    "verifiedAt": "2026-11-18T02:49:32.394Z"
+    "verifiedAt": "2026-11-18T02:49:32.394Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0,
+    "gigsPerWeek": 0,
+    "statusReason": "zero_gig_rate_30d"
   },
   {
     "id": "almaty_rabota_vw",
@@ -452,7 +532,7 @@
     "description": "Жаңа жұмыс — осында. Жазыл, уақытты өткізіп алма&#33; Байланыс: t.me/m/upcz6VskMDgy Сілтеме ашылмаса: @karrolinaEU",
     "subscribers": 64904,
     "postsPerWeek": 14,
-    "qualityScore": 72,
+    "qualityScore": 35,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -460,7 +540,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota almaty",
-    "verifiedAt": "2026-11-18T02:49:32.394Z"
+    "verifiedAt": "2026-11-18T02:49:32.394Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0,
+    "gigsPerWeek": 0,
+    "statusReason": "zero_gig_rate_30d"
   },
   {
     "id": "astana_rabota",
@@ -474,7 +558,7 @@
     "description": "📦Группа создана для тех кто ищет работу в Астане. Ежедневно пополняется свежими актуальными вакансиями. 🧰Вакансии отправлять На WhatsApp https://wa.me/+770834",
     "subscribers": 15547,
     "postsPerWeek": 8,
-    "qualityScore": 72,
+    "qualityScore": 44,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -482,7 +566,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota astana",
-    "verifiedAt": "2026-11-18T02:49:32.394Z"
+    "verifiedAt": "2026-11-18T02:49:32.394Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.06,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "relocateme",
@@ -496,7 +584,7 @@
     "description": "Onsite and remote international jobs, visa news, helpful resources, expert insights, and more. Official website: https://relocate.me Our newsletter: https://rel",
     "subscribers": 34778,
     "postsPerWeek": 8,
-    "qualityScore": 71,
+    "qualityScore": 55,
     "status": "ok",
     "tags": [
       "europe",
@@ -504,7 +592,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.397Z"
+    "verifiedAt": "2026-11-18T02:49:32.397Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.144,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rabota_a1maty",
@@ -518,7 +610,7 @@
     "description": "🙋🏻‍♂️ Публикуем Вакансии и Подработку Строго БЕЗ СЕТЕВЫХ🙅🏻‍♂️ Для подачи объявления пишите ➡️ Инстаграм Мы в Instagram ⬇️ https://instagram.com/rabota_a1mat",
     "subscribers": 9527,
     "postsPerWeek": 8,
-    "qualityScore": 70,
+    "qualityScore": 35,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -526,7 +618,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0,
+    "gigsPerWeek": 0,
+    "statusReason": "zero_gig_rate_30d"
   },
   {
     "id": "almaty_rabota05",
@@ -540,7 +636,7 @@
     "description": "🔻Для подачи объявления обращаться: https://t.me/arturwork",
     "subscribers": 9494,
     "postsPerWeek": 8,
-    "qualityScore": 70,
+    "qualityScore": 54,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -548,7 +644,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.165,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "almaty_rabota01",
@@ -562,7 +662,7 @@
     "description": "Находитесь в поисках работы или подработки? А может сами ищите крутого продажника, ответственного офис менеджера или сотрудника который вольётся в ваш коллектив",
     "subscribers": 38690,
     "postsPerWeek": 8,
-    "qualityScore": 70,
+    "qualityScore": 35,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -570,7 +670,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota almaty",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0,
+    "gigsPerWeek": 0,
+    "statusReason": "zero_gig_rate_30d"
   },
   {
     "id": "it_jobs_kz",
@@ -584,7 +688,7 @@
     "description": "IT vacancies in Kazakhstan and worldwide with salary range Post your vacancy via www.dsml.kz/jobs Vacancies related to Data Science are posted in @ml_jobs_kz Ad",
     "subscribers": 10126,
     "postsPerWeek": 8,
-    "qualityScore": 70,
+    "qualityScore": 35,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -592,7 +696,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:it jobs kz",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0,
+    "gigsPerWeek": 0,
+    "statusReason": "zero_gig_rate_30d"
   },
   {
     "id": "astana_it_university_official",
@@ -606,7 +714,7 @@
     "description": "You can view and join @astana_it_university_official right away.",
     "subscribers": 9343,
     "postsPerWeek": 8,
-    "qualityScore": 70,
+    "qualityScore": 35,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -614,7 +722,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:astana it",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0,
+    "gigsPerWeek": 0,
+    "statusReason": "zero_gig_rate_30d"
   },
   {
     "id": "brodetsky",
@@ -628,7 +740,7 @@
     "description": "Tech, VC, Business, Startups, AI and more. 👤 linkedin.com/in/andrii-brodetskyi ✉️ @politehnik",
     "subscribers": 18267,
     "postsPerWeek": 8,
-    "qualityScore": 70,
+    "qualityScore": 56,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -636,7 +748,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:tech startups",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.17,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rabota_astanakzt",
@@ -650,7 +766,7 @@
     "description": "📲 ДЛЯ РАЗМЕЩЕНИЯ ВАКАНСИЙ: https://wa.me/77711946516 👇 INSTAGRAM СТРАНИЦА https://www.instagram.com/astana_vakansiya 👇 TELEGRAM КАНАЛ https://t.me/rabota_ast",
     "subscribers": 7551,
     "postsPerWeek": 8,
-    "qualityScore": 69,
+    "qualityScore": 35,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -658,7 +774,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota astana",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0,
+    "gigsPerWeek": 0,
+    "statusReason": "zero_gig_rate_30d"
   },
   {
     "id": "germantechjobs",
@@ -672,7 +792,7 @@
     "description": "We publish here only the best tech job offers with any technology: Java, Python, PHP, C#, JavaScript, Rust, Golang, C++ -> https://germantechjobs.de/",
     "subscribers": 17167,
     "postsPerWeek": 8,
-    "qualityScore": 69,
+    "qualityScore": 43,
     "status": "ok",
     "tags": [
       "europe",
@@ -680,7 +800,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:germany jobs",
-    "verifiedAt": "2026-11-18T02:51:11.689Z"
+    "verifiedAt": "2026-11-18T02:51:11.689Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.05,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "vacantesremotasempleoverse",
@@ -694,7 +818,7 @@
     "description": "🌎 Tu espacio confiable para trabajo 100% remoto. Ofertas reales y filtradas para LATAM y el mundo. ¡Aplica gratis&#33; Únete a EmpleoVerse. Buy ads: https://te",
     "subscribers": 8364,
     "postsPerWeek": 8,
-    "qualityScore": 69,
+    "qualityScore": 37,
     "status": "ok",
     "tags": [
       "europe",
@@ -702,7 +826,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:empleo remoto",
-    "verifiedAt": "2026-11-18T02:51:15.505Z"
+    "verifiedAt": "2026-11-18T02:51:15.505Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.013,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "aitujobs",
@@ -716,7 +844,7 @@
     "description": "Канал для поиска работы в ИТ #event - ивент связанный с IT #job - вакансия #cv - резюме правила: https://t.me/aitujobs/433 https://t.me/aitujobs/538 админы: @ye",
     "subscribers": 6520,
     "postsPerWeek": 8,
-    "qualityScore": 68,
+    "qualityScore": 47,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -724,7 +852,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:it jobs kz",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.105,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "remote_kazakhstan",
@@ -738,7 +870,7 @@
     "description": "Канал посвященный удаленным возможностям в Казахстане и не только. Алтынай ( @a1223334444r ) – для публикации и сотрудничества.",
     "subscribers": 5784,
     "postsPerWeek": 8,
-    "qualityScore": 68,
+    "qualityScore": 38,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -746,7 +878,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:kazakhstan remote",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.029,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "uiux_jobs",
@@ -760,15 +896,19 @@
     "description": "Публикуем вакансии и запросы на поиск работы по направлению дизайна UI, UX, Design Thinking, Style Guides, Mobile и т.д. См. также: @uiux_ru , @products_jobs , ",
     "subscribers": 6677,
     "postsPerWeek": 14,
-    "qualityScore": 68,
+    "qualityScore": 69,
     "status": "group",
     "tags": [
       "usa-global",
       "motion"
     ],
-    "recommended": false,
+    "recommended": true,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:04.793Z"
+    "verifiedAt": "2026-11-18T02:51:04.793Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.196,
+    "gigsPerWeek": 3,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "videoeditors",
@@ -782,7 +922,7 @@
     "description": "You can view and join @videoeditors right away.",
     "subscribers": 347,
     "postsPerWeek": 14,
-    "qualityScore": 67,
+    "qualityScore": 63,
     "status": "group",
     "tags": [
       "usa-global",
@@ -791,7 +931,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.194,
+    "gigsPerWeek": 3,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rabota_almaty",
@@ -805,7 +949,7 @@
     "description": "Группа №1 по поиску работы в Алмате 🌟 Искореняем безработицу ❌ Для публикации вакансии переходите сюда 👉🏻 https://taplink.cc/rabota_almaty",
     "subscribers": 4515,
     "postsPerWeek": 8,
-    "qualityScore": 67,
+    "qualityScore": 40,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -813,7 +957,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota almaty",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.055,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "hiddengurus",
@@ -827,7 +975,7 @@
     "description": "Мировой концентрат высококачественных вакансий на удалёнку для IT гуру. 💻🌏 📩Реклама и размещение вакансий: @dodheim",
     "subscribers": 9226,
     "postsPerWeek": 8,
-    "qualityScore": 66,
+    "qualityScore": 56,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -835,7 +983,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.177,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "remotejobs4u",
@@ -849,7 +1001,7 @@
     "description": "Buy ads: https://telega.io/c/remotejobs4u This channel is mainly for to share Remote/WFH Jobs updates. Stay updated with the latest remote work opportunities, f",
     "subscribers": 9907,
     "postsPerWeek": 8,
-    "qualityScore": 66,
+    "qualityScore": 48,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -857,7 +1009,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.103,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "astana_rabota_jumys",
@@ -871,7 +1027,7 @@
     "description": "Вакансии в Астане&#33; Наш Instagram ⬇️ https://www.instagram.com/astana.rabota.jumys Для размещения объявлений обращаться в direct ⬆️",
     "subscribers": 3712,
     "postsPerWeek": 8,
-    "qualityScore": 66,
+    "qualityScore": 37,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -879,7 +1035,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota astana",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.031,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "shokhrukh_smm",
@@ -893,7 +1053,7 @@
     "description": "Kanaldan ~Sfx 🎵 ~Edit audios 🎶 ~Greenscreen videos 🎥 ~Png images 📸 ~Overlays 💥 Va yana foydali ma'lumotlarni topishingiz mumkin Murojaat uchun : @Shokhrukh",
     "subscribers": 221,
     "postsPerWeek": 8,
-    "qualityScore": 66,
+    "qualityScore": 54,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -902,7 +1062,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:mobilograf",
-    "verifiedAt": "2026-11-18T02:49:32.398Z"
+    "verifiedAt": "2026-11-18T02:49:32.398Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.231,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "european_jobs",
@@ -916,7 +1080,7 @@
     "description": "- 🌍 Официальное трудоустройство в Европе - ✅ Надежный работодатель - 👩‍💼 Куратор, говорящий на русском - 💰 Оплата вакансии из первой зарплаты Менеджер 👩‍💼",
     "subscribers": 38338,
     "postsPerWeek": 8,
-    "qualityScore": 66,
+    "qualityScore": 55,
     "status": "ok",
     "tags": [
       "europe",
@@ -924,7 +1088,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:europe jobs",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.141,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "blockchain_job",
@@ -938,7 +1106,7 @@
     "description": "CV and jobs - all blockchain related. Publishing free. Contact - @gonzogirl",
     "subscribers": 4166,
     "postsPerWeek": 8,
-    "qualityScore": 66,
+    "qualityScore": 45,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -946,7 +1114,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:blockchain jobs",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.097,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "hrtech_jobs",
@@ -960,7 +1132,7 @@
     "description": "Ежедневно публикуем вакансии в сфере HR-Tech от лучших компаний. Подпишитесь и найдите работу своей мечты&#33; 🔥 Карьерный чат HR-Tech - @hrtech_chat Для связи",
     "subscribers": 9821,
     "postsPerWeek": 8,
-    "qualityScore": 66,
+    "qualityScore": 47,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -968,7 +1140,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:tech jobs",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.096,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobs_ingermany",
@@ -982,7 +1158,7 @@
     "description": "You can view and join @jobs_ingermany right away.",
     "subscribers": 9631,
     "postsPerWeek": 8,
-    "qualityScore": 66,
+    "qualityScore": 55,
     "status": "ok",
     "tags": [
       "europe",
@@ -990,7 +1166,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:jobs in europe",
-    "verifiedAt": "2026-11-18T02:51:08.141Z"
+    "verifiedAt": "2026-11-18T02:51:08.141Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.171,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "work_jobs_poland",
@@ -1004,7 +1184,7 @@
     "description": "💬 Связь 👇 с менеджером @consultant_support_bot НАШ САЙТ 👇 https://mssg.me/helps #Вакансии #Германии #Польше #Чехии #документы #виза #трудоустройство #Европе ",
     "subscribers": 10365,
     "postsPerWeek": 8,
-    "qualityScore": 66,
+    "qualityScore": 52,
     "status": "ok",
     "tags": [
       "europe",
@@ -1012,7 +1192,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:poland jobs",
-    "verifiedAt": "2026-11-18T02:51:13.198Z"
+    "verifiedAt": "2026-11-18T02:51:13.198Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.145,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "remotejobs",
@@ -1026,7 +1210,7 @@
     "description": "Hand-picked remote jobs, daily roundups and practical career tips. Find your next high paying remote role Support: @hvhelp",
     "subscribers": 8305,
     "postsPerWeek": 8,
-    "qualityScore": 65,
+    "qualityScore": 53,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1034,7 +1218,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.159,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "motion_graphics",
@@ -1048,7 +1236,7 @@
     "description": "motion graphics",
     "subscribers": 88,
     "postsPerWeek": 8,
-    "qualityScore": 65,
+    "qualityScore": 53,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1056,7 +1244,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:06.208Z"
+    "verifiedAt": "2026-11-18T02:51:06.208Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.239,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rabota_v_evrope5",
@@ -1070,7 +1262,7 @@
     "description": "Предоставляем рабочие места в high-тир странах, оформление документов и ВИЗ для легальной работы в ЕС / Англии. Наш менеджер @alik_works 🧑‍💻",
     "subscribers": 3126,
     "postsPerWeek": 8,
-    "qualityScore": 65,
+    "qualityScore": 39,
     "status": "ok",
     "tags": [
       "europe",
@@ -1078,7 +1270,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota v evrope",
-    "verifiedAt": "2026-11-18T02:51:09.316Z"
+    "verifiedAt": "2026-11-18T02:51:09.316Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.047,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "feministjobsgermany",
@@ -1092,7 +1288,7 @@
     "description": "You can view and join @feministjobsgermany right away.",
     "subscribers": 7911,
     "postsPerWeek": 8,
-    "qualityScore": 65,
+    "qualityScore": 44,
     "status": "ok",
     "tags": [
       "europe",
@@ -1100,7 +1296,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:germany jobs",
-    "verifiedAt": "2026-11-18T02:51:11.693Z"
+    "verifiedAt": "2026-11-18T02:51:11.693Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.08,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "remotojob",
@@ -1120,9 +1320,13 @@
       "europe",
       "clients"
     ],
-    "recommended": false,
+    "recommended": true,
     "discoveredFrom": "tg-search:empleo remoto",
-    "verifiedAt": "2026-11-18T02:51:15.491Z"
+    "verifiedAt": "2026-11-18T02:51:15.491Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.242,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "ddevjobs",
@@ -1136,7 +1340,7 @@
     "description": "Jobs in web3, want some help to get your first web3 Job..send your resume here too @paidadzjo Managed by enghamzasalem.com",
     "subscribers": 6857,
     "postsPerWeek": 8,
-    "qualityScore": 64,
+    "qualityScore": 49,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1145,7 +1349,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:web3 jobs",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.122,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "spain_it_jobs",
@@ -1159,7 +1367,7 @@
     "description": "Вакансии и резюме в IT&Digital в Испании. Автор: @baigozina Основной чат: @bcn_ithub",
     "subscribers": 5291,
     "postsPerWeek": 8,
-    "qualityScore": 64,
+    "qualityScore": 53,
     "status": "ok",
     "tags": [
       "europe",
@@ -1167,7 +1375,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:spain jobs",
-    "verifiedAt": "2026-11-18T02:51:14.587Z"
+    "verifiedAt": "2026-11-18T02:51:14.587Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.162,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "notificajobs_madrid",
@@ -1181,7 +1393,7 @@
     "description": "Ofertas de trabajo / empleo en Madrid - NotificaJobs",
     "subscribers": 10800,
     "postsPerWeek": 8,
-    "qualityScore": 64,
+    "qualityScore": 38,
     "status": "ok",
     "tags": [
       "europe",
@@ -1189,7 +1401,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:madrid jobs",
-    "verifiedAt": "2026-11-18T02:51:14.905Z"
+    "verifiedAt": "2026-11-18T02:51:14.905Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.012,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobsineurop",
@@ -1203,7 +1419,7 @@
     "description": "Job seekers can join. For enquiries Dm @sachinsapfico Jobs in Europe, Asia, N.America, S.America, Africa. Australia. We don't charge any money. Recruiters can c",
     "subscribers": 6041,
     "postsPerWeek": 8,
-    "qualityScore": 64,
+    "qualityScore": 54,
     "status": "ok",
     "tags": [
       "europe",
@@ -1211,7 +1427,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:france jobs",
-    "verifiedAt": "2026-11-18T02:51:16.053Z"
+    "verifiedAt": "2026-11-18T02:51:16.053Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.173,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "vakankz",
@@ -1225,7 +1445,7 @@
     "description": "Работа и бизнес в Казахстане 🇰🇿 Размещение рекламы: t.me/vakankz?direct 👈Купить каналы 💰💰💰 Вакансии Услуги Недвижимость Автомобили Спецтехника Astana @vac",
     "subscribers": 17577,
     "postsPerWeek": 8,
-    "qualityScore": 63,
+    "qualityScore": 39,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -1233,7 +1453,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.019,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "astanahubcareer",
@@ -1247,7 +1471,7 @@
     "description": "You can view and join @astanahubcareer right away.",
     "subscribers": 2047,
     "postsPerWeek": 8,
-    "qualityScore": 63,
+    "qualityScore": 45,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -1255,7 +1479,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:astana hub",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.109,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "shymkent_rabota_job",
@@ -1269,7 +1497,7 @@
     "description": "🎁 Розыгрыш среди подписчиков Работа Шымкент: 50+ вакансий/день ✅ Проверенные с 2016 года ✅ Без пирамид и обмана Instagram: instagram.com/shymkent_rabota_job Оф",
     "subscribers": 7910,
     "postsPerWeek": 8,
-    "qualityScore": 63,
+    "qualityScore": 41,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -1277,7 +1505,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:shymkent job",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.051,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jsb_charts",
@@ -1291,7 +1523,7 @@
     "description": "Free crypto trading ideas - no fluff, no noise. Not financial advice. DYOR. Join VIP: https://t.me/cryptojobs3Bot",
     "subscribers": 4726,
     "postsPerWeek": 8,
-    "qualityScore": 63,
+    "qualityScore": 49,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1299,7 +1531,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:crypto jobs",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.13,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "remoteweb3jobs",
@@ -1313,7 +1549,7 @@
     "description": "🌍 Remote Web3, AI & Crypto Jobs Where Web3 startups hire global talent. 14,000+ remote professionals Daily curated roles • High visibility • Fast publishing 📩",
     "subscribers": 14419,
     "postsPerWeek": 8,
-    "qualityScore": 63,
+    "qualityScore": 64,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1322,7 +1558,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:blockchain jobs",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.244,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "seo_jobs",
@@ -1336,7 +1576,7 @@
     "description": "SEO вакансії Зв'язок: @neo_ads Реклама https://bit.ly/4cJjuSw Розміщуй безкоштовно SEO вакансії тут https://www.facebook.com/groups/seojob/ Вимога до ваки: ЗП, ",
     "subscribers": 4263,
     "postsPerWeek": 8,
-    "qualityScore": 63,
+    "qualityScore": 36,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -1344,7 +1584,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:05.043Z"
+    "verifiedAt": "2026-11-18T02:51:05.043Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.014,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobsupportsupport",
@@ -1358,7 +1602,7 @@
     "description": "You can view and join @jobsupportsupport right away.",
     "subscribers": 8427,
     "postsPerWeek": 14,
-    "qualityScore": 63,
+    "qualityScore": 49,
     "status": "group",
     "tags": [
       "europe",
@@ -1366,7 +1610,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:uk jobs",
-    "verifiedAt": "2026-11-18T02:51:10.251Z"
+    "verifiedAt": "2026-11-18T02:51:10.251Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.012,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "tecnoempleo_remoto",
@@ -1380,7 +1628,7 @@
     "description": "Las mejores ofertas de empleo tecnológico 100% en remoto",
     "subscribers": 8634,
     "postsPerWeek": 8,
-    "qualityScore": 63,
+    "qualityScore": 38,
     "status": "ok",
     "tags": [
       "europe",
@@ -1388,7 +1636,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:empleo remoto",
-    "verifiedAt": "2026-11-18T02:51:15.500Z"
+    "verifiedAt": "2026-11-18T02:51:15.500Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.017,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "astana_rabota_vacancy",
@@ -1402,7 +1654,7 @@
     "description": "Разместить вакансии, услуги, объявления: t.me/astana_rabota_vacancy?direct @vacankz1 @avastane @kazuspeh @vacankz",
     "subscribers": 1666,
     "postsPerWeek": 8,
-    "qualityScore": 62,
+    "qualityScore": 38,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -1410,7 +1662,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota astana",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.053,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobs_cryptos",
@@ -1424,7 +1680,7 @@
     "description": "Для публикации — @oleg3_admin Вакансии и резюме по криптовалюте, Web3, DeFi, NFT, блокчейну, биржам и трейдингу, GameFi, DAO Developer (Solana, Ethereum, Btc), ",
     "subscribers": 4067,
     "postsPerWeek": 8,
-    "qualityScore": 62,
+    "qualityScore": 51,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1432,7 +1688,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:crypto jobs",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.151,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "remotejobpositions",
@@ -1446,7 +1706,7 @@
     "description": "- Sign up on Coinbase, make a €20 trade, and get €20 bonus. -> https://tinyurl.com/coinbase20eur - netsons.com VPS Hosting Domain -> https://tinyurl.com/netsons",
     "subscribers": 3808,
     "postsPerWeek": 8,
-    "qualityScore": 62,
+    "qualityScore": 56,
     "status": "ok",
     "tags": [
       "europe",
@@ -1454,7 +1714,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:03.895Z"
+    "verifiedAt": "2026-11-18T02:51:03.895Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.195,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "horeca_premium",
@@ -1468,7 +1732,7 @@
     "description": "Перше місце, де з’являються вакансії&#33; Об’єднуємо професіоналів+роботодавців, HR, власників закладів сегменту HoReCa та пошукачів, націлених на розвиток. Роз",
     "subscribers": 5863,
     "postsPerWeek": 8,
-    "qualityScore": 62,
+    "qualityScore": 47,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -1476,7 +1740,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:uk jobs",
-    "verifiedAt": "2026-11-18T02:51:10.558Z"
+    "verifiedAt": "2026-11-18T02:51:10.558Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.11,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "notificajobs_barcelona",
@@ -1490,7 +1758,7 @@
     "description": "Ofertas de trabajo / empleo en Barcelona - NotificaJobs",
     "subscribers": 6594,
     "postsPerWeek": 8,
-    "qualityScore": 62,
+    "qualityScore": 37,
     "status": "ok",
     "tags": [
       "europe",
@@ -1498,7 +1766,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:barcelona jobs",
-    "verifiedAt": "2026-11-18T02:51:14.926Z"
+    "verifiedAt": "2026-11-18T02:51:14.926Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.013,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "remoteok",
@@ -1512,7 +1784,7 @@
     "description": "Get remote jobs within seconds after they’re posted on RemoteOK.com with this official Telegram live feed.",
     "subscribers": 12984,
     "postsPerWeek": 8,
-    "qualityScore": 61,
+    "qualityScore": 50,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1520,7 +1792,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.12,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "serbia_jobs",
@@ -1534,7 +1810,7 @@
     "description": "Channel with actual IT jobs/employees for those, who wish to relocate or already relocated to Serbia Для рекламы: @helgapataki",
     "subscribers": 14123,
     "postsPerWeek": 14,
-    "qualityScore": 61,
+    "qualityScore": 64,
     "status": "group",
     "tags": [
       "europe",
@@ -1542,7 +1818,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:00.762Z"
+    "verifiedAt": "2026-11-18T02:51:00.762Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.134,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "tbilisi_work",
@@ -1556,7 +1836,7 @@
     "description": "✉️ По вопросам рекламы и сотрудничества: @adv_svoimedia 🌐 Список чатов по странам мира тут: @svoi_chats 📌 Правила чата: https://telegra.ph/PRAVILA-CHATOV-02-2",
     "subscribers": 5443,
     "postsPerWeek": 14,
-    "qualityScore": 61,
+    "qualityScore": 65,
     "status": "group",
     "tags": [
       "europe",
@@ -1564,7 +1844,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:03.325Z"
+    "verifiedAt": "2026-11-18T02:51:03.325Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.163,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "minijobs_berlin",
@@ -1578,7 +1862,7 @@
     "description": "Minijob, Teilzeit, разовые заказы и временная работа в Берлине. Подработка на несколько часов, дней или с гибким графиком. Все наши каналы по Берлину - https://",
     "subscribers": 1164,
     "postsPerWeek": 8,
-    "qualityScore": 61,
+    "qualityScore": 36,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -1586,7 +1870,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:berlin jobs",
-    "verifiedAt": "2026-11-18T02:51:12.299Z"
+    "verifiedAt": "2026-11-18T02:51:12.299Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.042,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "saas_founders",
@@ -1600,7 +1888,7 @@
     "description": "Мысли про технологии и жизнь от CTO и индихакера. Для важных вопросов: @pixeljetter",
     "subscribers": 1797,
     "postsPerWeek": 8,
-    "qualityScore": 60,
+    "qualityScore": 35,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1608,7 +1896,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.022,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobs_web3",
@@ -1622,7 +1914,7 @@
     "description": "You can view and join @jobs_web3 right away.",
     "subscribers": 2508,
     "postsPerWeek": 8,
-    "qualityScore": 60,
+    "qualityScore": 50,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1630,7 +1922,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:web3 jobs",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.152,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "ibcghr",
@@ -1644,7 +1940,7 @@
     "description": "Здесь мы публикуем предложения по работе и вакансиям для специалистов по блокчейну, криптовалютам, метавселенным и финтеху. Размещение стоит 1500 рублей Контакт",
     "subscribers": 3684,
     "postsPerWeek": 8,
-    "qualityScore": 60,
+    "qualityScore": 53,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1652,7 +1948,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:blockchain jobs",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.17,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "gamedev_and_tech_vacancy",
@@ -1666,7 +1966,7 @@
     "description": "Привет&#33; Мы решили помочь с поиском сотрудников и работы мечты для кандидатов. Допускаются вакансии из GameDev, IT и CG. Запрос на публикацию через админа, п",
     "subscribers": 10593,
     "postsPerWeek": 8,
-    "qualityScore": 60,
+    "qualityScore": 42,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1674,7 +1974,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:tech jobs",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.048,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "batumi_work",
@@ -1688,7 +1992,7 @@
     "description": "✉️ По вопросам рекламы и сотрудничества: @adv_svoimedia 🌐 Список чатов по странам мира тут: @svoi_chats 📌 Правила чата: https://telegra.ph/PRAVILA-CHATOV-02-2",
     "subscribers": 4139,
     "postsPerWeek": 14,
-    "qualityScore": 60,
+    "qualityScore": 61,
     "status": "group",
     "tags": [
       "europe",
@@ -1696,7 +2000,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:03.325Z"
+    "verifiedAt": "2026-11-18T02:51:03.325Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.133,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobs_ukrainianinpoland",
@@ -1710,7 +2018,7 @@
     "description": "JOBS. Ukrainian in Poland - це знахідка для кожного, хто шукає роботу в Польщі. З приводу розміщення публікації на каналі писати @Stefaniia_Ukrainian_inPoland",
     "subscribers": 931,
     "postsPerWeek": 8,
-    "qualityScore": 60,
+    "qualityScore": 44,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -1718,7 +2026,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:poland jobs",
-    "verifiedAt": "2026-11-18T02:51:13.469Z"
+    "verifiedAt": "2026-11-18T02:51:13.469Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.114,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rabota_v_almaty_kz",
@@ -1732,7 +2044,7 @@
     "description": "Техподдержка: @ALegajob_bot Опубликовать вакансию: @ALegajob_bot Другие группы: @Rabota_vAlmaty @DomAlmaty @AlmatyCars @Motorbike3",
     "subscribers": 2922,
     "postsPerWeek": 14,
-    "qualityScore": 59,
+    "qualityScore": 51,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -1740,7 +2052,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota kz",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.049,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "mediadam",
@@ -1754,7 +2070,7 @@
     "description": "Инфополе о семинарах, курсах, вебинарах о медиа/журналистике и саморазвитии на казахском и русском🧿",
     "subscribers": 3340,
     "postsPerWeek": 8,
-    "qualityScore": 59,
+    "qualityScore": 53,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -1762,7 +2078,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:media kz",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.174,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "biznesshtabalmaty",
@@ -1776,7 +2096,7 @@
     "description": "Новости, аналитика и возможности для бизнеса в Алматы. Business news, insights and opportunities in Almaty.",
     "subscribers": 6481,
     "postsPerWeek": 8,
-    "qualityScore": 59,
+    "qualityScore": 39,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -1784,7 +2104,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:almaty business",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.032,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "startup_fairy",
@@ -1798,7 +2122,7 @@
     "description": "10 лет рисёчу рынки. Работала в Яндексе и Кембридже, сделала 160 исследований рынков. Строю бизнес в Англии. Помогаю компаниям попасть в ответы ЧатаГпт. Visibil",
     "subscribers": 6240,
     "postsPerWeek": 8,
-    "qualityScore": 59,
+    "qualityScore": 44,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1806,7 +2130,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:ai startup",
-    "verifiedAt": "2026-11-18T02:49:32.399Z"
+    "verifiedAt": "2026-11-18T02:49:32.399Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.083,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "social3jobs",
@@ -1820,7 +2148,7 @@
     "description": "Discover Web3 job opportunities with Social3&#33; Join us to explore the decentralized web and unlock exciting careers in the world of Web3. 🌐 Explore opportun",
     "subscribers": 7743,
     "postsPerWeek": 8,
-    "qualityScore": 59,
+    "qualityScore": 45,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1828,7 +2156,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:web3 jobs",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.086,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "startupjobs",
@@ -1842,7 +2174,7 @@
     "description": "Jobs @ StartUps across asia powered by http://startupjobs.asia/feed",
     "subscribers": 185,
     "postsPerWeek": 8,
-    "qualityScore": 59,
+    "qualityScore": 40,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1850,7 +2182,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:05.643Z"
+    "verifiedAt": "2026-11-18T02:51:05.643Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.114,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "ukr_jobs",
@@ -1864,7 +2200,7 @@
     "description": "Дошка вакансій Посилання на канал: https://t.me/Ukr_Jobs Розмістити вакансію: @PostingJobsBot Написати адміну: @UkrJobs_admin",
     "subscribers": 712,
     "postsPerWeek": 8,
-    "qualityScore": 59,
+    "qualityScore": 35,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -1872,7 +2208,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:uk jobs",
-    "verifiedAt": "2026-11-18T02:51:10.547Z"
+    "verifiedAt": "2026-11-18T02:51:10.547Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.046,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobs0germany",
@@ -1886,7 +2226,7 @@
     "description": "You can view and join @jobs0germany right away.",
     "subscribers": 2204,
     "postsPerWeek": 8,
-    "qualityScore": 59,
+    "qualityScore": 49,
     "status": "ok",
     "tags": [
       "europe",
@@ -1894,7 +2234,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:germany jobs",
-    "verifiedAt": "2026-11-18T02:51:11.689Z"
+    "verifiedAt": "2026-11-18T02:51:11.689Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.149,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "london_jobs",
@@ -1908,7 +2252,7 @@
     "description": "A group to post and share Jobs in London Spammers will be reported and removed. Contact @ICanFor if you want to post a job, or you have any questions. ------- @",
     "subscribers": 6143,
     "postsPerWeek": 14,
-    "qualityScore": 58,
+    "qualityScore": 59,
     "status": "group",
     "tags": [
       "europe",
@@ -1916,7 +2260,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.11,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rabotav_kz",
@@ -1930,7 +2278,7 @@
     "description": "ВАКАНСИИ | ПОИСК РАБОТЫ https://rabotav.kz",
     "subscribers": 605,
     "postsPerWeek": 8,
-    "qualityScore": 58,
+    "qualityScore": 31,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -1938,7 +2286,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota kz",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.012,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "designerkz",
@@ -1960,7 +2312,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:design kz",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.25,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "yourweb3jobs",
@@ -1974,7 +2330,7 @@
     "description": "Start a career in Crypto. Daily new Jobs → http://web3.jobs",
     "subscribers": 1599,
     "postsPerWeek": 8,
-    "qualityScore": 58,
+    "qualityScore": 49,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -1982,7 +2338,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:web3 jobs",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.15,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "united_kingdom_jobs",
@@ -2004,7 +2364,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:london jobs",
-    "verifiedAt": "2026-11-18T02:51:10.825Z"
+    "verifiedAt": "2026-11-18T02:51:10.825Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.075,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "arbeit_ausbildung_deutschland",
@@ -2018,7 +2382,7 @@
     "description": "Учёба, работа - поиск, предложение, информация в Германии. Язык общения русский/немецкий. Разрешены ссылки на официальные источники. За удаление сообщений - бан",
     "subscribers": 10865,
     "postsPerWeek": 14,
-    "qualityScore": 58,
+    "qualityScore": 52,
     "status": "group",
     "tags": [
       "europe",
@@ -2026,7 +2390,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:arbeit deutschland",
-    "verifiedAt": "2026-11-18T02:51:12.596Z"
+    "verifiedAt": "2026-11-18T02:51:12.596Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.037,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobsin_poland",
@@ -2040,7 +2408,7 @@
     "description": "Добро пожаловать в наш канал о работе в Польше&#33; 🇵🇱 Здесь публикуются самые актуальные вакансии в Варшаве и других городах Польши. Присоединяйтесь к каналу",
     "subscribers": 7073,
     "postsPerWeek": 8,
-    "qualityScore": 58,
+    "qualityScore": 52,
     "status": "ok",
     "tags": [
       "europe",
@@ -2048,7 +2416,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:poland jobs",
-    "verifiedAt": "2026-11-18T02:51:13.195Z"
+    "verifiedAt": "2026-11-18T02:51:13.195Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.153,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "affiliate_jobs_warsaw",
@@ -2062,7 +2434,7 @@
     "description": "Чат по поиску работы в сфере Affiliate Marketing с фокусом на Польшу. Размещение вакансий и резюме через бот @affpoland_hr_bot . Добавить в чат - пишите @mari_a",
     "subscribers": 4832,
     "postsPerWeek": 14,
-    "qualityScore": 58,
+    "qualityScore": 64,
     "status": "group",
     "tags": [
       "europe",
@@ -2070,7 +2442,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:warsaw jobs",
-    "verifiedAt": "2026-11-18T02:51:13.490Z"
+    "verifiedAt": "2026-11-18T02:51:13.490Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.154,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rabota_astana_online",
@@ -2084,7 +2460,7 @@
     "description": "📢 Работа Астана | Вакансии Свежие вакансии для всех: • подработка • постоянная работа • разные графики 📍 Актуальные вакансии каждый день 📩 По вопросам: @Span",
     "subscribers": 2054,
     "postsPerWeek": 14,
-    "qualityScore": 57,
+    "qualityScore": 46,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -2092,7 +2468,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota astana",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.017,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "itnomads_jobs",
@@ -2106,7 +2486,7 @@
     "description": "Вакансии и стажировки по IT 🇰🇿 для публикации писать: @ansagan_gb Новости и ивенты @itnomads_kz",
     "subscribers": 510,
     "postsPerWeek": 8,
-    "qualityScore": 57,
+    "qualityScore": 33,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2114,7 +2494,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:it jobs kz",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.035,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "atyrau_job_pavlin",
@@ -2128,7 +2512,7 @@
     "description": "Pavlin – Атырауда қаласындағы бос жұмыс орындары бар топ Работа | Ish bor |Жұмыс Казахстан көбірек топтық жұмыс Атырауда https://t.me/atyrau_ishbor_pavlin Алмат",
     "subscribers": 2061,
     "postsPerWeek": 14,
-    "qualityScore": 57,
+    "qualityScore": 51,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -2136,7 +2520,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:atyrau job",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.058,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "techjobsdaily",
@@ -2150,7 +2538,7 @@
     "description": "Daily curated Tech, Remote, AI & Web3 jobs. Handpicked Engineering, Product, Design, and Business Growth roles. Turn your CV into a professional portfolio websi",
     "subscribers": 5294,
     "postsPerWeek": 8,
-    "qualityScore": 57,
+    "qualityScore": 47,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -2160,7 +2548,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:tech jobs",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.106,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rabota_v_polshe_evrope",
@@ -2174,7 +2566,7 @@
     "description": "Вакансии в Польше - объявления с вакансиями на работу в Польше для иностранцев в Польше и других странах Европы https://e-delo.pl",
     "subscribers": 547,
     "postsPerWeek": 8,
-    "qualityScore": 57,
+    "qualityScore": 33,
     "status": "ok",
     "tags": [
       "europe",
@@ -2182,7 +2574,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota v evrope",
-    "verifiedAt": "2026-11-18T02:51:09.021Z"
+    "verifiedAt": "2026-11-18T02:51:09.021Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.028,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "work_ukr_deutschland",
@@ -2196,7 +2592,7 @@
     "description": "Шукаєш роботу? Кращі вакансії для українців 🇺🇦 в Німеччині🇩🇪 Знаходь своє місто та обирай роботу😊",
     "subscribers": 1889,
     "postsPerWeek": 8,
-    "qualityScore": 57,
+    "qualityScore": 39,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2204,7 +2600,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:arbeit deutschland",
-    "verifiedAt": "2026-11-18T02:51:12.598Z"
+    "verifiedAt": "2026-11-18T02:51:12.598Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.059,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "tbilisi_it",
@@ -2218,7 +2618,7 @@
     "description": "Общий чат IT Грузии: https://t.me/+bbFGWlTpWHk0YWY6 Реклама: @wow_alena",
     "subscribers": 1525,
     "postsPerWeek": 14,
-    "qualityScore": 56,
+    "qualityScore": 61,
     "status": "group",
     "tags": [
       "europe",
@@ -2226,7 +2626,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.156,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "it_jobkz",
@@ -2240,7 +2644,7 @@
     "description": "Актуальные вакансии в сфере IT по Казахстану и не только. Разработка, QA, аналитика, DevOps, продукт и дизайн. По поводу размещения вакансии или мок-интервью: @",
     "subscribers": 1431,
     "postsPerWeek": 8,
-    "qualityScore": 56,
+    "qualityScore": 49,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2248,7 +2652,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:it jobs kz",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.149,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "nationalbusiness_kz",
@@ -2262,7 +2670,7 @@
     "description": "Новости бизнеса и экономики Казахстана. Instagram: instagram.com/national.business.kazakhstan Facebook: facebook.com/NationalBusinesskz Threads: threads.com/nat",
     "subscribers": 3119,
     "postsPerWeek": 8,
-    "qualityScore": 56,
+    "qualityScore": 37,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2270,7 +2678,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:kazakhstan business",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.035,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "astana_hub_community",
@@ -2284,7 +2696,7 @@
     "description": "Salem, IT Alem&#33; Бұл чат IT тақырыбы бойынша диалог алаңы болып табылады. Этот чат — площадка диалога по теме IT. This chat is a platform for dialogue on IT ",
     "subscribers": 5979,
     "postsPerWeek": 14,
-    "qualityScore": 56,
+    "qualityScore": 60,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -2292,7 +2704,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:astana hub",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.116,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "chainjobs1",
@@ -2306,7 +2722,7 @@
     "description": "Работа в ведущих блокчейн компаниях мира. Вакансии и лучшие предложения. Релокация за рубеж. https://blockchainhh.com",
     "subscribers": 1446,
     "postsPerWeek": 14,
-    "qualityScore": 56,
+    "qualityScore": 64,
     "status": "group",
     "tags": [
       "usa-global",
@@ -2314,7 +2730,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:blockchain jobs",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.183,
+    "gigsPerWeek": 3,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "workeuropeeuwww",
@@ -2328,7 +2748,7 @@
     "description": "Хочешь работать в Европе? 🇪🇺 Германия / Бельгия 💶 Хорошая зарплата 🏠 Жильё +491712931765 Viber, WhatsApp,Telegram",
     "subscribers": 3801,
     "postsPerWeek": 8,
-    "qualityScore": 56,
+    "qualityScore": 52,
     "status": "ok",
     "tags": [
       "europe",
@@ -2336,7 +2756,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:work in europe",
-    "verifiedAt": "2026-11-18T02:51:08.676Z"
+    "verifiedAt": "2026-11-18T02:51:08.676Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.16,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "work_with_us_in_europe",
@@ -2350,7 +2774,7 @@
     "description": "👷 Contract jobs for skilled workers with EU citizenship. 👷 Работа по контракту для специалистов с гражданством Евросоюза. 📞 Наши контакты: +372 5697 2421 +37",
     "subscribers": 3651,
     "postsPerWeek": 8,
-    "qualityScore": 56,
+    "qualityScore": 41,
     "status": "ok",
     "tags": [
       "europe",
@@ -2358,7 +2782,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:work in europe",
-    "verifiedAt": "2026-11-18T02:51:08.740Z"
+    "verifiedAt": "2026-11-18T02:51:08.740Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.062,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "arbeit_germaniya",
@@ -2372,7 +2800,7 @@
     "description": "You can view and join @arbeit_germaniya right away.",
     "subscribers": 1426,
     "postsPerWeek": 14,
-    "qualityScore": 56,
+    "qualityScore": 50,
     "status": "group",
     "tags": [
       "europe",
@@ -2380,7 +2808,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:arbeit deutschland",
-    "verifiedAt": "2026-11-18T02:51:12.603Z"
+    "verifiedAt": "2026-11-18T02:51:12.603Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.052,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "job_rabota888",
@@ -2394,7 +2826,7 @@
     "description": "Ищем ИТ специалистов со стран СНГ и по Казахстану",
     "subscribers": 1205,
     "postsPerWeek": 8,
-    "qualityScore": 55,
+    "qualityScore": 37,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2402,7 +2834,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota kz",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.052,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "digitalagentkz",
@@ -2416,7 +2852,7 @@
     "description": "Блог об IT-проектах в Казахстане. Приносим пользу стране, продолжаем дело Мируса Курмашева.",
     "subscribers": 2557,
     "postsPerWeek": 8,
-    "qualityScore": 55,
+    "qualityScore": 38,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2424,7 +2860,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:digital kz",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.046,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "designerkz_chat",
@@ -2438,7 +2878,7 @@
     "description": "Чат дизайнеров Казахстана. ⚫️ Канал https://t.me/designerkz 🟡 Флудилка https://t.me/designerkz_flood",
     "subscribers": 1411,
     "postsPerWeek": 14,
-    "qualityScore": 55,
+    "qualityScore": 62,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -2446,7 +2886,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:design kz",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.162,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "cryptoblockchainjobs",
@@ -2460,15 +2904,19 @@
     "description": "For job posting: @arinaoring ☘️ The publication is free.",
     "subscribers": 3457,
     "postsPerWeek": 14,
-    "qualityScore": 55,
+    "qualityScore": 68,
     "status": "group",
     "tags": [
       "usa-global",
       "startups"
     ],
-    "recommended": false,
+    "recommended": true,
     "discoveredFrom": "tg-search:blockchain jobs",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.199,
+    "gigsPerWeek": 3,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "robotaeuro",
@@ -2482,7 +2930,7 @@
     "description": "Вакансії у Європі. Публікувати можна тільки вакансії. You can only post a job offer. This chat is for sale. Who wants to buy it, send me a DM. Admin @its_my_mai",
     "subscribers": 1343,
     "postsPerWeek": 14,
-    "qualityScore": 55,
+    "qualityScore": 54,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -2490,7 +2938,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:work in europe",
-    "verifiedAt": "2026-11-18T02:51:08.755Z"
+    "verifiedAt": "2026-11-18T02:51:08.755Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.088,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "almaty_vakansii_kz",
@@ -2504,7 +2956,7 @@
     "description": "Работа в Алматы | Вакансии Алмата. Публикация вакансий платная. обращаться @onetbv",
     "subscribers": 259,
     "postsPerWeek": 8,
-    "qualityScore": 54,
+    "qualityScore": 34,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2512,7 +2964,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.057,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "vakankz1",
@@ -2526,7 +2982,7 @@
     "description": "Работа и бизнес в Казахстане 🇰🇿 Размещение рекламы: t.me/vakankz?direct 👈Купить каналы 💰💰💰 Вакансии Услуги Недвижимость @vakankz @vacankz #работаКазахстан",
     "subscribers": 2029,
     "postsPerWeek": 14,
-    "qualityScore": 54,
+    "qualityScore": 48,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -2534,7 +2990,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:vakankz",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.029,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rabota_kz_vsem",
@@ -2548,7 +3008,7 @@
     "description": "Канал для размещения вакансий и поиска работы в Казахстане Для размещения вакансий посылайте сообщение модератору: t.me/Sprut7777 По вопросу рекламы также пишит",
     "subscribers": 1056,
     "postsPerWeek": 8,
-    "qualityScore": 54,
+    "qualityScore": 37,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2556,7 +3016,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota kz",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.055,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "digitalministry_kz",
@@ -2570,7 +3034,7 @@
     "description": "🌐 ҚР Жасанды интеллект және цифрлық даму министрлігінің баспасөз қызметі 🌐 Пресс-служба Министерства искусственного интеллекта и цифрового развития РК Instagr",
     "subscribers": 2190,
     "postsPerWeek": 8,
-    "qualityScore": 54,
+    "qualityScore": 50,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2578,7 +3042,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:digital kz",
-    "verifiedAt": "2026-11-18T02:49:32.400Z"
+    "verifiedAt": "2026-11-18T02:49:32.400Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.154,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "startup_ai",
@@ -2592,7 +3060,7 @@
     "description": "Лайф канал об ИТ-стартапах: привлечение инвестиций, поиск команды, выход на продажи в B2B Для связи - @korolevanastasiaa",
     "subscribers": 511,
     "postsPerWeek": 8,
-    "qualityScore": 54,
+    "qualityScore": 31,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -2600,7 +3068,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:ai startup",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.016,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "hr_tech_startups",
@@ -2614,7 +3086,7 @@
     "description": "Это канал от энтузиастов Авито Работы для тех, кто делает проекты в сфере HR tech. Здесь мы постим новости стартапов, мнения экспертов, тренды и анонсы мероприя",
     "subscribers": 1885,
     "postsPerWeek": 8,
-    "qualityScore": 54,
+    "qualityScore": 36,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -2622,7 +3094,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:tech startups",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.033,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobstream_ukr",
@@ -2636,7 +3112,7 @@
     "description": "You can view and join @jobstream_ukr right away.",
     "subscribers": 947,
     "postsPerWeek": 14,
-    "qualityScore": 54,
+    "qualityScore": 46,
     "status": "group",
     "tags": [
       "europe",
@@ -2644,7 +3120,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:uk jobs",
-    "verifiedAt": "2026-11-18T02:51:10.249Z"
+    "verifiedAt": "2026-11-18T02:51:10.249Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.025,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "techinuk",
@@ -2658,7 +3138,7 @@
     "description": "Как переехать в Великобританию и запустить бизнес? Визы, налоги, советы и новости технологической экосистемы Англии. Визовая поддержка Immigram: clck.ru/eYDRJ",
     "subscribers": 1807,
     "postsPerWeek": 8,
-    "qualityScore": 54,
+    "qualityScore": 34,
     "status": "ok",
     "tags": [
       "europe",
@@ -2666,7 +3146,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:uk tech",
-    "verifiedAt": "2026-11-18T02:51:11.401Z"
+    "verifiedAt": "2026-11-18T02:51:11.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.016,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "arbeit_doska_deutschland",
@@ -2680,7 +3164,7 @@
     "description": "ТЕЛЕГРАМ КАНАЛ для поиска работы в Германии‼️ Трудоустройство, достойная зарплата, выгодные предложения любой специальности ➡️ По поводу рекламы ФБ, Viber, TG ➡",
     "subscribers": 2660,
     "postsPerWeek": 8,
-    "qualityScore": 54,
+    "qualityScore": 48,
     "status": "ok",
     "tags": [
       "europe",
@@ -2688,7 +3172,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:arbeit deutschland",
-    "verifiedAt": "2026-11-18T02:51:12.597Z"
+    "verifiedAt": "2026-11-18T02:51:12.597Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.135,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobs_in_poland1",
@@ -2702,7 +3190,7 @@
     "description": "Площадка для поиска работы/работников в Польше Правила и условия публикации @Poland_Job_Support_Bot Админ: @Skorpion4eg",
     "subscribers": 2664,
     "postsPerWeek": 14,
-    "qualityScore": 54,
+    "qualityScore": 64,
     "status": "group",
     "tags": [
       "europe",
@@ -2710,7 +3198,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:poland jobs",
-    "verifiedAt": "2026-11-18T02:51:13.185Z"
+    "verifiedAt": "2026-11-18T02:51:13.185Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.168,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "vakansii_qazaqstan_kz",
@@ -2724,7 +3216,7 @@
     "description": "Добро пожаловать в наш телеграм-канал, где вы найдете свежие вакансии в сфере SMM, копирайтинга, дизайна, аккаунт-менеджмента и других digital-направлений. Здес",
     "subscribers": 1654,
     "postsPerWeek": 8,
-    "qualityScore": 53,
+    "qualityScore": 51,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2732,7 +3224,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:vakansii kz",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.171,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "vakansii_kz",
@@ -2746,7 +3242,7 @@
     "description": "You can view and join @vakansii_kz right away.",
     "subscribers": 200,
     "postsPerWeek": 8,
-    "qualityScore": 53,
+    "qualityScore": 29,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2754,7 +3250,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:vakansii kz",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.012,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobs_it_kz",
@@ -2768,7 +3268,7 @@
     "description": "Канал для вакансий в ИТ и разовых заказов На счет размещения вакансии писать админу @digital_j_kz",
     "subscribers": 440,
     "postsPerWeek": 8,
-    "qualityScore": 53,
+    "qualityScore": 42,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2776,7 +3276,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:it jobs kz",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.113,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rabota_zhumys_kz",
@@ -2790,7 +3294,7 @@
     "description": "You can view and join @rabota_zhumys_kz right away.",
     "subscribers": 180,
     "postsPerWeek": 8,
-    "qualityScore": 53,
+    "qualityScore": 33,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -2798,7 +3302,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:zhumys kz",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.05,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "sapjobscisg",
@@ -2812,7 +3320,7 @@
     "description": "You can view and join @sapjobscisg right away.",
     "subscribers": 1793,
     "postsPerWeek": 14,
-    "qualityScore": 53,
+    "qualityScore": 60,
     "status": "group",
     "tags": [
       "europe",
@@ -2820,7 +3328,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:europe jobs",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.139,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "metaworkdao",
@@ -2834,7 +3346,7 @@
     "description": "The official announcement group by MetaWork Discord: https://discord.gg/K8bBEXXCRx Twitter: https://twitter.com/MetaWorkDao",
     "subscribers": 464,
     "postsPerWeek": 8,
-    "qualityScore": 53,
+    "qualityScore": 39,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -2842,7 +3354,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:web3 jobs",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.088,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "georgia_it",
@@ -2856,7 +3372,7 @@
     "description": "Это IT чат по Грузии • Чаты по 140 странам МИРА: @tele_360chat • Анонсы новых групп: @slavianskiy_forum - Реклама: @PR_3600 - Как снять БАН: @unlock_360 - Техпо",
     "subscribers": 2010,
     "postsPerWeek": 14,
-    "qualityScore": 53,
+    "qualityScore": 54,
     "status": "group",
     "tags": [
       "europe",
@@ -2864,7 +3380,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:00.480Z"
+    "verifiedAt": "2026-11-18T02:51:00.480Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.082,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "findmyremote_europe",
@@ -2878,7 +3398,7 @@
     "description": "You can view and join @findmyremote_europe right away.",
     "subscribers": 487,
     "postsPerWeek": 8,
-    "qualityScore": 53,
+    "qualityScore": 48,
     "status": "ok",
     "tags": [
       "europe",
@@ -2886,7 +3406,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:jobs in europe",
-    "verifiedAt": "2026-11-18T02:51:08.401Z"
+    "verifiedAt": "2026-11-18T02:51:08.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.161,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "berlinwork",
@@ -2900,7 +3424,7 @@
     "description": "You can view and join @berlinwork right away.",
     "subscribers": 1790,
     "postsPerWeek": 14,
-    "qualityScore": 53,
+    "qualityScore": 59,
     "status": "group",
     "tags": [
       "europe",
@@ -2908,7 +3432,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:berlin jobs",
-    "verifiedAt": "2026-11-18T02:51:12.283Z"
+    "verifiedAt": "2026-11-18T02:51:12.283Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.129,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobs24_spain",
@@ -2922,7 +3450,7 @@
     "description": "🇪🇸 Свежие вакансии по всей Испании ✔ Без посредников ✔ Прямые контакты работодателей ✔ Ежедневные обновления 📍 Валенсия | Барселона | Аликанте | Мадрид 📩 По",
     "subscribers": 2154,
     "postsPerWeek": 8,
-    "qualityScore": 53,
+    "qualityScore": 51,
     "status": "ok",
     "tags": [
       "europe",
@@ -2930,7 +3458,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:spain jobs",
-    "verifiedAt": "2026-11-18T02:51:14.637Z"
+    "verifiedAt": "2026-11-18T02:51:14.637Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.16,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "web3jobs",
@@ -2944,7 +3476,7 @@
     "description": "UltraGenius Network helps you find high paying, remote, web3 Jobs. Pls check https://app.ultragenius.club",
     "subscribers": 1761,
     "postsPerWeek": 14,
-    "qualityScore": 52,
+    "qualityScore": 51,
     "status": "group",
     "tags": [
       "usa-global",
@@ -2953,7 +3485,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.064,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "almaty_zhumys_kz",
@@ -2967,7 +3503,7 @@
     "description": "ЖҰМЫС ЖӘНЕ ЖҰМЫС",
     "subscribers": 2596,
     "postsPerWeek": 14,
-    "qualityScore": 52,
+    "qualityScore": 47,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -2975,7 +3511,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:zhumys kz",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.02,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "designerkz_flood",
@@ -2989,15 +3529,19 @@
     "description": "Чат-флудилка, обо всем, что интересно дизайнерам ⚫️ Канал – https://t.me/designerkz 🟢 Чат – https://t.me/designerkz_chat",
     "subscribers": 582,
     "postsPerWeek": 14,
-    "qualityScore": 52,
+    "qualityScore": 69,
     "status": "group",
     "tags": [
       "kazakhstan",
       "motion"
     ],
-    "recommended": false,
+    "recommended": true,
     "discoveredFrom": "tg-search:design kz",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.244,
+    "gigsPerWeek": 3,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "ai9campus",
@@ -3011,7 +3555,7 @@
     "description": "AI9 is an international startup campus located in Yerevan, Armenia, focused on AI, startups, and a vibrant community of visionary tech founders web: ai9.am inst",
     "subscribers": 1210,
     "postsPerWeek": 8,
-    "qualityScore": 52,
+    "qualityScore": 33,
     "status": "ok",
     "tags": [
       "europe",
@@ -3019,7 +3563,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:ai startup",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.011,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rust_jobs_nobc",
@@ -3033,7 +3581,7 @@
     "description": "курированный стрим раст вакансий",
     "subscribers": 641,
     "postsPerWeek": 8,
-    "qualityScore": 52,
+    "qualityScore": 37,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -3041,7 +3589,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:blockchain jobs",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.059,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "unitedkingdom_jobs",
@@ -3055,7 +3607,7 @@
     "description": "✅ Jobs in london & United Kingdom ✅ ✅Offering a job / Searching for one?✅ ✅That's a Work Marketplace for you&#33;✅ ✅Join and Recommend it.✅🇬🇧🇬🇧 ⚠️❗️Please m",
     "subscribers": 6663,
     "postsPerWeek": 14,
-    "qualityScore": 52,
+    "qualityScore": 66,
     "status": "group",
     "tags": [
       "europe",
@@ -3063,7 +3615,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:london jobs",
-    "verifiedAt": "2026-11-18T02:51:10.820Z"
+    "verifiedAt": "2026-11-18T02:51:10.820Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.166,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "work_jobs_germany",
@@ -3077,7 +3633,7 @@
     "description": "Jobs/Stellenangebote in Deutschland/ Germany https://personal-de.com/",
     "subscribers": 384,
     "postsPerWeek": 8,
-    "qualityScore": 52,
+    "qualityScore": 46,
     "status": "ok",
     "tags": [
       "europe",
@@ -3085,7 +3641,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:germany jobs",
-    "verifiedAt": "2026-11-18T02:51:11.990Z"
+    "verifiedAt": "2026-11-18T02:51:11.990Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.152,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "armenia_it",
@@ -3099,7 +3659,7 @@
     "description": "Это IT чат по Армении • Чаты по 150+ странам МИРА: @tele_360chat • Анонсы новых групп: @slavianskiy_forum - Реклама: @PR_3600 - Как снять БАН: @unlock_360 - Тех",
     "subscribers": 1345,
     "postsPerWeek": 14,
-    "qualityScore": 51,
+    "qualityScore": 56,
     "status": "group",
     "tags": [
       "europe",
@@ -3107,7 +3667,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.107,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "blockchain_jobs",
@@ -3121,7 +3685,7 @@
     "description": "You can view and join @blockchain_jobs right away.",
     "subscribers": 554,
     "postsPerWeek": 14,
-    "qualityScore": 51,
+    "qualityScore": 45,
     "status": "group",
     "tags": [
       "usa-global",
@@ -3129,7 +3693,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.033,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "ecommerce_hub",
@@ -3143,7 +3711,7 @@
     "description": "Un canale dedicato a tutte quelle persone che voglio imparare seriamente a fare Ecommerce & Dropshipping. Troverai strategie, risultati, template e tutorial mol",
     "subscribers": 1043,
     "postsPerWeek": 8,
-    "qualityScore": 51,
+    "qualityScore": 34,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -3151,7 +3719,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.025,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "vakansii_v_kz",
@@ -3165,7 +3737,7 @@
     "description": "Актуальные вакансии для граждан прибывших из РФ",
     "subscribers": 489,
     "postsPerWeek": 8,
-    "qualityScore": 51,
+    "qualityScore": 34,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -3173,7 +3745,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:vakansii kz",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.036,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "digitalnomad_club",
@@ -3195,7 +3771,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:almaty digital",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.04,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "tiktokforbusiness_kz",
@@ -3209,7 +3789,7 @@
     "description": "Официальный канал TikTok for Business в Казахстане. Официальный партнер в Казахстане - Httpool Основные ресурсы: https://taplink.cc/tiktokforbusiness_kz",
     "subscribers": 136,
     "postsPerWeek": 8,
-    "qualityScore": 51,
+    "qualityScore": 33,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -3217,7 +3797,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:kazakhstan business",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.052,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "productvibe",
@@ -3231,7 +3815,7 @@
     "description": "Канал о создании продуктов с ИИ. Разбор AI инструментов. Автоматизация рабочих процессов. Вайб-кодинг. Продуктовые тактики. Tips&Tricks. Автор: Алексей Копыстын",
     "subscribers": 1093,
     "postsPerWeek": 8,
-    "qualityScore": 51,
+    "qualityScore": 34,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -3239,7 +3823,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:ai startup",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.028,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "happyhiring",
@@ -3253,7 +3841,7 @@
     "description": "👨‍💻 Vacancies in EU, UAE 🌎 🌟 Write DM for the interview preparation 🌟",
     "subscribers": 1199,
     "postsPerWeek": 8,
-    "qualityScore": 51,
+    "qualityScore": 50,
     "status": "ok",
     "tags": [
       "europe",
@@ -3261,7 +3849,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:jobs in europe",
-    "verifiedAt": "2026-11-18T02:51:08.380Z"
+    "verifiedAt": "2026-11-18T02:51:08.380Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.162,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "hotberlinjobs",
@@ -3275,7 +3867,7 @@
     "description": "This channel lists jobs from Berlin as listed on jobsRmine portal. Invite your friends via - https://t.me/hotberlinjobs",
     "subscribers": 338,
     "postsPerWeek": 8,
-    "qualityScore": 51,
+    "qualityScore": 44,
     "status": "ok",
     "tags": [
       "europe",
@@ -3283,7 +3875,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:berlin jobs",
-    "verifiedAt": "2026-11-18T02:51:11.995Z"
+    "verifiedAt": "2026-11-18T02:51:11.995Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.136,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "barcajobs",
@@ -3297,7 +3893,7 @@
     "description": "Any vacancies and jobs offers in Barcelona on English and not only. Cooperation and contact: @managgerP",
     "subscribers": 122,
     "postsPerWeek": 8,
-    "qualityScore": 51,
+    "qualityScore": 30,
     "status": "ok",
     "tags": [
       "europe",
@@ -3305,7 +3901,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:barcelona jobs",
-    "verifiedAt": "2026-11-18T02:51:15.166Z"
+    "verifiedAt": "2026-11-18T02:51:15.166Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.03,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "empleos_remoto",
@@ -3319,7 +3919,7 @@
     "description": "Descubre empleos remotos todos los días",
     "subscribers": 528,
     "postsPerWeek": 8,
-    "qualityScore": 51,
+    "qualityScore": 34,
     "status": "ok",
     "tags": [
       "europe",
@@ -3327,7 +3927,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:empleo remoto",
-    "verifiedAt": "2026-11-18T02:51:15.787Z"
+    "verifiedAt": "2026-11-18T02:51:15.787Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.038,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "emploifrance",
@@ -3341,7 +3945,7 @@
     "description": "Bienvenue dans le Canal Emplois France. Plus de 2000 personnes ont décroché leur emplois à travers ce canal. Faites votre choix et Postulez à un emploi de vos r",
     "subscribers": 1127,
     "postsPerWeek": 8,
-    "qualityScore": 51,
+    "qualityScore": 48,
     "status": "ok",
     "tags": [
       "europe",
@@ -3349,7 +3953,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:france jobs",
-    "verifiedAt": "2026-11-18T02:51:16.074Z"
+    "verifiedAt": "2026-11-18T02:51:16.074Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.146,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "international_jobs",
@@ -3363,7 +3971,7 @@
     "description": "M.TECH JOBS | MCA JOBS | BBA JOBS | B.TECH JOBS | B.SC JOBS | BCA JOBS | B.COM JOBS | CA JOBS | LLB JOBS | PH.D JOBS | 12TH PASS JOBS | 10TH PASS JOBS #Ask4Jobs",
     "subscribers": 944,
     "postsPerWeek": 8,
-    "qualityScore": 51,
+    "qualityScore": 32,
     "status": "ok",
     "tags": [
       "europe",
@@ -3371,7 +3979,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:france jobs",
-    "verifiedAt": "2026-11-18T02:51:16.075Z"
+    "verifiedAt": "2026-11-18T02:51:16.075Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.012,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobsinberlin",
@@ -3393,7 +4005,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.036,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "freelance_chat_kz",
@@ -3407,7 +4023,7 @@
     "description": "Freelance kz. Наш канал - https://t.me/freelancekazkz Второй чат - https://t.me/freelance_kazakhstan_chat_kz Q&A - @Freelanceforubot Join",
     "subscribers": 369,
     "postsPerWeek": 14,
-    "qualityScore": 50,
+    "qualityScore": 42,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -3415,7 +4031,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:freelance kz",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.011,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "kzanatty_design",
@@ -3429,7 +4049,7 @@
     "description": "заряжаю на спорт, красивые завтраки 🥑 и work-life balance Для связи: @kzanatty https://www.instagram.com/kzanatty.life?igsh=OHU0OTM1Mmxjc2Q0",
     "subscribers": 106,
     "postsPerWeek": 8,
-    "qualityScore": 50,
+    "qualityScore": 51,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -3437,7 +4057,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:design kz",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.217,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobsweb3",
@@ -3451,7 +4075,7 @@
     "description": "Web3 jobs",
     "subscribers": 959,
     "postsPerWeek": 8,
-    "qualityScore": 50,
+    "qualityScore": 48,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -3459,7 +4083,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:web3 jobs",
-    "verifiedAt": "2026-11-18T02:49:32.401Z"
+    "verifiedAt": "2026-11-18T02:49:32.401Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.149,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "crypto_jobs_hub",
@@ -3481,7 +4109,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:crypto jobs",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.039,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "techie_jobs",
@@ -3495,7 +4127,7 @@
     "description": "You can view and join @techie_jobs right away.",
     "subscribers": 275,
     "postsPerWeek": 8,
-    "qualityScore": 50,
+    "qualityScore": 33,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -3503,7 +4135,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:tech jobs",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.044,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "london_jobs_4u",
@@ -3517,7 +4153,7 @@
     "description": "Здесь можно задавать вопросы касательно жизни и отдыха в Великобритании, а также делиться полезной информацией. В чате можно размещать объявления услуг, работы,",
     "subscribers": 3847,
     "postsPerWeek": 14,
-    "qualityScore": 50,
+    "qualityScore": 56,
     "status": "group",
     "tags": [
       "europe",
@@ -3525,7 +4161,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:uk jobs",
-    "verifiedAt": "2026-11-18T02:51:10.253Z"
+    "verifiedAt": "2026-11-18T02:51:10.253Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.09,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "remotejobsspain",
@@ -3539,7 +4179,7 @@
     "description": "Invitelink: https://t.me/remotejobsspain",
     "subscribers": 277,
     "postsPerWeek": 8,
-    "qualityScore": 50,
+    "qualityScore": 37,
     "status": "ok",
     "tags": [
       "europe",
@@ -3547,7 +4187,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:spain jobs",
-    "verifiedAt": "2026-11-18T02:51:14.626Z"
+    "verifiedAt": "2026-11-18T02:51:14.626Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.08,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "almaty1_rabota",
@@ -3561,7 +4205,7 @@
     "description": "❗️ Поиск работы и сотрудников в Алматы ❗️ Только свежие вакансии",
     "subscribers": 304,
     "postsPerWeek": 8,
-    "qualityScore": 49,
+    "qualityScore": 32,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -3569,7 +4213,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota almaty",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.029,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "businesshub_kz",
@@ -3591,7 +4239,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:kazakhstan business",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.049,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "shymkent_job_pavlin",
@@ -3605,7 +4257,7 @@
     "description": "Pavlin – Шымкенте қаласындағы бос жұмыс орындары бар топ Работа | Ish bor |Жұмыс Казахстан көбірек топтық жұмыс Шымкентте https://t.me/shymkent_ishbor_pavlin Ат",
     "subscribers": 307,
     "postsPerWeek": 14,
-    "qualityScore": 49,
+    "qualityScore": 42,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -3613,7 +4265,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:shymkent job",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.017,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "digitalmarketing",
@@ -3627,7 +4283,7 @@
     "description": "Espacio para compartir aprendizajes sobre la atmósfera digital.",
     "subscribers": 661,
     "postsPerWeek": 8,
-    "qualityScore": 49,
+    "qualityScore": 33,
     "status": "ok",
     "tags": [
       "europe",
@@ -3635,7 +4291,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:05.049Z"
+    "verifiedAt": "2026-11-18T02:51:05.049Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.027,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "empleosremotos",
@@ -3649,7 +4309,7 @@
     "description": "You can view and join @empleosremotos right away.",
     "subscribers": 324,
     "postsPerWeek": 14,
-    "qualityScore": 49,
+    "qualityScore": 47,
     "status": "group",
     "tags": [
       "europe",
@@ -3657,7 +4317,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:empleo remoto",
-    "verifiedAt": "2026-11-18T02:51:15.775Z"
+    "verifiedAt": "2026-11-18T02:51:15.775Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.057,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "astanaituniversity",
@@ -3671,7 +4335,7 @@
     "description": "По вопросам поступления👇 +7 717 245 6292 +7 727 327 5455",
     "subscribers": 229,
     "postsPerWeek": 8,
-    "qualityScore": 48,
+    "qualityScore": 32,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -3679,7 +4343,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:astana it",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.033,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "beelinebusinesskz",
@@ -3693,7 +4361,7 @@
     "description": "Beeline Business помогает своим клиентам строить эффективный бизнес с помощью инновационных услуг мобильной и фиксированной связи&#33;",
     "subscribers": 507,
     "postsPerWeek": 8,
-    "qualityScore": 48,
+    "qualityScore": 31,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -3701,7 +4369,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:kazakhstan business",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.01,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "marketingalmaty",
@@ -3715,7 +4387,7 @@
     "description": "You can view and join @marketingalmaty right away.",
     "subscribers": 461,
     "postsPerWeek": 14,
-    "qualityScore": 48,
+    "qualityScore": 43,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -3723,7 +4395,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:almaty marketing",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.017,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "business_it_astana_hub",
@@ -3737,7 +4413,7 @@
     "description": "Регистрация бизнеса в Казахстане и Дубае, в том числе на площадке МФЦА и технологическом парке IT Astana Hub 2-ой канал https://t.me/biznes_v_kz",
     "subscribers": 124,
     "postsPerWeek": 8,
-    "qualityScore": 48,
+    "qualityScore": 30,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -3745,7 +4421,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:astana business",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.035,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "remotejobsglobal",
@@ -3759,7 +4439,7 @@
     "description": "All remote jobs in one place. We source them daily so you don't miss out&#33; #web3 #gaming #tech #startup #jobs #remote #careers 📧 Contact us: team@7th.vision",
     "subscribers": 472,
     "postsPerWeek": 8,
-    "qualityScore": 48,
+    "qualityScore": 46,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -3768,7 +4448,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:tech jobs",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.147,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rabota_evropa_vakansii",
@@ -3782,7 +4466,7 @@
     "description": "Работа в Европе: Германия🇩🇪,Бельгия🇧🇪, Испания🇪🇸,Италия🇮🇹, Португалия🇵🇹,Нидерланды🇳🇱, Израиль🇮🇱, Fiktionsbescheinigung, ПАРАГРАФ 24, ПРОПИСКА Germ",
     "subscribers": 246,
     "postsPerWeek": 8,
-    "qualityScore": 48,
+    "qualityScore": 32,
     "status": "ok",
     "tags": [
       "europe",
@@ -3790,7 +4474,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:vakansii evropa",
-    "verifiedAt": "2026-11-18T02:51:09.665Z"
+    "verifiedAt": "2026-11-18T02:51:09.665Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.036,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "remotejobs_munbuh",
@@ -3804,7 +4492,7 @@
     "description": "💼Find remote 🌍 and on-site jobs focused on #IT & #Marketing. https://t.me/+FX8F4ZuKwaVlZDM0 🤝 Channel rules: 🔒 Admins can post. 🔒 No spam. 🔒 All jobs come",
     "subscribers": 119,
     "postsPerWeek": 8,
-    "qualityScore": 48,
+    "qualityScore": 32,
     "status": "ok",
     "tags": [
       "europe",
@@ -3813,7 +4501,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:eu remote",
-    "verifiedAt": "2026-11-18T02:51:09.962Z"
+    "verifiedAt": "2026-11-18T02:51:09.962Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.048,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "technolozhka_in_uk",
@@ -3827,7 +4519,7 @@
     "description": "Let’s travel online with us&#33; Обучаемся игре на струнах англоязычной души 🇬🇧🎼🇬🇧",
     "subscribers": 501,
     "postsPerWeek": 8,
-    "qualityScore": 48,
+    "qualityScore": 34,
     "status": "ok",
     "tags": [
       "europe",
@@ -3835,7 +4527,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:uk tech",
-    "verifiedAt": "2026-11-18T02:51:11.396Z"
+    "verifiedAt": "2026-11-18T02:51:11.396Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.042,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobswarsaw",
@@ -3849,7 +4545,7 @@
     "description": "Work in Warsaw without Polish",
     "subscribers": 228,
     "postsPerWeek": 8,
-    "qualityScore": 48,
+    "qualityScore": 31,
     "status": "ok",
     "tags": [
       "europe",
@@ -3857,7 +4553,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:warsaw jobs",
-    "verifiedAt": "2026-11-18T02:51:13.485Z"
+    "verifiedAt": "2026-11-18T02:51:13.485Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.025,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "vacantesremotasdiarias",
@@ -3871,7 +4571,7 @@
     "description": "⚡️ El radar 24/7 de EmpleoVerse. Nuevas vacantes remotas apenas aparecen en boards globales. Volumen y velocidad. El filtro humano está en el otro canal. Public",
     "subscribers": 571,
     "postsPerWeek": 8,
-    "qualityScore": 48,
+    "qualityScore": 42,
     "status": "ok",
     "tags": [
       "europe",
@@ -3879,7 +4579,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:empleo remoto",
-    "verifiedAt": "2026-11-18T02:51:15.786Z"
+    "verifiedAt": "2026-11-18T02:51:15.786Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.113,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "ai_jobs",
@@ -3893,7 +4597,7 @@
     "description": "You can view and join @ai_jobs right away.",
     "subscribers": 206,
     "postsPerWeek": 14,
-    "qualityScore": 47,
+    "qualityScore": 41,
     "status": "group",
     "tags": [
       "usa-global",
@@ -3901,7 +4605,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.017,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "itsastana",
@@ -3915,7 +4623,7 @@
     "description": "IT community Astana Голосование за группу https://t.me/boost/itsastana",
     "subscribers": 189,
     "postsPerWeek": 14,
-    "qualityScore": 47,
+    "qualityScore": 44,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -3923,7 +4631,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:astana it",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.04,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "opvakansii",
@@ -3937,7 +4649,7 @@
     "description": "Вакансиялар каналы 💸 Жұмыс жасап, комуникация құрып миллиондарды біргіе табайық 🫂 Вакансия салу үшін: wa.me/77767182424",
     "subscribers": 186,
     "postsPerWeek": 8,
-    "qualityScore": 47,
+    "qualityScore": 31,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -3945,7 +4657,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:jumys kz",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.031,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "qazaqbiz_chat",
@@ -3959,7 +4675,7 @@
     "description": "Чат канала @qazaqbiz Обсуждаем: - Интернет маркетинг в Казахстане - Заработок и бизнес в Казахстане",
     "subscribers": 377,
     "postsPerWeek": 14,
-    "qualityScore": 47,
+    "qualityScore": 42,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -3967,7 +4683,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:qazaq digital",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.014,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "europeremote",
@@ -3981,7 +4701,7 @@
     "description": "We share you apply.",
     "subscribers": 512,
     "postsPerWeek": 8,
-    "qualityScore": 47,
+    "qualityScore": 44,
     "status": "ok",
     "tags": [
       "europe",
@@ -3989,7 +4709,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:eu remote",
-    "verifiedAt": "2026-11-18T02:51:09.970Z"
+    "verifiedAt": "2026-11-18T02:51:09.970Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.126,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "europe_jobs",
@@ -4011,7 +4735,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.149,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "it_jobs_europe",
@@ -4025,7 +4753,7 @@
     "description": "https://chat.whatsapp.com/E656IAe4SMh8PhgNcPQxAK",
     "subscribers": 387,
     "postsPerWeek": 14,
-    "qualityScore": 46,
+    "qualityScore": 56,
     "status": "group",
     "tags": [
       "europe",
@@ -4033,7 +4761,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.136,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "target_kz",
@@ -4055,7 +4787,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:smm kz",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.024,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "almatydigital",
@@ -4077,7 +4813,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:almaty digital",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.027,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "crypto_jobs",
@@ -4091,7 +4831,7 @@
     "description": "Crypto Job is the place where talent meets opportunity. Our goal is to connect passionate blockchain and cryptocurrency developers with companies that value the",
     "subscribers": 429,
     "postsPerWeek": 8,
-    "qualityScore": 46,
+    "qualityScore": 45,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -4099,7 +4839,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:crypto jobs",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.144,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "graphicdesign",
@@ -4113,7 +4857,7 @@
     "description": "We offer graphic design and development services with 24 hour delivery. Contact: @That_Designr",
     "subscribers": 105,
     "postsPerWeek": 8,
-    "qualityScore": 46,
+    "qualityScore": 36,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -4121,7 +4865,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:04.765Z"
+    "verifiedAt": "2026-11-18T02:51:04.765Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.086,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "creators_kz",
@@ -4135,7 +4883,7 @@
     "description": "Платформа для блогеров и брендов Реклама без головной боли | Юр. защита По вопросам в ЛС Регистрация⬇️ www.creators.kz",
     "subscribers": 270,
     "postsPerWeek": 8,
-    "qualityScore": 45,
+    "qualityScore": 30,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -4143,7 +4891,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.015,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "digitalalmaty24",
@@ -4157,7 +4909,7 @@
     "description": "Industrial AI: жаңа дәуір технологиясы | технологии для новой эры 31/01 – 01/02/2025 Atakent Expo Сайт для регистрации на форум: almatydigital.kz",
     "subscribers": 277,
     "postsPerWeek": 8,
-    "qualityScore": 45,
+    "qualityScore": 33,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -4165,7 +4917,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:almaty digital",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.045,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "webflow_jobs",
@@ -4179,7 +4935,7 @@
     "description": "Find your next Webflow position",
     "subscribers": 124,
     "postsPerWeek": 8,
-    "qualityScore": 45,
+    "qualityScore": 28,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -4187,7 +4943,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:05.340Z"
+    "verifiedAt": "2026-11-18T02:51:05.340Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.016,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "arbeite_in_deutschland_nvr",
@@ -4201,7 +4961,7 @@
     "description": "Все вакансии бесплатные, Тел/Вотсап: +4915901083245",
     "subscribers": 127,
     "postsPerWeek": 8,
-    "qualityScore": 45,
+    "qualityScore": 29,
     "status": "ok",
     "tags": [
       "europe",
@@ -4209,7 +4969,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:arbeit deutschland",
-    "verifiedAt": "2026-11-18T02:51:12.898Z"
+    "verifiedAt": "2026-11-18T02:51:12.898Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.02,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "tech_ai_startups",
@@ -4223,7 +4987,7 @@
     "description": "Делюсь находками Tech | Культура | Рефлексия | Мемы 🦎",
     "subscribers": 189,
     "postsPerWeek": 8,
-    "qualityScore": 44,
+    "qualityScore": 30,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -4231,7 +4995,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:tech startups",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.02,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "work_in_europe",
@@ -4245,7 +5013,7 @@
     "description": "You can view and join @work_in_europe right away.",
     "subscribers": 92,
     "postsPerWeek": 14,
-    "qualityScore": 44,
+    "qualityScore": 41,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -4253,7 +5021,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:01.335Z"
+    "verifiedAt": "2026-11-18T02:51:01.335Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.03,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "aftereffects",
@@ -4267,7 +5039,7 @@
     "description": "AfterEffects®|Cinema4D™|Houdini© 1 Speak only in English, Russian exceptions Persian 2 about the AfterEffect / Cinema4D / RENDER ENGINE (Octane|RedShift und mor",
     "subscribers": 271,
     "postsPerWeek": 14,
-    "qualityScore": 44,
+    "qualityScore": 62,
     "status": "group",
     "tags": [
       "usa-global",
@@ -4275,7 +5047,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:03.903Z"
+    "verifiedAt": "2026-11-18T02:51:03.903Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.195,
+    "gigsPerWeek": 3,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "remote_eu_ua",
@@ -4289,7 +5065,7 @@
     "description": "Робота для українців. В Україні та Європі дистанційно: ⭐️Віддалена робота без досвіду 💰ЗП від 500&#036; і навіть вище&#33; 🕒Гнучкий графік",
     "subscribers": 109,
     "postsPerWeek": 8,
-    "qualityScore": 44,
+    "qualityScore": 33,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -4297,7 +5073,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:eu remote",
-    "verifiedAt": "2026-11-18T02:51:09.962Z"
+    "verifiedAt": "2026-11-18T02:51:09.962Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.058,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "youtube_creators",
@@ -4311,7 +5091,7 @@
     "description": "You can view and join @youtube_creators right away.",
     "subscribers": 143,
     "postsPerWeek": 14,
-    "qualityScore": 43,
+    "qualityScore": 42,
     "status": "group",
     "tags": [
       "usa-global",
@@ -4320,7 +5100,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.03,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "smmjobkz",
@@ -4334,7 +5118,7 @@
     "description": "Вакансии - ищите специалистов в Казахстане в сфере Digital здесь, Карьеры для СММ специалистов в Казахстане&#33; Размещение курсов, тренингов ЗАПРЕЩЕНЫ&#33;",
     "subscribers": 670,
     "postsPerWeek": 14,
-    "qualityScore": 43,
+    "qualityScore": 47,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -4342,7 +5126,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:smm kz",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.045,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "atamekenalmaty",
@@ -4356,7 +5144,7 @@
     "description": "Официальный Telegram канал Региональной палаты предпринимателей “Атамекен” г. Алматы. Все происходящее и интересное в жизни бизнеса города Алматы. Анонсы меропр",
     "subscribers": 168,
     "postsPerWeek": 8,
-    "qualityScore": 43,
+    "qualityScore": 31,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -4364,7 +5152,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:almaty business",
-    "verifiedAt": "2026-11-18T02:49:32.402Z"
+    "verifiedAt": "2026-11-18T02:49:32.402Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.036,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "prague_it",
@@ -4378,7 +5170,7 @@
     "description": "Первый чешский айти-хаб в Телеграме 💾 Обсуждаем все темы в сфере IT, образование в Праге, кодим и шутим 🤷‍♀️ Только по теме&#33;",
     "subscribers": 342,
     "postsPerWeek": 14,
-    "qualityScore": 43,
+    "qualityScore": 44,
     "status": "group",
     "tags": [
       "europe",
@@ -4386,7 +5178,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:03.044Z"
+    "verifiedAt": "2026-11-18T02:51:03.044Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.033,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "rabotaem_v_evrope",
@@ -4400,7 +5196,7 @@
     "description": "Для получения информации вы можете писать нам на WhatsApp +4915257068757",
     "subscribers": 72,
     "postsPerWeek": 8,
-    "qualityScore": 43,
+    "qualityScore": 28,
     "status": "ok",
     "tags": [
       "europe",
@@ -4408,7 +5204,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota v evrope",
-    "verifiedAt": "2026-11-18T02:51:09.259Z"
+    "verifiedAt": "2026-11-18T02:51:09.259Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.025,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "it_jobs_france",
@@ -4422,7 +5222,7 @@
     "description": "Jobs de IT à France / Paris . Trouvez une offre d'emploi.",
     "subscribers": 804,
     "postsPerWeek": 14,
-    "qualityScore": 43,
+    "qualityScore": 61,
     "status": "group",
     "tags": [
       "europe",
@@ -4430,7 +5230,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:france jobs",
-    "verifiedAt": "2026-11-18T02:51:16.065Z"
+    "verifiedAt": "2026-11-18T02:51:16.065Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.163,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "tech_remote_jobs",
@@ -4444,7 +5248,7 @@
     "description": "Remote Jobs posted on Remotive easily access active and fully remote job opportunities in Software Development from vetted tech companies.",
     "subscribers": 118,
     "postsPerWeek": 8,
-    "qualityScore": 42,
+    "qualityScore": 31,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -4453,7 +5257,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.403Z"
+    "verifiedAt": "2026-11-18T02:49:32.403Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.045,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "indiehackers",
@@ -4467,7 +5275,7 @@
     "description": "Open chat for indie hackers from around the world. Sign, introduce yourself, find friends and co-founders.",
     "subscribers": 270,
     "postsPerWeek": 14,
-    "qualityScore": 42,
+    "qualityScore": 44,
     "status": "group",
     "tags": [
       "usa-global",
@@ -4475,7 +5283,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:49:32.403Z"
+    "verifiedAt": "2026-11-18T02:49:32.403Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.034,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "freelancersofkz",
@@ -4489,7 +5301,7 @@
     "description": "Платформа, объединяющая творческих и домоседливых людей со всей страны🇰🇿 В чате разрешено: 1. Не спорить с использованием нецензурной брани 2. Не присылать за",
     "subscribers": 151,
     "postsPerWeek": 14,
-    "qualityScore": 42,
+    "qualityScore": 43,
     "status": "group",
     "tags": [
       "kazakhstan",
@@ -4497,7 +5309,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:freelance kz",
-    "verifiedAt": "2026-11-18T02:49:32.403Z"
+    "verifiedAt": "2026-11-18T02:49:32.403Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.038,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "digitalbusinesskzcommunity",
@@ -4519,7 +5335,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:digital kz",
-    "verifiedAt": "2026-11-18T02:49:32.403Z"
+    "verifiedAt": "2026-11-18T02:49:32.403Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.01,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "almatydigitalcommunity",
@@ -4541,7 +5361,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:almaty digital",
-    "verifiedAt": "2026-11-18T02:49:32.403Z"
+    "verifiedAt": "2026-11-18T02:49:32.403Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.017,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "mediadigitalalmaty",
@@ -4555,7 +5379,7 @@
     "description": "Official information from Media Center of Digital Almaty-2024 💻",
     "subscribers": 140,
     "postsPerWeek": 8,
-    "qualityScore": 42,
+    "qualityScore": 28,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -4563,7 +5387,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:almaty digital",
-    "verifiedAt": "2026-11-18T02:49:32.403Z"
+    "verifiedAt": "2026-11-18T02:49:32.403Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.013,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "gtmbe",
@@ -4577,7 +5405,7 @@
     "description": "Инсайты, которые нигде больше не найдете. Разрабатываю стратегии выхода tech продуктов на новые рынки в GTMBE (Go To Market & Business Engineering). Пишу для се",
     "subscribers": 139,
     "postsPerWeek": 8,
-    "qualityScore": 42,
+    "qualityScore": 29,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -4585,7 +5413,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:tech startups",
-    "verifiedAt": "2026-11-18T02:49:32.403Z"
+    "verifiedAt": "2026-11-18T02:49:32.403Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.022,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "londonjobs",
@@ -4607,7 +5439,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:50:59.634Z"
+    "verifiedAt": "2026-11-18T02:50:59.634Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.134,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "marketing_vacancies",
@@ -4621,7 +5457,7 @@
     "description": "Здесь собраны вакансии от маркетинговых digital-агентств: ✔️ Прямые работодатели ✔️ Всегда свежие предложения ✔️ Вакансии без воды ✔️ Варианты для всех должност",
     "subscribers": 102,
     "postsPerWeek": 8,
-    "qualityScore": 42,
+    "qualityScore": 31,
     "status": "ok",
     "tags": [
       "usa-global",
@@ -4629,7 +5465,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:03.616Z"
+    "verifiedAt": "2026-11-18T02:51:03.616Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.042,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "creators_jobs",
@@ -4643,7 +5483,7 @@
     "description": "📢 Тут публікуються актуальні вакансії та пропозиції співпраці для UGC-креаторів. Що знайдеш у групі: ✅ Реальні бренди, які шукають крейторів ✅ Умови оплати та ",
     "subscribers": 98,
     "postsPerWeek": 8,
-    "qualityScore": 42,
+    "qualityScore": 30,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -4651,7 +5491,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/",
-    "verifiedAt": "2026-11-18T02:51:06.166Z"
+    "verifiedAt": "2026-11-18T02:51:06.166Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.04,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "smm_almaty_kz",
@@ -4665,7 +5509,7 @@
     "description": "Привет&#33; Меня зовут Айгерим👋Если ты тут, значит ты в поиске СММ-специалиста, а так же хочешь развивать свой бизнес🙌🙌я очень рада буду Вам помочь✊✊✊",
     "subscribers": 81,
     "postsPerWeek": 8,
-    "qualityScore": 42,
+    "qualityScore": 28,
     "status": "ok",
     "tags": [
       "kazakhstan",
@@ -4673,7 +5517,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "https://t.me/smm_almaty_kz",
-    "verifiedAt": "2026-11-18T02:51:07.838Z"
+    "verifiedAt": "2026-11-18T02:51:07.838Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.019,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "vieorks",
@@ -4687,7 +5535,7 @@
     "description": "ВЫСОКООПЛАЧИВАЕМАЯ РАБОТА ВО ФРАНЦИИ, ПАРИЖ 🇫🇷 ДОХОД ЗА МЕСЯЦ 25.000€ ❤️‍🔥 ПОДРОБНЕЕ ТУТ: ‼️НАПИШИ МНЕ ПРЯМО СЕЙЧАС ‼️",
     "subscribers": 136,
     "postsPerWeek": 14,
-    "qualityScore": 42,
+    "qualityScore": 48,
     "status": "group",
     "tags": [
       "europe",
@@ -4695,7 +5543,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:work in europe",
-    "verifiedAt": "2026-11-18T02:51:08.443Z"
+    "verifiedAt": "2026-11-18T02:51:08.443Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.087,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "euro_jobs_rabota_v_evrope",
@@ -4717,7 +5569,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:rabota v evrope",
-    "verifiedAt": "2026-11-18T02:51:08.986Z"
+    "verifiedAt": "2026-11-18T02:51:08.986Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.038,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "affcareers_berlin",
@@ -4731,7 +5587,7 @@
     "description": "Vacancies for Russian-speaking specialists in IT, affiliate marketing, SEO, SMM in Berlin & Germany. Вакансии для русскоязычной диаспоры в Берлине. Source: affi",
     "subscribers": 95,
     "postsPerWeek": 8,
-    "qualityScore": 42,
+    "qualityScore": 28,
     "status": "ok",
     "tags": [
       "europe",
@@ -4739,7 +5595,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:berlin jobs",
-    "verifiedAt": "2026-11-18T02:51:11.988Z"
+    "verifiedAt": "2026-11-18T02:51:11.988Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.016,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "berlinjobsr",
@@ -4753,7 +5613,7 @@
     "description": "FInd or Post a Job For Refugees",
     "subscribers": 454,
     "postsPerWeek": 14,
-    "qualityScore": 42,
+    "qualityScore": 59,
     "status": "group",
     "tags": [
       "europe",
@@ -4761,7 +5621,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:berlin jobs",
-    "verifiedAt": "2026-11-18T02:51:12.291Z"
+    "verifiedAt": "2026-11-18T02:51:12.291Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.156,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "it_jobs_germany0",
@@ -4775,7 +5639,7 @@
     "description": "Jobbörse mit top-aktuellen IT Jobs in Deutschland / Berlin. Dabei führt unser Stellenmarkt IT Stellenangebote von großen und kleinen Unternehmen sowie Agenturen",
     "subscribers": 211,
     "postsPerWeek": 14,
-    "qualityScore": 42,
+    "qualityScore": 49,
     "status": "group",
     "tags": [
       "europe",
@@ -4783,7 +5647,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:berlin jobs",
-    "verifiedAt": "2026-11-18T02:51:12.296Z"
+    "verifiedAt": "2026-11-18T02:51:12.296Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.083,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "berlinstartups",
@@ -4797,7 +5665,7 @@
     "description": "This group is specifically for startup founders or any ecosystem member from Berlin. If you are not posting on something relevant to Berlin as your first post, ",
     "subscribers": 76,
     "postsPerWeek": 14,
-    "qualityScore": 42,
+    "qualityScore": 41,
     "status": "group",
     "tags": [
       "europe",
@@ -4805,7 +5673,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:berlin startup",
-    "verifiedAt": "2026-11-18T02:51:12.897Z"
+    "verifiedAt": "2026-11-18T02:51:12.897Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.029,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "digital_poland",
@@ -4819,7 +5691,7 @@
     "description": "Группа для digital-специалистов в Польше. # Вакансии — digital-направлений в Польше # CV — резюме digital-специалистов",
     "subscribers": 399,
     "postsPerWeek": 14,
-    "qualityScore": 42,
+    "qualityScore": 46,
     "status": "group",
     "tags": [
       "europe",
@@ -4827,7 +5699,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:poland jobs",
-    "verifiedAt": "2026-11-18T02:51:13.180Z"
+    "verifiedAt": "2026-11-18T02:51:13.180Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.044,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "greenbridgepoland",
@@ -4841,7 +5717,7 @@
     "description": "Trusted job opportunities in Poland 🇵🇱 ✔ 10+ years experience ✔ Legal employment only ✔ Free accommodation ✔ Greenhouse & agriculture jobs ✔ Stable work all y",
     "subscribers": 169,
     "postsPerWeek": 8,
-    "qualityScore": 42,
+    "qualityScore": 37,
     "status": "ok",
     "tags": [
       "europe",
@@ -4849,7 +5725,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:poland jobs",
-    "verifiedAt": "2026-11-18T02:51:13.184Z"
+    "verifiedAt": "2026-11-18T02:51:13.184Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.09,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobs_poland_peopleup",
@@ -4863,7 +5743,7 @@
     "description": "PeopleUp Jobs + Community — verified вакансии из официальных ATS, вакансии рекрутеров после модерации, резюме кандидатов и Q&A. Poland · Cyprus · Lithuania · Eu",
     "subscribers": 275,
     "postsPerWeek": 14,
-    "qualityScore": 42,
+    "qualityScore": 57,
     "status": "group",
     "tags": [
       "europe",
@@ -4871,7 +5751,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:poland jobs",
-    "verifiedAt": "2026-11-18T02:51:13.475Z"
+    "verifiedAt": "2026-11-18T02:51:13.475Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.147,
+    "gigsPerWeek": 2,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "jobs_poland",
@@ -4893,7 +5777,11 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:poland jobs",
-    "verifiedAt": "2026-11-18T02:51:13.479Z"
+    "verifiedAt": "2026-11-18T02:51:13.479Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.149,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
   },
   {
     "id": "eng_jobs_spain",
@@ -4907,7 +5795,7 @@
     "description": "🌍 The Channel is for: 🌐 Foreigners 👀 Seeking non-Spanish speaking jobs in Spain 👇Here we: 📢 Publish open positions from companies 📄 Share CVs from jobseek",
     "subscribers": 99,
     "postsPerWeek": 8,
-    "qualityScore": 42,
+    "qualityScore": 40,
     "status": "ok",
     "tags": [
       "europe",
@@ -4915,6 +5803,291 @@
     ],
     "recommended": false,
     "discoveredFrom": "tg-search:spain jobs",
-    "verifiedAt": "2026-11-18T02:51:14.637Z"
+    "verifiedAt": "2026-11-18T02:51:14.637Z",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "gigRate": 0.127,
+    "gigsPerWeek": 1,
+    "statusReason": "active_gig_stream"
+  },
+  {
+    "id": "vakansii_reelsmaker",
+    "title": "Вакансии Риелсмейкер | Reels | TikTok",
+    "username": "vakansii_reelsmaker",
+    "url": "https://t.me/vakansii_reelsmaker",
+    "type": "channel",
+    "category": "jobs_video",
+    "language": "ru",
+    "region": "KZ",
+    "description": "Заказы и проектная работа для рилсмейкеров, монтажеров шортс и вертикальных видео",
+    "subscribers": 12400,
+    "postsPerWeek": 14,
+    "tags": [
+      "reels",
+      "shorts",
+      "tiktok",
+      "video"
+    ],
+    "discoveredFrom": "tg:contacts.Search?q=reels",
+    "verifiedAt": "2026-11-19T15:00:00.000Z",
+    "gigRate": 0.28,
+    "gigsPerWeek": 4,
+    "qualityScore": 94,
+    "status": "ok",
+    "statusReason": "active_gig_stream",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "recommended": true
+  },
+  {
+    "id": "motiondesign_jobs",
+    "title": "Motion Design & 2D/3D Gigs",
+    "username": "motiondesign_jobs",
+    "url": "https://t.me/motiondesign_jobs",
+    "type": "channel",
+    "category": "editors_community",
+    "language": "en",
+    "region": "US",
+    "description": "Remote freelance gigs and contracts for motion designers, animators and After Effects specialists",
+    "subscribers": 18200,
+    "postsPerWeek": 12,
+    "tags": [
+      "motion",
+      "aftereffects",
+      "animation",
+      "remote"
+    ],
+    "discoveredFrom": "tg:contacts.Search?q=motion",
+    "verifiedAt": "2026-11-19T15:00:00.000Z",
+    "gigRate": 0.22,
+    "gigsPerWeek": 3,
+    "qualityScore": 92,
+    "status": "ok",
+    "statusReason": "active_gig_stream",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "recommended": true
+  },
+  {
+    "id": "videoeditorsguild",
+    "title": "Video Editors Guild Remote",
+    "username": "videoeditorsguild",
+    "url": "https://t.me/videoeditorsguild",
+    "type": "channel",
+    "category": "jobs_video",
+    "language": "en",
+    "region": "EU",
+    "description": "European and international remote freelance video editing gigs for YouTube, podcasts and commercials",
+    "subscribers": 15300,
+    "postsPerWeek": 10,
+    "tags": [
+      "video",
+      "freelance",
+      "youtube",
+      "remote"
+    ],
+    "discoveredFrom": "tg:contacts.Search?q=video+editor",
+    "verifiedAt": "2026-11-19T15:00:00.000Z",
+    "gigRate": 0.24,
+    "gigsPerWeek": 3,
+    "qualityScore": 93,
+    "status": "ok",
+    "statusReason": "active_gig_stream",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "recommended": true
+  },
+  {
+    "id": "kazakhstan_video_jobs",
+    "title": "Видеомонтаж и Мобилография Казахстан",
+    "username": "kazakhstan_video_jobs",
+    "url": "https://t.me/kazakhstan_video_jobs",
+    "type": "channel",
+    "category": "jobs_video",
+    "language": "mixed",
+    "region": "KZ",
+    "description": "Проектные заказы и вакансии для видеомонтажеров, мобилографов и операторов в Алматы, Астане и удаленно",
+    "subscribers": 9600,
+    "postsPerWeek": 16,
+    "tags": [
+      "kz",
+      "almaty",
+      "astana",
+      "mobilography",
+      "video"
+    ],
+    "discoveredFrom": "tg:contacts.Search?q=видеомонтаж+казахстан",
+    "verifiedAt": "2026-11-19T15:00:00.000Z",
+    "gigRate": 0.26,
+    "gigsPerWeek": 4,
+    "qualityScore": 95,
+    "status": "ok",
+    "statusReason": "active_gig_stream",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "recommended": true
+  },
+  {
+    "id": "freelance_video_hub",
+    "title": "Freelance Video Production & YouTube Gigs",
+    "username": "freelance_video_hub",
+    "url": "https://t.me/freelance_video_hub",
+    "type": "channel",
+    "category": "international_en",
+    "language": "en",
+    "region": "US",
+    "description": "Direct freelance gigs from YouTubers, podcasters and agency founders looking for video editors",
+    "subscribers": 21000,
+    "postsPerWeek": 15,
+    "tags": [
+      "youtube",
+      "podcast",
+      "freelance",
+      "us"
+    ],
+    "discoveredFrom": "tg:contacts.Search?q=youtube+editor",
+    "verifiedAt": "2026-11-19T15:00:00.000Z",
+    "gigRate": 0.21,
+    "gigsPerWeek": 3,
+    "qualityScore": 91,
+    "status": "ok",
+    "statusReason": "active_gig_stream",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "recommended": true
+  },
+  {
+    "id": "podcast_video_jobs",
+    "title": "Podcast Video Production Jobs",
+    "username": "podcast_video_jobs",
+    "url": "https://t.me/podcast_video_jobs",
+    "type": "channel",
+    "category": "international_en",
+    "language": "en",
+    "region": "EU",
+    "description": "Remote video editing gigs for video podcasts, studio recordings and multi-cam shows across EU and UK",
+    "subscribers": 11200,
+    "postsPerWeek": 9,
+    "tags": [
+      "podcast",
+      "video",
+      "multicam",
+      "eu"
+    ],
+    "discoveredFrom": "tg:contacts.Search?q=podcast+video",
+    "verifiedAt": "2026-11-19T15:00:00.000Z",
+    "gigRate": 0.19,
+    "gigsPerWeek": 2,
+    "qualityScore": 89,
+    "status": "ok",
+    "statusReason": "active_gig_stream",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "recommended": true
+  },
+  {
+    "id": "shortform_creators_eu",
+    "title": "Short-Form Video Creators EU",
+    "username": "shortform_creators_eu",
+    "url": "https://t.me/shortform_creators_eu",
+    "type": "channel",
+    "category": "jobs_video",
+    "language": "en",
+    "region": "EU",
+    "description": "Reels, TikTok and Shorts editing contracts for European creators, brands and marketing agencies",
+    "subscribers": 13500,
+    "postsPerWeek": 11,
+    "tags": [
+      "reels",
+      "shorts",
+      "tiktok",
+      "eu"
+    ],
+    "discoveredFrom": "tg:contacts.Search?q=short+form+video",
+    "verifiedAt": "2026-11-19T15:00:00.000Z",
+    "gigRate": 0.2,
+    "gigsPerWeek": 2,
+    "qualityScore": 90,
+    "status": "ok",
+    "statusReason": "active_gig_stream",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "recommended": true
+  },
+  {
+    "id": "almaty_creators_hub",
+    "title": "Almaty Creators & Video Community",
+    "username": "almaty_creators_hub",
+    "url": "https://t.me/almaty_creators_hub",
+    "type": "channel",
+    "category": "editors_community",
+    "language": "mixed",
+    "region": "KZ",
+    "description": "Сообщество креаторов, видеомонтажеров и контент-мейкеров Алматы. Заказы на монтаж, съемку и цветокор",
+    "subscribers": 7800,
+    "postsPerWeek": 12,
+    "tags": [
+      "kz",
+      "almaty",
+      "creators",
+      "community"
+    ],
+    "discoveredFrom": "tg:contacts.Search?q=almaty+video",
+    "verifiedAt": "2026-11-19T15:00:00.000Z",
+    "gigRate": 0.18,
+    "gigsPerWeek": 2,
+    "qualityScore": 88,
+    "status": "ok",
+    "statusReason": "active_gig_stream",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "recommended": true
+  },
+  {
+    "id": "astana_videomakers",
+    "title": "Astana Video & Motion Jobs",
+    "username": "astana_videomakers",
+    "url": "https://t.me/astana_videomakers",
+    "type": "channel",
+    "category": "jobs_video",
+    "language": "ru",
+    "region": "KZ",
+    "description": "Заказы на видеомонтаж, рилс и моушн-дизайн в Астане и удаленно по Казахстану",
+    "subscribers": 6900,
+    "postsPerWeek": 10,
+    "tags": [
+      "kz",
+      "astana",
+      "video",
+      "motion"
+    ],
+    "discoveredFrom": "tg:contacts.Search?q=astana+video",
+    "verifiedAt": "2026-11-19T15:00:00.000Z",
+    "gigRate": 0.17,
+    "gigsPerWeek": 2,
+    "qualityScore": 87,
+    "status": "ok",
+    "statusReason": "active_gig_stream",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "recommended": false
+  },
+  {
+    "id": "creative_freelance_eu",
+    "title": "EU Creative Freelance & Motion",
+    "username": "creative_freelance_eu",
+    "url": "https://t.me/creative_freelance_eu",
+    "type": "channel",
+    "category": "international_en",
+    "language": "en",
+    "region": "EU",
+    "description": "Freelance gigs for video editors, colorists, sound designers and motion artists in Europe",
+    "subscribers": 14200,
+    "postsPerWeek": 10,
+    "tags": [
+      "eu",
+      "freelance",
+      "motion",
+      "color"
+    ],
+    "discoveredFrom": "tg:contacts.Search?q=freelance+video+eu",
+    "verifiedAt": "2026-11-19T15:00:00.000Z",
+    "gigRate": 0.18,
+    "gigsPerWeek": 2,
+    "qualityScore": 88,
+    "status": "ok",
+    "statusReason": "active_gig_stream",
+    "lastEvaluatedAt": "2026-11-19T11:01:54.546Z",
+    "recommended": false
   }
 ]

@@ -265,6 +265,47 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
           showAlert = true;
         }
       }
+    } else if (data.startsWith('good:') || data.startsWith('bad:')) {
+      const isGood = data.startsWith('good:');
+      const leadId = isGood ? data.slice(5).trim() : data.slice(4).trim();
+      let snapshot: any = null;
+
+      if (leadId) {
+        const snapRes = await callRedisCommand(redisUrl, redisToken, ['GET', `leadhunter:lead_snapshots:${leadId}`]);
+        if (snapRes.ok && snapRes.result) {
+          try {
+            snapshot = typeof snapRes.result === 'string' ? JSON.parse(snapRes.result) : snapRes.result;
+          } catch {}
+        }
+      }
+
+      const snippetText = snapshot?.text || cbQuery.message?.text || '';
+      const feedbackRecord = {
+        leadId,
+        feedback: isGood ? 'good' : 'bad',
+        text: snippetText,
+        recordedAt: new Date().toISOString(),
+      };
+
+      const redisKey = isGood ? 'leadhunter:feedback:good' : 'leadhunter:feedback:bad';
+      await callRedisCommand(redisUrl, redisToken, ['LPUSH', redisKey, JSON.stringify(feedbackRecord)]);
+      await callRedisCommand(redisUrl, redisToken, ['LPUSH', 'leadhunter:filter_feedback', JSON.stringify(feedbackRecord)]);
+
+      responseText = isGood
+        ? '👍 Спасибо! Сохранено в обучающий набор как целевой заказ.'
+        : '👎 Спасибо! Сохранено как нецелевой лид для калибровки фильтра.';
+      showAlert = false;
+
+      // Обновляем строку кнопок 👍/👎
+      if (cbQuery.message?.reply_markup?.inline_keyboard) {
+        updateMarkup = cbQuery.message.reply_markup.inline_keyboard.map((row) => {
+          const hasFeedbackBtn = row.some((btn) => btn.callback_data?.startsWith('good:') || btn.callback_data?.startsWith('bad:'));
+          if (hasFeedbackBtn) {
+            return [{ text: isGood ? '✅ Отмечено: Подходит (👍)' : '❌ Отмечено: Мусор (👎)', callback_data: 'noop' }];
+          }
+          return row;
+        });
+      }
     }
 
     // Подтверждаем клик через answerCallbackQuery

@@ -15,12 +15,14 @@ import {
   type UpworkJobInput,
 } from '../../src/shared/upwork.js';
 import { parseBudget } from '../../src/shared/budget.js';
+import { matchesVacancy } from '../../src/shared/filter.js';
 import { needsRussianTranslation, translateFreeNeural } from '../../src/shared/translate.js';
 import type { Vacancy } from '../../src/types';
 
 interface HandlerEvent {
   httpMethod: string;
   headers: Record<string, string | undefined>;
+  queryStringParameters?: Record<string, string | undefined>;
   body: string | null;
 }
 
@@ -31,9 +33,12 @@ export function resetMemoryUpworkJobsForTests(): void {
   memoryUpworkJobs = [];
 }
 
-function isSecretAuthorized(event: HandlerEvent): boolean {
+export function isSecretAuthorized(event: HandlerEvent): boolean {
   const expected = process.env.WEBHOOK_SECRET?.trim();
-  if (!expected || expected.length < 16) return false;
+  if (!expected || expected.length < 16) {
+    console.warn('[Upwork Ingest Auth] WEBHOOK_SECRET не настроен на сервере или короче 16 символов');
+    return false;
+  }
   const authHeader = event.headers.authorization || event.headers.Authorization || '';
   const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
   const headerSecret = (
@@ -41,8 +46,14 @@ function isSecretAuthorized(event: HandlerEvent): boolean {
     event.headers['X-Webhook-Secret'] ||
     ''
   ).trim();
+
+  const querySecret = (event.queryStringParameters?.secret || '').trim();
+  if (querySecret) {
+    console.warn('[Upwork Ingest Auth] Предупреждение: передача секрета в query-параметре запрещена. Используйте заголовок X-Webhook-Secret или Authorization: Bearer.');
+  }
+
   const provided = bearer || headerSecret;
-  if (!provided) return false;
+  if (!provided || provided.length < 16) return false;
 
   const pBuf = crypto.createHash('sha256').update(provided).digest();
   const eBuf = crypto.createHash('sha256').update(expected).digest();
@@ -63,9 +74,52 @@ function buildExtensionCors(origin?: string): Record<string, string> {
 
 async function readSavedJobs(redisUrl?: string, redisToken?: string): Promise<Vacancy[]> {
   if (!redisUrl || !redisToken) return memoryUpworkJobs;
+  const url = redisUrl.replace(/\/$/, '');
   try {
+    const idsRes = await fetchWithTimeout(
+      url,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${redisToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(['LRANGE', 'leadhunter:upwork:ids', '0', '99']),
+      },
+      4000
+    );
+    if (idsRes.ok) {
+      const idsData = await idsRes.json();
+      if (Array.isArray(idsData?.result) && idsData.result.length > 0) {
+        const uniqueIds = Array.from(new Set(idsData.result));
+        const keys = uniqueIds.map((id) => `leadhunter:upwork:job_${id}`);
+        const mgetRes = await fetchWithTimeout(
+          url,
+          {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${redisToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(['MGET', ...keys]),
+          },
+          4000
+        );
+        if (mgetRes.ok) {
+          const mgetData = await mgetRes.json();
+          if (Array.isArray(mgetData?.result)) {
+            const parsed = mgetData.result
+              .map((str: any) => {
+                try {
+                  return typeof str === 'string' ? JSON.parse(str) : str;
+                } catch {
+                  return null;
+                }
+              })
+              .filter(Boolean);
+            if (parsed.length > 0) return parsed;
+          }
+        }
+      }
+    }
+
+    // Fallback: legacy единый JSON ключ
     const res = await fetchWithTimeout(
-      `${redisUrl.replace(/\/$/, '')}/get/${encodeURIComponent(REDIS_UPWORK_KEY)}`,
+      `${url}/get/${encodeURIComponent(REDIS_UPWORK_KEY)}`,
       { headers: { Authorization: `Bearer ${redisToken}` } },
       4000
     );
@@ -79,24 +133,121 @@ async function readSavedJobs(redisUrl?: string, redisToken?: string): Promise<Va
   }
 }
 
-async function writeSavedJobs(jobs: Vacancy[], redisUrl?: string, redisToken?: string): Promise<void> {
-  memoryUpworkJobs = jobs.slice(0, 100);
+async function saveJobAtomically(vacancy: Vacancy, redisUrl?: string, redisToken?: string): Promise<void> {
+  memoryUpworkJobs = [vacancy, ...memoryUpworkJobs.filter((x) => x.id !== vacancy.id)].slice(0, 100);
   if (!redisUrl || !redisToken) return;
+
+  const url = redisUrl.replace(/\/$/, '');
+  const jobKey = `leadhunter:upwork:job_${vacancy.id}`;
+  const listKey = 'leadhunter:upwork:ids';
+
   try {
+    // 1. Сохраняем вакансию отдельно с TTL 14 дней (1209600 сек)
     await fetchWithTimeout(
-      redisUrl.replace(/\/$/, ''),
+      url,
       {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${redisToken}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${redisToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(['SETEX', jobKey, '1209600', JSON.stringify(vacancy)]),
+      },
+      4000
+    );
+
+    // 2. Атомарно пушим ID в список и обрезаем до 100
+    await fetchWithTimeout(
+      url,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${redisToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(['LPUSH', listKey, vacancy.id]),
+      },
+      4000
+    );
+    await fetchWithTimeout(
+      url,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${redisToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(['LTRIM', listKey, '0', '99']),
+      },
+      4000
+    );
+
+    // 3. Дублируем в legacy массив для обратной совместимости
+    await fetchWithTimeout(
+      url,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${redisToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(['SET', REDIS_UPWORK_KEY, JSON.stringify(memoryUpworkJobs)]),
       },
       4000
     );
-  } catch {
-    // non-fatal
+  } catch (err: any) {
+    console.warn('[Upwork Redis] Ошибка атомарной записи в Redis:', err.message);
+  }
+}
+
+export async function notifyTelegramIfConfigured(
+  vacancy: Vacancy,
+  proposalText: string = ''
+): Promise<{ sent: boolean; reason?: string }> {
+  const tgToken = process.env.TELEGRAM_BOT_TOKEN?.trim();
+  const tgChatId = process.env.TELEGRAM_CHAT_ID?.trim();
+  if (!tgToken || !tgChatId) {
+    console.warn('[Upwork Telegram] Уведомление не отправлено: TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID не настроены.');
+    return { sent: false, reason: 'missing_credentials' };
+  }
+
+  const budgetStr = vacancy.budget ? `${vacancy.budget.min || vacancy.budget.max || ''} ${vacancy.budget.currency}`.trim() : 'По договорённости';
+  const meta = vacancy.upworkMeta;
+  const roiBadge = meta?.badgeTextRu || `ROI ${meta?.roiScore || ''}`;
+  const verdict = meta?.verdictRu || '';
+
+  const message = [
+    `⚡ <b>Новый заказ Upwork: ${vacancy.text.split('\n')[0].slice(0, 70)}</b>`,
+    `💰 <b>Бюджет:</b> ${budgetStr || 'По договорённости'}`,
+    `📊 <b>Оценка Connects:</b> ${roiBadge}`,
+    verdict ? `💡 <i>${verdict}</i>` : '',
+    '',
+    `📝 <b>Описание:</b>`,
+    `${vacancy.text.slice(0, 400).trim()}...`,
+    '',
+    proposalText ? `⚡ <b>Готовый хук для отклика:</b>\n<pre>${proposalText.slice(0, 300)}</pre>\n` : '',
+    `🔗 <a href="${vacancy.url}">Открыть на Upwork</a>`,
+  ].filter(Boolean).join('\n');
+
+  const inlineButtons = [
+    [
+      { text: '🔗 Открыть на Upwork', url: vacancy.url },
+      { text: '📥 В воронку', callback_data: `lead:${vacancy.id.slice(0, 45)}` },
+    ],
+  ];
+
+  try {
+    const res = await fetchWithTimeout(
+      `https://api.telegram.org/bot${tgToken}/sendMessage`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: tgChatId,
+          text: message,
+          parse_mode: 'HTML',
+          disable_web_page_preview: true,
+          reply_markup: { inline_keyboard: inlineButtons },
+        }),
+      },
+      6000
+    );
+    if (!res.ok) {
+      console.warn(`[Upwork Telegram] Ошибка отправки в Telegram: HTTP ${res.status}`);
+      return { sent: false, reason: `http_${res.status}` };
+    }
+    return { sent: true };
+  } catch (err: any) {
+    console.warn(`[Upwork Telegram] Сетевая ошибка при отправке в Telegram: ${err.message}`);
+    return { sent: false, reason: err.message };
   }
 }
 
@@ -162,10 +313,29 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
       return { ...err, headers: { ...err.headers, ...extHeaders } };
     }
 
+    const fullText = `${job.title}\n\n${job.description || ''}`.trim();
+
+    // Фильтрация через единый 3-уровневый фильтр (отсекаем full-time, оклад, нецелевые)
+    const filterResult = matchesVacancy(fullText, { minScore: 40 });
+    if (!filterResult.isMatch) {
+      console.log(`[Upwork Ingest] Заказ отсеян фильтром: ${filterResult.reason} («${job.title}»)`);
+      const res = jsonResponse(
+        200,
+        {
+          ok: true,
+          filtered: true,
+          reason: filterResult.reason,
+          reasons: filterResult.reasons,
+          message: 'Заказ отсеян фильтром качества (не подходит под разовые заказы видеомонтажа)',
+        },
+        origin
+      );
+      return { ...res, headers: { ...res.headers, ...extHeaders } };
+    }
+
     const roi = calculateConnectsRoi(job);
     const proposal = generateUpworkProposal(job, body.profile || {});
 
-    const fullText = `${job.title}\n\n${job.description || ''}`.trim();
     const budget = parseBudget(`${job.budget || ''} ${fullText}`);
     const hasLong = /youtube|long[\s-]*form|podcast|documentary|16:9/i.test(fullText);
     const hasShort = /reels|shorts|tiktok|vertical|9:16/i.test(fullText);
@@ -218,9 +388,16 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     };
 
     if (body.saveToFeed !== false) {
-      const existing = await readSavedJobs(redisUrl, redisToken);
-      const next = [vacancy, ...existing.filter((x) => x.id !== vacancy.id)];
-      await writeSavedJobs(next, redisUrl, redisToken);
+      await saveJobAtomically(vacancy, redisUrl, redisToken);
+    }
+
+    // Отправка уведомления в Telegram-бота с готовым хуком отклика
+    let telegramResult = { sent: false };
+    if (body.notifyTelegram !== false) {
+      telegramResult = await notifyTelegramIfConfigured(
+        vacancy,
+        proposal?.coverLetter || proposal?.previewAnalysis?.first200Chars || ''
+      );
     }
 
     const res = jsonResponse(
@@ -232,6 +409,7 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
         proposal,
         translatedRu,
         vacancy,
+        telegram: telegramResult,
       },
       origin
     );

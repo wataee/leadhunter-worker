@@ -282,6 +282,12 @@ export async function handler(event: HandlerEvent): Promise<NetlifyResponse> {
     row.push({ text: '📥 В воронку', callback_data: `lead:${leadBytes}` });
     inlineButtons.push(row);
 
+    // Обратная связь по качеству лида (👍 / 👎) для обучения фильтра
+    inlineButtons.push([
+      { text: '👍 Подходит', callback_data: `good:${leadBytes}` },
+      { text: '👎 Мусор', callback_data: `bad:${leadBytes}` },
+    ]);
+
     // C2: Save snapshot to Redis via POST command array
     const redisUrl = process.env.UPSTASH_REDIS_REST_URL?.trim();
     const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
