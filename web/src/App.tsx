@@ -113,21 +113,15 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
 
-  // Автоматическая облачная синхронизация CRM между ПК и телефоном
+  // Бесшовная загрузка актуального состояния CRM из облачной БД (Upstash Redis)
   useEffect(() => {
     if (location.pathname === '/login') return;
     syncCrmWithCloud();
-    const syncTimer = setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        syncCrmWithCloud();
-      }
-    }, 90_000);
     const onFocus = () => {
       syncCrmWithCloud();
     };
     window.addEventListener('focus', onFocus);
     return () => {
-      clearInterval(syncTimer);
       window.removeEventListener('focus', onFocus);
     };
   }, [location.pathname]);

@@ -9,14 +9,9 @@ import {
   Settings,
   Database,
   LogOut,
-  Cloud,
-  RefreshCw,
 } from 'lucide-react';
 import { useVacanciesStore } from '../store/vacanciesStore';
-import { useLeadsStore } from '../store/leadsStore';
-import { useToastStore } from '../store/toastStore';
 import { logout } from '../lib/api';
-import { syncCrmWithCloud } from '../lib/cloudSync';
 
 interface SidebarProps {
   mobileOpen: boolean;
@@ -29,26 +24,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const vacancies = useVacanciesStore((s) => s.vacancies);
   const unseenVacanciesCount = vacancies.filter((v) => !v.seen && !v.hidden).length;
-  const isSyncingCloud = useLeadsStore((s) => s.isSyncingCloud);
-  const lastCloudSyncAt = useLeadsStore((s) => s.lastCloudSyncAt);
-  const addToast = useToastStore((s) => s.addToast);
-
-  const handleManualSync = async () => {
-    const res = await syncCrmWithCloud();
-    if (res?.ok) {
-      addToast({
-        type: 'success',
-        message: res.redisConfigured
-          ? `CRM синхронизирована с облаком (${res.state.leads.length} лидов)`
-          : 'Облачная синхронизация выполнена (локальный сервер)',
-      });
-    } else {
-      addToast({
-        type: 'error',
-        message: 'Не удалось синхронизировать CRM (проверьте сессию или Upstash Redis)',
-      });
-    }
-  };
 
   const navItems = [
     {
@@ -142,32 +117,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </nav>
 
-      {/* Bottom Action: Cloud Sync & Logout */}
-      <div className="p-3 border-t border-border bg-surface space-y-1.5">
-        <button
-          type="button"
-          onClick={handleManualSync}
-          disabled={isSyncingCloud}
-          className="w-full flex items-center justify-between px-3 py-2 text-xs text-text-muted hover:text-accent hover:bg-accent/10 rounded-control transition-colors disabled:opacity-60"
-          title={
-            lastCloudSyncAt
-              ? `Последняя синхронизация: ${new Date(lastCloudSyncAt).toLocaleTimeString('ru-RU')}`
-              : 'Синхронизировать CRM между телефоном и ПК'
-          }
-        >
-          <span className="flex items-center gap-2">
-            {isSyncingCloud ? (
-              <RefreshCw size={14} className="animate-spin text-accent" />
-            ) : (
-              <Cloud size={14} className="text-emerald-400" />
-            )}
-            <span>Синхр. (ПК ↔ Тел)</span>
-          </span>
-          {lastCloudSyncAt && (
-            <span className="text-[10px] font-mono text-emerald-400">OK</span>
-          )}
-        </button>
-
+      {/* Bottom Action: Logout */}
+      <div className="p-3 border-t border-border bg-surface">
         <button
           onClick={() => logout()}
           className="w-full flex items-center gap-2 px-3 py-2 text-xs text-text-muted hover:text-danger hover:bg-danger/10 rounded-control transition-colors"
