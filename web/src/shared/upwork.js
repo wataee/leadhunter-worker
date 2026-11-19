@@ -102,13 +102,30 @@ export function calculateConnectsRoi(job = {}) {
     redFlags.push('Подозрительные условия (бесплатный тест / слишком низкая цена)');
   }
 
-  const roiScore = clamp(score, 0, 100);
+  const isNewClientNoHistory =
+    (!job.clientTotalSpent || job.clientTotalSpent === 0) &&
+    (job.clientHireRate === undefined || job.clientHireRate === 0) &&
+    job.clientPaymentVerified !== true;
+
+  if (isNewClientNoHistory) {
+    score -= 15;
+    redFlags.push('Новый клиент: история на Upwork отсутствует ($0 spent, 0 наймов)');
+  }
+
+  let roiScore = clamp(score, 0, 100);
+  if (isNewClientNoHistory && roiScore > 45) {
+    roiScore = 45;
+  }
 
   let recommendation;
   let badgeTextRu;
   let verdictRu;
 
-  if (roiScore >= 75) {
+  if (isNewClientNoHistory) {
+    recommendation = 'caution';
+    badgeTextRu = '❓ Новый клиент (неполные данные)';
+    verdictRu = 'У клиента нет истории на платформе (spent = $0, hires = 0). Оценивайте заказ по тексту ТЗ и бюджету.';
+  } else if (roiScore >= 75) {
     recommendation = 'apply_now';
     badgeTextRu = '🔥 Откликаться сразу';
     verdictRu = 'Сильный клиент с высоким шансом найма — смело инвестируй Connects.';
