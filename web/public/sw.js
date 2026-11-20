@@ -1,5 +1,4 @@
-// Service Worker for LeadHunter PWA
-const CACHE_VERSION = 'leadhunter-v2.1.0';
+const CACHE_VERSION = 'leadhunter-v3.0.0';
 const SHELL_CACHE = `shell-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 
@@ -14,7 +13,6 @@ const SHELL_ASSETS = [
   '/icon-maskable-512.png',
 ];
 
-// Install: Cache application shell
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(SHELL_CACHE).then((cache) => {
@@ -23,7 +21,6 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate: Remove stale caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -36,13 +33,11 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch routing
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
 
-  // 1. Never cache API routes or external domains (Netlify Functions, Telegram, etc.)
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/.netlify/')) {
     return;
   }
@@ -50,7 +45,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. Navigation requests: Network-first with offline fallback (/index.html)
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
@@ -74,7 +68,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Static assets with hashed filename (/assets/.*-[a-zA-Z0-9_-]+\.(js|css|...)): Cache-first
   const isHashedAsset = /\/assets\/.*-[a-zA-Z0-9_-]+\.(js|css|woff2?|png|jpg|svg)$/.test(url.pathname);
   if (isHashedAsset) {
     event.respondWith(
@@ -84,7 +77,8 @@ self.addEventListener('fetch', (event) => {
 
         try {
           const networkRes = await fetch(event.request);
-          if (networkRes.ok) {
+          const contentType = networkRes.headers.get('content-type') || '';
+          if (networkRes.ok && !contentType.includes('text/html')) {
             cache.put(event.request, networkRes.clone());
           }
           return networkRes;
@@ -96,7 +90,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 4. Other local assets (favicon, manifest, icons): Stale-while-revalidate
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const fetchPromise = fetch(event.request).then((networkRes) => {
@@ -111,7 +104,6 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Web-Push notifications
 self.addEventListener('push', (event) => {
   let data = { title: 'LeadHunter', body: 'Новая горячая вакансия!' };
   try {
@@ -120,7 +112,7 @@ self.addEventListener('push', (event) => {
     }
   } catch {
     if (event.data) {
-      data.body = event.data.text();
+      data = event.data.text();
     }
   }
 
@@ -137,7 +129,6 @@ self.addEventListener('push', (event) => {
   );
 });
 
-// Notification click
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const targetUrl = event.notification.data?.url || '/';

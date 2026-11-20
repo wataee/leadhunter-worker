@@ -1,3 +1,4 @@
 /api/inbox/ack  /.netlify/functions/inbox-ack  200
 /api/*          /.netlify/functions/:splat    200
+/assets/*       /assets/:splat                404
 /*              /index.html                   200
